@@ -1228,7 +1228,6 @@
                             React.createElement("th", { className: "p-1 w-[5%] text-center" }, t.w_range),
                             React.createElement("th", { className: "p-1 w-[10%]" }, t.w_qual),
                             React.createElement("th", { className: "p-1 w-[8%]" }, t.w_ammo),
-                            React.createElement("th", { className: "p-1 w-[5%] text-center" }, t.w_assigned),
                             React.createElement("th", { className: "p-1 w-[5%] text-center" }, t.w_weight),
                             isEditing && React.createElement("th", { className: "p-1 w-6" })
                           )
@@ -1260,6 +1259,15 @@
                                 disabled: !isEditing,
                                 onChange: (e) => updateListItem("weapons", w.id, "skill", e.target.value)
                               })),
+                              React.createElement("td", { className: "p-1 text-center" },
+                              React.createElement("input", {
+                                type: "checkbox",
+                                checked: !!w.assigned,
+                                onChange: (e) => updateListItem("weapons", w.id, "assigned", e.target.checked),
+                                disabled: !isEditing,
+                                className: "accent-amber-600 w-4 h-4"
+                              })
+                            ),
                               React.createElement("td", { className: "p-1" }, React.createElement("input", {
                                 className: "tbl-inp text-center",
                                 value: w.targetNum,
@@ -1308,15 +1316,6 @@
                                 disabled: !isEditing,
                                 onChange: (e) => updateListItem("weapons", w.id, "ammo", e.target.value)
                               })),
-                              React.createElement("td", { className: "p-1 text-center" },
-                              React.createElement("input", {
-                                type: "checkbox",
-                                checked: !!w.assigned,
-                                onChange: (e) => updateListItem("weapons", w.id, "assigned", e.target.checked),
-                                disabled: !isEditing,
-                                className: "accent-amber-600 w-4 h-4"
-                              })
-                            ),
                               React.createElement("td", { className: "p-1" }, React.createElement("input", {
                                 className: "tbl-inp text-center",
                                 value: w.weight,
