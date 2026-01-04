@@ -318,8 +318,6 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
         xp: "0",
         xpNext: "100",
         imageUrl: "",
-        about: "",
-        notes: "",
         strength: "5",
         perception: "5",
         endurance: "5",
@@ -2073,7 +2071,6 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                 )
               )
             )
-
         );
       }
 
