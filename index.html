@@ -483,6 +483,10 @@
         const [localChar, setLocalChar] = useState(null);
         const [loading, setLoading] = useState(true);
         const [lang, setLang] = useState("cs");
+        const [isAdminOpen, setIsAdminOpen] = useState(false);
+        const [templates, setTemplates] = useState({ weapons: [], inventory: [], perks: [] });
+        const [tplTab, setTplTab] = useState("weapons");
+        const [tplDraft, setTplDraft] = useState({ weapons: null, inventory: null, perks: null });
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
@@ -561,6 +565,30 @@
 
           return () => unsubscribe();
         }, [user]);
+        // 2b) Template Library (admin + quick insert)
+        useEffect(() => {
+          if (!user) return;
+
+          const cWeapons = collection(db, "artifacts", appId, "public", "data", "fallout_templates_weapons");
+          const cInv = collection(db, "artifacts", appId, "public", "data", "fallout_templates_inventory");
+          const cPerks = collection(db, "artifacts", appId, "public", "data", "fallout_templates_perks");
+
+          const unsubW = onSnapshot(cWeapons, (snap) => {
+            const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            setTemplates((prev) => ({ ...prev, weapons: rows }));
+          });
+          const unsubI = onSnapshot(cInv, (snap) => {
+            const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            setTemplates((prev) => ({ ...prev, inventory: rows }));
+          });
+          const unsubP = onSnapshot(cPerks, (snap) => {
+            const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            setTemplates((prev) => ({ ...prev, perks: rows }));
+          });
+
+          return () => { unsubW(); unsubI(); unsubP(); };
+        }, [user]);
+
 
         // Sync local state
         useEffect(() => {
@@ -637,6 +665,89 @@
           });
           setLocalChar({ ...localChar, [listName]: list });
         };
+        const addFromTemplate = (listName, templateId) => {
+          if (!localChar) return;
+          const tplList = templates[listName] || [];
+          const tpl = tplList.find((x) => x.id === templateId);
+          if (!tpl) return;
+          const newId = crypto.randomUUID();
+
+          if (listName === "weapons") {
+            const newItem = {
+              id: newId,
+              name: tpl.name || "",
+              skill: tpl.skill || "",
+              assigned: !!tpl.assigned,
+              targetNum: tpl.targetNum || "",
+              damage: tpl.damage || "",
+              effects: tpl.effects || "",
+              type: tpl.type || "",
+              rateOfFire: tpl.rateOfFire || "",
+              range: tpl.range || "",
+              attributes: tpl.attributes || "",
+              ammo: tpl.ammo || "",
+              weight: tpl.weight || ""
+            };
+            setLocalChar({ ...localChar, weapons: [...localChar.weapons, newItem] });
+            return;
+          }
+
+          if (listName === "inventory") {
+            const newItem = {
+              id: newId,
+              type: tpl.type || "other",
+              name: tpl.name || "",
+              weight: tpl.weight || "",
+              quantity: tpl.quantity || "1"
+            };
+            setLocalChar({ ...localChar, inventory: [...localChar.inventory, newItem] });
+            return;
+          }
+
+          if (listName === "perks") {
+            const newItem = {
+              id: newId,
+              name: tpl.name || "",
+              rank: tpl.rank || "1",
+              effect: tpl.effect || ""
+            };
+            setLocalChar({ ...localChar, perks: [...localChar.perks, newItem] });
+          }
+        };
+
+        const templateCollectionPath = (tab) => {
+          if (tab === "weapons") return "fallout_templates_weapons";
+          if (tab === "inventory") return "fallout_templates_inventory";
+          return "fallout_templates_perks";
+        };
+
+        const defaultTemplate = (tab) => {
+          if (tab === "weapons") return { name: "", skill: "", assigned: false, targetNum: "", damage: "", effects: "", type: "", rateOfFire: "", range: "", attributes: "", ammo: "", weight: "" };
+          if (tab === "inventory") return { type: "other", name: "", weight: "", quantity: "1" };
+          return { name: "", rank: "1", effect: "" };
+        };
+
+        const saveTemplate = async (tab, draft) => {
+          if (!draft) return;
+          const colName = templateCollectionPath(tab);
+          const id = draft.id || crypto.randomUUID();
+          try {
+            await setDoc(doc(db, "artifacts", appId, "public", "data", colName, id), { ...draft, id: undefined }, { merge: true });
+            setTplDraft((p) => ({ ...p, [tab]: null }));
+          } catch (e) {
+            console.error(e);
+          }
+        };
+
+        const deleteTemplate = async (tab, id) => {
+          const colName = templateCollectionPath(tab);
+          try {
+            await deleteDoc(doc(db, "artifacts", appId, "public", "data", colName, id));
+          } catch (e) {
+            console.error(e);
+          }
+        };
+
 
         const handleCreate = async () => {
           if (!user) return;
@@ -808,6 +919,18 @@
                   },
                   React.createElement("option", { value: "" }, t.selectChar),
                   characters.map((c) => React.createElement("option", { key: c.id, value: c.id }, c.name))
+                ),
+
+
+                React.createElement(
+                  "button",
+                  {
+                    onClick: () => setIsAdminOpen(true),
+                    className: "btn-admin bg-stone-700 text-amber-200 hover:bg-stone-600"
+                  },
+                  React.createElement(Icon, { name: "Settings", size: 16 }),
+                  " ",
+                  "Administrace"
                 ),
 
                 React.createElement(
@@ -1013,12 +1136,12 @@
 
                   React.createElement(
                     "div",
-                    { className: "grid grid-cols-1 lg:grid-cols-2 gap-8" },
+                    { className: "grid grid-cols-1 lg:grid-cols-2 gap-8 print-maingrid" },
 
                     // LEFT: SKILLS
                     React.createElement(
                       "div",
-                      null,
+                      { className: "print-skills" },
                       React.createElement("h3", { className: "section-title" }, t.skillsTitle),
                       React.createElement(
                         "div",
@@ -1069,7 +1192,7 @@
                     // RIGHT: STATS & BODY
                     React.createElement(
                       "div",
-                      { className: "flex flex-col gap-6" },
+                      { className: "flex flex-col gap-6 print-right" },
 
                       // Secondary Stats
                       React.createElement(
@@ -1199,8 +1322,32 @@
                       React.createElement("h3", { className: "section-title mb-0 border-none" }, t.weaponsTitle),
                       isEditing &&
                         React.createElement(
-                          "button",
-                          { onClick: () => addItem("weapons"), className: "btn-add" },
+                          "div",
+                          { className: "flex gap-2 items-center" },
+                          React.createElement(
+                            "select",
+                            {
+                              className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                              defaultValue: "",
+                              onChange: (e) => {
+                                const val = e.target.value;
+                                if (val) addFromTemplate("weapons", val);
+                                e.target.value = "";
+                              }
+                            },
+                            React.createElement("option", { value: "" }, "Vložit ze seznamu…"),
+                            (templates.weapons || []).map((tpl) =>
+                              React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.skill ? " — " + tpl.skill : ""))
+                            )
+                          ),
+                          React.createElement(
+                            "button",
+                            { onClick: () => addItem("weapons"), className: "btn-add" },
+                            React.createElement(Icon, { name: "Plus", size: 14 }),
+                            " ",
+                            t.btnAdd
+                          )
+                        )
                           React.createElement(Icon, { name: "Plus", size: 14 }),
                           " ",
                           t.btnAdd
@@ -1364,8 +1511,27 @@
                           }),
                           isEditing &&
                             React.createElement(
+                              "select",
+                              {
+                                className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                                defaultValue: "",
+                                onChange: (e) => {
+                                  const val = e.target.value;
+                                  if (val) addFromTemplate("inventory", val);
+                                  e.target.value = "";
+                                }
+                              },
+                              React.createElement("option", { value: "" }, "Vložit…"),
+                              (templates.inventory || []).map((tpl) =>
+                                React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.type ? " — " + getTypeLabel(tpl.type, lang) : ""))
+                              )
+                            ),
+                          isEditing &&
+                            React.createElement(
                               "button",
                               { onClick: () => addItem("inventory"), className: "btn-add" },
+                              React.createElement(Icon, { name: "Plus", size: 14 })
+                            )
                               React.createElement(Icon, { name: "Plus", size: 14 })
                             )
                         )
@@ -1460,8 +1626,30 @@
                         React.createElement("h3", { className: "section-title mb-0 border-none" }, t.perksTitle),
                         isEditing &&
                           React.createElement(
-                            "button",
-                            { onClick: () => addItem("perks"), className: "btn-add" },
+                            "div",
+                            { className: "flex gap-2 items-center" },
+                            React.createElement(
+                              "select",
+                              {
+                                className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                                defaultValue: "",
+                                onChange: (e) => {
+                                  const val = e.target.value;
+                                  if (val) addFromTemplate("perks", val);
+                                  e.target.value = "";
+                                }
+                              },
+                              React.createElement("option", { value: "" }, "Vložit ze seznamu…"),
+                              (templates.perks || []).map((tpl) =>
+                                React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.rank ? " (" + tpl.rank + ")" : ""))
+                              )
+                            ),
+                            React.createElement(
+                              "button",
+                              { onClick: () => addItem("perks"), className: "btn-add" },
+                              React.createElement(Icon, { name: "Plus", size: 14 })
+                            )
+                          )
                             React.createElement(Icon, { name: "Plus", size: 14 })
                           )
                       ),
@@ -1533,6 +1721,277 @@
           ),
 
           // Component-scoped styles (kept from the original to preserve visuals)
+
+          ,
+
+          // ADMIN MODAL
+          isAdminOpen &&
+            React.createElement(
+              "div",
+              { className: "fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 print:hidden", onMouseDown: () => setIsAdminOpen(false) },
+              React.createElement(
+                "div",
+                {
+                  className: "w-full max-w-5xl bg-[#fdfaf5] border-2 border-stone-800 shadow-2xl p-4 sm:p-6",
+                  onMouseDown: (e) => e.stopPropagation()
+                },
+                React.createElement(
+                  "div",
+                  { className: "flex items-center justify-between mb-4 border-b border-stone-300 pb-2" },
+                  React.createElement("h2", { className: "text-lg font-bold uppercase tracking-wide" }, "Administrace – databáze"),
+                  React.createElement(
+                    "button",
+                    { className: "btn-admin bg-red-800 text-white", onClick: () => setIsAdminOpen(false) },
+                    React.createElement(Icon, { name: "X", size: 16 }),
+                    " Zavřít"
+                  )
+                ),
+
+                React.createElement(
+                  "div",
+                  { className: "flex gap-2 mb-4" },
+                  ["weapons", "inventory", "perks"].map((tab) =>
+                    React.createElement(
+                      "button",
+                      {
+                        key: tab,
+                        className:
+                          "btn-admin " +
+                          (tplTab === tab ? "bg-amber-700 text-stone-900" : "bg-stone-700 text-amber-200 hover:bg-stone-600"),
+                        onClick: () => {
+                          setTplTab(tab);
+                          setTplDraft((p) => ({ ...p, [tab]: null }));
+                        }
+                      },
+                      tab === "weapons" ? "Zbraně" : tab === "inventory" ? "Vybavení" : "Perky"
+                    )
+                  )
+                ),
+
+                React.createElement(
+                  "div",
+                  { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" },
+
+                  // LEFT: LIST
+                  React.createElement(
+                    "div",
+                    { className: "border border-stone-400 bg-white" },
+                    React.createElement(
+                      "div",
+                      { className: "flex justify-between items-center p-2 bg-stone-800 text-stone-100" },
+                      React.createElement("div", { className: "font-bold text-sm" }, tplTab === "weapons" ? "Zbraně" : tplTab === "inventory" ? "Vybavení" : "Perky"),
+                      React.createElement(
+                        "button",
+                        {
+                          className: "btn-add",
+                          onClick: () => setTplDraft((p) => ({ ...p, [tplTab]: defaultTemplate(tplTab) }))
+                        },
+                        React.createElement(Icon, { name: "Plus", size: 14 }),
+                        " Nový"
+                      )
+                    ),
+                    React.createElement(
+                      "div",
+                      { className: "max-h-[60vh] overflow-auto" },
+                      (templates[tplTab] || []).length === 0
+                        ? React.createElement("div", { className: "p-3 text-sm text-stone-500" }, "Zatím prázdné.")
+                        : (templates[tplTab] || []).map((row) =>
+                            React.createElement(
+                              "div",
+                              {
+                                key: row.id,
+                                className: "p-2 border-b border-stone-200 flex items-start justify-between gap-2 hover:bg-amber-50"
+                              },
+                              React.createElement(
+                                "button",
+                                {
+                                  className: "text-left flex-1",
+                                  onClick: () => setTplDraft((p) => ({ ...p, [tplTab]: row }))
+                                },
+                                React.createElement("div", { className: "font-bold text-sm" }, row.name || "(beze jména)"),
+                                tplTab === "inventory" &&
+                                  React.createElement("div", { className: "text-xs text-stone-600" }, getTypeLabel(row.type || "other", lang)),
+                                tplTab === "weapons" &&
+                                  React.createElement("div", { className: "text-xs text-stone-600" }, row.skill || "")
+                              ),
+                              React.createElement(
+                                "button",
+                                {
+                                  className: "text-red-700",
+                                  onClick: () => deleteTemplate(tplTab, row.id),
+                                  title: "Smazat"
+                                },
+                                React.createElement(Icon, { name: "Trash2", size: 16 })
+                              )
+                            )
+                          )
+                    )
+                  ),
+
+                  // RIGHT: EDIT FORM
+                  React.createElement(
+                    "div",
+                    { className: "border border-stone-400 bg-white p-3" },
+                    !tplDraft[tplTab]
+                      ? React.createElement("div", { className: "text-sm text-stone-500" }, "Vyber položku vlevo, nebo vytvoř novou.")
+                      : React.createElement(
+                          "div",
+                          { className: "flex flex-col gap-3" },
+                          React.createElement("div", { className: "text-xs uppercase font-bold text-stone-600" }, "Editace"),
+                          // Common: name
+                          React.createElement(InputGroup, {
+                            label: tplTab === "perks" ? "Název perku" : tplTab === "inventory" ? "Název předmětu" : "Název zbraně",
+                            value: tplDraft[tplTab].name || "",
+                            onChange: (v) => setTplDraft((p) => ({ ...p, [tplTab]: { ...p[tplTab], name: v } })),
+                            isEditing: true
+                          }),
+
+                          tplTab === "inventory" &&
+                            React.createElement(
+                              "div",
+                              { className: "grid grid-cols-2 gap-3" },
+                              React.createElement(
+                                "div",
+                                { className: "flex flex-col" },
+                                React.createElement("label", { className: "text-[10px] uppercase font-bold text-stone-500 mb-1" }, "Typ"),
+                                React.createElement(
+                                  "select",
+                                  {
+                                    className: "border-b-2 border-stone-400 bg-transparent px-1 py-1 font-bold text-stone-800 focus:border-amber-600 focus:outline-none",
+                                    value: tplDraft[tplTab].type || "other",
+                                    onChange: (e) => setTplDraft((p) => ({ ...p, inventory: { ...p.inventory, type: e.target.value } }))
+                                  },
+                                  ITEM_TYPES.map((opt) =>
+                                    React.createElement("option", { key: opt.key, value: opt.key }, lang === "en" ? opt.en : opt.cs)
+                                  )
+                                )
+                              ),
+                              React.createElement(InputGroup, {
+                                label: "Váha",
+                                value: tplDraft[tplTab].weight || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, inventory: { ...p.inventory, weight: v } })),
+                                isEditing: true
+                              })
+                            ),
+
+                          tplTab === "perks" &&
+                            React.createElement(
+                              "div",
+                              { className: "grid grid-cols-2 gap-3" },
+                              React.createElement(InputGroup, {
+                                label: "Stupeň",
+                                value: tplDraft[tplTab].rank || "1",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, perks: { ...p.perks, rank: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(
+                                "div",
+                                { className: "flex flex-col" },
+                                React.createElement("label", { className: "text-[10px] uppercase font-bold text-stone-500 mb-1" }, "Účinek"),
+                                React.createElement(AutoResizeTextarea, {
+                                  className: "border border-stone-300 p-2 text-sm",
+                                  value: tplDraft[tplTab].effect || "",
+                                  onChange: (e) => setTplDraft((p) => ({ ...p, perks: { ...p.perks, effect: e.target.value } })),
+                                  disabled: false
+                                })
+                              )
+                            ),
+
+                          tplTab === "weapons" &&
+                            React.createElement(
+                              "div",
+                              { className: "grid grid-cols-2 gap-3" },
+                              React.createElement(InputGroup, {
+                                label: "Dovednost",
+                                value: tplDraft[tplTab].skill || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, skill: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(
+                                "div",
+                                { className: "flex items-center gap-2 mt-5" },
+                                React.createElement("input", {
+                                  type: "checkbox",
+                                  className: "accent-amber-600 w-4 h-4",
+                                  checked: !!tplDraft[tplTab].assigned,
+                                  onChange: (e) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, assigned: e.target.checked } }))
+                                }),
+                                React.createElement("span", { className: "text-sm font-bold" }, "PŘIŘ.")
+                              ),
+                              React.createElement(InputGroup, {
+                                label: "CČ",
+                                value: tplDraft[tplTab].targetNum || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, targetNum: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Pošk.",
+                                value: tplDraft[tplTab].damage || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, damage: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Účinky",
+                                value: tplDraft[tplTab].effects || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, effects: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Druh",
+                                value: tplDraft[tplTab].type || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, type: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Rych.",
+                                value: tplDraft[tplTab].rateOfFire || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, rateOfFire: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Dostř.",
+                                value: tplDraft[tplTab].range || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, range: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Atributy",
+                                value: tplDraft[tplTab].attributes || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, attributes: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Munice",
+                                value: tplDraft[tplTab].ammo || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, ammo: v } })),
+                                isEditing: true
+                              }),
+                              React.createElement(InputGroup, {
+                                label: "Váha",
+                                value: tplDraft[tplTab].weight || "",
+                                onChange: (v) => setTplDraft((p) => ({ ...p, weapons: { ...p.weapons, weight: v } })),
+                                isEditing: true
+                              })
+                            ),
+
+                          React.createElement(
+                            "div",
+                            { className: "flex justify-end gap-2 pt-2 border-t border-stone-200" },
+                            React.createElement(
+                              "button",
+                              {
+                                className: "btn-admin bg-green-700 text-white",
+                                onClick: () => saveTemplate(tplTab, tplDraft[tplTab])
+                              },
+                              React.createElement(Icon, { name: "Save", size: 16 }),
+                              " Uložit"
+                            )
+                          )
+                        )
+                  )
+                )
+              )
+            )
           React.createElement("style", null, `
             .section-title {
               font-family: monospace;
@@ -1608,6 +2067,21 @@
               .border-2 { border-width: 1px !important; }
               .ring-4 { box-shadow: none !important; }
               .min-h-screen { min-height: auto !important; }
+              /* Print layout: keep the sheet in 2 columns even on narrow print viewport */
+              .print-maingrid { display: grid !important; grid-template-columns: 0.33fr 0.67fr !important; gap: 0.6rem !important; align-items: start !important; }
+              .print-skills { break-inside: avoid !important; }
+              .print-right { break-inside: avoid !important; }
+
+              /* Make the skills table more compact so it doesn't dominate the page */
+              .print-skills table, .print-skills thead, .print-skills tbody { font-size: 8px !important; }
+              .print-skills .grid.grid-cols-12 { grid-template-columns: 18px 1fr 40px !important; }
+              .print-skills .col-span-8 { font-size: 8px !important; }
+              .print-skills input[type="number"] { width: 100% !important; }
+
+              /* Tighten the hit location cards a bit */
+              .print-right .grid.grid-cols-2.gap-2 { gap: 0.35rem !important; }
+              .print-right input { padding: 1px !important; }
+
             }
 
           `)
