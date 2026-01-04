@@ -2074,7 +2074,6 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
               )
             )
 
-          null
         );
       }
 
