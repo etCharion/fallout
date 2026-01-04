@@ -127,6 +127,67 @@ input:focus, select:focus, textarea:focus{
   }
 }
 
+
+/* ===== v2: stronger PDF-inspired colors for SPECIAL + categories (screen), B/W print ===== */
+
+:root{
+  --c-special-1:#e6a15a; /* STR */
+  --c-special-2:#6faecb; /* PER */
+  --c-special-3:#7fb69c; /* END */
+  --c-special-4:#e5b7a3; /* CHA */
+  --c-special-5:#e4d07a; /* INT */
+  --c-special-6:#6fbfb3; /* AGI */
+  --c-special-7:#b8a6d9; /* LCK */
+
+  --c-cat-1:#e6a15a; /* skills */
+  --c-cat-2:#2b2b2b; /* weapons */
+  --c-cat-3:#7fb69c; /* inventory */
+  --c-cat-4:#6fbfb3; /* perks */
+  --c-cat-5:#6faecb; /* other */
+  --c-cat-6:#e4d07a; /* other */
+  --c-cat-7:#d98a7a; /* other */
+}
+
+/* SPECIAL: color the 7 stat boxes (likely unique grid-cols-7 on page) */
+.grid.grid-cols-7 > div:nth-child(1) input{ background: var(--c-special-1) !important; }
+.grid.grid-cols-7 > div:nth-child(2) input{ background: var(--c-special-2) !important; }
+.grid.grid-cols-7 > div:nth-child(3) input{ background: var(--c-special-3) !important; }
+.grid.grid-cols-7 > div:nth-child(4) input{ background: var(--c-special-4) !important; }
+.grid.grid-cols-7 > div:nth-child(5) input{ background: var(--c-special-5) !important; }
+.grid.grid-cols-7 > div:nth-child(6) input{ background: var(--c-special-6) !important; }
+.grid.grid-cols-7 > div:nth-child(7) input{ background: var(--c-special-7) !important; }
+
+/* keep input text readable on colored backgrounds */
+.grid.grid-cols-7 input{
+  color: #111 !important;
+  font-weight: 800;
+}
+
+/* Category headers: map first 7 section titles to distinct PDF-like colors */
+.section-title{
+  color:#111 !important;
+  background: var(--paper-2) !important;
+}
+.section-title::before{ display:none !important; } /* remove the thin bar; use full color */
+
+.section-title:nth-of-type(7n+1){ background: var(--c-cat-1) !important; }
+.section-title:nth-of-type(7n+2){ background: var(--c-cat-2) !important; color:#fff !important; }
+.section-title:nth-of-type(7n+3){ background: var(--c-cat-3) !important; }
+.section-title:nth-of-type(7n+4){ background: var(--c-cat-4) !important; }
+.section-title:nth-of-type(7n+5){ background: var(--c-cat-5) !important; }
+.section-title:nth-of-type(7n+6){ background: var(--c-cat-6) !important; }
+.section-title:nth-of-type(7n+0){ background: var(--c-cat-7) !important; }
+
+/* Slightly stronger lines like the PDF */
+.section-title{ border-width: 2px !important; }
+th, td{ border-width: 1px !important; }
+
+/* PRINT: force monochrome everywhere (including SPECIAL backgrounds and category bars) */
+@media print{
+  .grid.grid-cols-7 input{ background: transparent !important; }
+  .section-title{ background: #fff !important; color:#000 !important; }
+}
+
 </style>
   </head>
   <body class="min-h-screen">
