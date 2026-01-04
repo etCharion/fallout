@@ -8,7 +8,126 @@
     <style>
       /* Keep default browser styles minimal; Tailwind handles most UI. */
       html, body { height: 100%; }
-    </style>
+    
+/* ===== Fallout-ish PDF-inspired look (screen), B/W print ===== */
+
+/* Screen palette */
+:root{
+  --paper:#f3f1ea;
+  --paper-2:#fbfaf6;
+  --ink:#171717;
+  --line:#111;
+  --muted:#5b5b5b;
+
+  /* subtle accents (screen only) */
+  --accent-1:#e5a35f;
+  --accent-2:#7fb69c;
+  --accent-3:#6fbfb3;
+  --accent-4:#6faecb;
+}
+
+html, body{
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body{
+  background-image:
+    linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,0)),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.012) 0, rgba(0,0,0,.012) 1px, transparent 1px, transparent 14px);
+  background-attachment: fixed;
+}
+
+*{ border-radius: 0 !important; }
+
+.section-title{
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  position: relative;
+  padding: 6px 10px;
+  border: 2px solid var(--line);
+  background: var(--paper-2);
+}
+
+.section-title::before{
+  content:"";
+  position:absolute;
+  left:-2px;
+  top:-2px;
+  bottom:-2px;
+  width: 10px;
+  background: var(--accent-3);
+  border-right: 2px solid var(--line);
+}
+
+.section-title:nth-of-type(4n+1)::before{ background: var(--accent-1); }
+.section-title:nth-of-type(4n+2)::before{ background: var(--accent-2); }
+.section-title:nth-of-type(4n+3)::before{ background: var(--accent-3); }
+.section-title:nth-of-type(4n+4)::before{ background: var(--accent-4); }
+
+table{ border-collapse: collapse; }
+th, td{ border: 1px solid var(--line); }
+
+thead th{
+  background: #111;
+  color: #fff;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+input, select, textarea{
+  background: transparent !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+input:focus, select:focus, textarea:focus{
+  outline: none !important;
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.15) !important;
+}
+
+.btn-admin, .btn-add, button{
+  border: 2px solid var(--line) !important;
+}
+
+.shadow, .shadow-lg, .shadow-xl{
+  box-shadow: 0 1px 0 rgba(0,0,0,.15) !important;
+}
+
+@media print{
+  html, body{
+    background: #fff !important;
+    background-image: none !important;
+    color: #000 !important;
+  }
+
+  .section-title{
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .section-title::before{ display:none !important; }
+
+  thead th{
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  *{
+    -webkit-print-color-adjust: economy !important;
+    print-color-adjust: economy !important;
+    color: #000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  th, td, .section-title{
+    border-color: #000 !important;
+  }
+}
+
+</style>
   </head>
   <body class="min-h-screen">
     <div id="root"></div>
