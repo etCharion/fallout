@@ -284,10 +284,8 @@
           w_assigned: "ASSN.",
           dragTip: "Drag to reorder"
         }
-        about: "",
-        knowledge: "",
-        notes: ""
       };
+
 
       const ITEM_TYPES = [
         { key: "food", cs: "Jídlo", en: "Food" },
@@ -489,7 +487,6 @@
         const [templates, setTemplates] = useState({ weapons: [], inventory: [], perks: [] });
         const [tplTab, setTplTab] = useState("weapons");
         const [tplDraft, setTplDraft] = useState({ weapons: null, inventory: null, perks: null });
-        const [picker, setPicker] = useState({ open: false, list: "weapons", query: "", type: "" });
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
@@ -667,11 +664,6 @@
             return item;
           });
           setLocalChar({ ...localChar, [listName]: list });
-        };
-
-        const openPicker = (listName) => {
-          if (!isEditing) return;
-          setPicker({ open: true, list: listName, query: "", type: "" });
         };
         const addFromTemplate = (listName, templateId) => {
           if (!localChar) return;
@@ -1331,20 +1323,215 @@
                       { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
                       React.createElement("h3", { className: "section-title mb-0 border-none" }, t.weaponsTitle),
                       isEditing &&
+                        React.createElement(
+                          "div",
+                          { className: "flex gap-2 items-center" },
                           React.createElement(
-                            "div",
-                            { className: "flex gap-2 items-center" },
+                            "select",
+                            {
+                              className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                              defaultValue: "",
+                              onChange: (e) => {
+                                const val = e.target.value;
+                                if (val) addFromTemplate("weapons", val);
+                                e.target.value = "";
+                              }
+                            },
+                            React.createElement("option", { value: "" }, "Vložit ze seznamu…"),
+                            (templates.weapons || []).map((tpl) =>
+                              React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.skill ? " — " + tpl.skill : ""))
+                            )
+                          ),
+                          React.createElement(
+                            "button",
+                            { onClick: () => addItem("weapons"), className: "btn-add" },
+                            React.createElement(Icon, { name: "Plus", size: 14 }),
+                            " ",
+                            t.btnAdd
+                          )
+                          )
+                    ),
+                    React.createElement(
+                      "div",
+                      { className: "overflow-x-auto" },
+                      React.createElement(
+                        "table",
+                        { className: "w-full text-left text-xs sm:text-sm border-collapse table-fixed" },
+                        React.createElement(
+                          "thead",
+                          null,
+                          React.createElement(
+                            "tr",
+                            { className: "bg-stone-800 text-stone-100 print:bg-stone-300 print:text-black" },
+                            React.createElement("th", { className: "p-1 w-[15%]" }, t.w_name),
+                            React.createElement("th", { className: "p-1 w-[10%]" }, t.w_skill),
+                            React.createElement("th", { className: "p-1 w-[5%] text-center" }, t.w_tn),
+                            React.createElement("th", { className: "p-1 w-[8%] text-center" }, t.w_dmg),
+                            React.createElement("th", { className: "p-1 w-[15%]" }, t.w_effects),
+                            React.createElement("th", { className: "p-1 w-[8%]" }, t.w_type),
+                            React.createElement("th", { className: "p-1 w-[5%] text-center" }, t.w_rate),
+                            React.createElement("th", { className: "p-1 w-[5%] text-center" }, t.w_range),
+                            React.createElement("th", { className: "p-1 w-[10%]" }, t.w_qual),
+                            React.createElement("th", { className: "p-1 w-[8%]" }, t.w_ammo),
+                            React.createElement("th", { className: "p-1 w-[5%] text-center" }, t.w_weight),
+                            isEditing && React.createElement("th", { className: "p-1 w-6" })
+                          )
+                        ),
+                        React.createElement(
+                          "tbody",
+                          null,
+                          localChar.weapons.map((w) =>
                             React.createElement(
-                              "button",
-                              { onClick: () => openPicker("perks"), className: "btn-add bg-stone-200 text-stone-900 hover:bg-stone-300" },
-                              "Vložit…"
+                              "tr",
+                              {
+                                key: w.id,
+                                className: "border-b border-stone-300 hover:bg-stone-100 align-top" + (isEditing ? " cursor-move" : ""),
+                                draggable: isEditing,
+                                title: isEditing ? t.dragTip : "",
+                                onDragStart: onDragStartRow("weapons", w.id),
+                                onDragOver: onDragOverRow(),
+                                onDrop: onDropRow("weapons", w.id)
+                              },
+                              React.createElement("td", { className: "p-1" }, React.createElement(AutoResizeTextarea, {
+                                className: "tbl-inp",
+                                value: w.name,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "name", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement(AutoResizeTextarea, {
+                                className: "tbl-inp",
+                                value: w.skill,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "skill", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1 text-center" },
+                              React.createElement("input", {
+                                type: "checkbox",
+                                checked: !!w.assigned,
+                                onChange: (e) => updateListItem("weapons", w.id, "assigned", e.target.checked),
+                                disabled: !isEditing,
+                                className: "accent-amber-600 w-4 h-4"
+                              })
                             ),
+                              React.createElement("td", { className: "p-1" }, React.createElement("input", {
+                                className: "tbl-inp text-center",
+                                value: w.targetNum,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "targetNum", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement("input", {
+                                className: "tbl-inp text-center",
+                                value: w.damage,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "damage", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement(AutoResizeTextarea, {
+                                className: "tbl-inp",
+                                value: w.effects,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "effects", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement("input", {
+                                className: "tbl-inp",
+                                value: w.type,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "type", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement("input", {
+                                className: "tbl-inp text-center",
+                                value: w.rateOfFire,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "rateOfFire", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement("input", {
+                                className: "tbl-inp text-center",
+                                value: w.range,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "range", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement(AutoResizeTextarea, {
+                                className: "tbl-inp",
+                                value: w.attributes,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "attributes", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement("input", {
+                                className: "tbl-inp",
+                                value: w.ammo,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "ammo", e.target.value)
+                              })),
+                              React.createElement("td", { className: "p-1" }, React.createElement("input", {
+                                className: "tbl-inp text-center",
+                                value: w.weight,
+                                disabled: !isEditing,
+                                onChange: (e) => updateListItem("weapons", w.id, "weight", e.target.value)
+                              })),
+                              isEditing &&
+                                React.createElement(
+                                  "td",
+                                  { className: "p-1 text-center" },
+                                  React.createElement(
+                                    "button",
+                                    { onClick: () => removeItem("weapons", w.id), className: "text-red-600" },
+                                    React.createElement(Icon, { name: "X", size: 16 })
+                                  )
+                                )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  ),
+
+                  // INVENTORY & PERKS
+                  React.createElement(
+                    "div",
+                    { className: "grid grid-cols-1 md:grid-cols-2 gap-8 mt-8" },
+
+                    // INVENTORY
+                    React.createElement(
+                      "div",
+                      null,
+                      React.createElement(
+                        "div",
+                        { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
+                        React.createElement("h3", { className: "section-title mb-0 border-none" }, t.invTitle),
+                        React.createElement(
+                          "div",
+                          { className: "flex gap-2 items-center" },
+                          React.createElement("span", { className: "text-xs font-bold text-amber-700" }, t.caps, ":"),
+                          React.createElement("input", {
+                            className: "w-16 border-b border-stone-400 bg-transparent text-right font-mono",
+                            value: localChar.caps,
+                            onChange: (e) => updateField("caps", e.target.value),
+                            disabled: !isEditing
+                          }),
+                          isEditing &&
+                            React.createElement(
+                              "select",
+                              {
+                                className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                                defaultValue: "",
+                                onChange: (e) => {
+                                  const val = e.target.value;
+                                  if (val) addFromTemplate("inventory", val);
+                                  e.target.value = "";
+                                }
+                              },
+                              React.createElement("option", { value: "" }, "Vložit…"),
+                              (templates.inventory || []).map((tpl) =>
+                                React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.type ? " — " + getTypeLabel(tpl.type, lang) : ""))
+                              )
+                            ),
+                          isEditing &&
                             React.createElement(
                               "button",
-                              { onClick: () => addItem("perks"), className: "btn-add" },
+                              { onClick: () => addItem("inventory"), className: "btn-add" },
                               React.createElement(Icon, { name: "Plus", size: 14 })
                             )
-                          )),
+                        )
+                      ),
                       React.createElement(
                         "table",
                         { className: "w-full text-left text-sm table-fixed" },
@@ -1800,99 +1987,7 @@
                 )
               )
             ),
-          
-          ,
-
-          // TEMPLATE PICKER MODAL (search/filter + insert)
-          picker.open &&
-            React.createElement(
-              "div",
-              {
-                className: "fixed inset-0 z-[90] bg-black/50 flex items-center justify-center p-4 print:hidden",
-                onMouseDown: () => setPicker((p) => ({ ...p, open: false }))
-              },
-              React.createElement(
-                "div",
-                {
-                  className: "w-full max-w-3xl bg-[#fdfaf5] border-2 border-stone-800 shadow-2xl p-4 sm:p-6",
-                  onMouseDown: (e) => e.stopPropagation()
-                },
-                React.createElement(
-                  "div",
-                  { className: "flex items-center justify-between mb-3 border-b border-stone-300 pb-2" },
-                  React.createElement(
-                    "h2",
-                    { className: "text-lg font-bold uppercase tracking-wide" },
-                    picker.list === "weapons" ? "Vložit zbraň" : picker.list === "inventory" ? "Vložit vybavení" : "Vložit perk"
-                  ),
-                  React.createElement(
-                    "button",
-                    { className: "btn-admin bg-red-800 text-white", onClick: () => setPicker((p) => ({ ...p, open: false })) },
-                    React.createElement(Icon, { name: "X", size: 16 }),
-                    " Zavřít"
-                  )
-                ),
-                React.createElement(
-                  "div",
-                  { className: "flex flex-col sm:flex-row gap-2 mb-3" },
-                  React.createElement("input", {
-                    className: "w-full border border-stone-300 p-2 text-sm",
-                    placeholder: "Hledat…",
-                    value: picker.query,
-                    onChange: (e) => setPicker((p) => ({ ...p, query: e.target.value }))
-                  }),
-                  picker.list === "inventory" &&
-                    React.createElement(
-                      "select",
-                      {
-                        className: "border border-stone-300 p-2 text-sm bg-white",
-                        value: picker.type,
-                        onChange: (e) => setPicker((p) => ({ ...p, type: e.target.value }))
-                      },
-                      React.createElement("option", { value: "" }, "Všechny typy"),
-                      ITEM_TYPES.map((opt) => React.createElement("option", { key: opt.key, value: opt.key }, lang === "en" ? opt.en : opt.cs))
-                    )
-                ),
-                React.createElement(
-                  "div",
-                  { className: "max-h-[60vh] overflow-auto border border-stone-300 bg-white" },
-                  (() => {
-                    const list = templates[picker.list] || [];
-                    const q = (picker.query || "").trim().toLowerCase();
-                    const filtered = list.filter((x) => {
-                      const hay = JSON.stringify(x || {}).toLowerCase();
-                      if (q && !hay.includes(q)) return false;
-                      if (picker.list === "inventory" && picker.type && (x.type || "other") !== picker.type) return false;
-                      return true;
-                    });
-                    if (filtered.length === 0) {
-                      return React.createElement("div", { className: "p-3 text-sm text-stone-500" }, "Nic nenalezeno.");
-                    }
-                    return filtered.map((row) =>
-                      React.createElement(
-                        "button",
-                        {
-                          key: row.id,
-                          className: "w-full text-left p-3 border-b border-stone-200 hover:bg-amber-50",
-                          onClick: () => {
-                            addFromTemplate(picker.list, row.id);
-                            setPicker((p) => ({ ...p, open: false }));
-                          }
-                        },
-                        React.createElement("div", { className: "font-bold text-sm" }, row.name || "(beze jména)"),
-                        picker.list === "weapons" &&
-                          React.createElement("div", { className: "text-xs text-stone-600" }, (row.skill || "") + (row.damage ? " • " + row.damage : "")),
-                        picker.list === "inventory" &&
-                          React.createElement("div", { className: "text-xs text-stone-600" }, getTypeLabel(row.type || "other", lang) + (row.weight ? " • " + row.weight : "")),
-                        picker.list === "perks" &&
-                          React.createElement("div", { className: "text-xs text-stone-600" }, row.rank ? "Rank " + row.rank : "")
-                      )
-                    );
-                  })()
-                )
-              )
-            )
-React.createElement("style", null, `
+          React.createElement("style", null, `
             .section-title {
               font-family: monospace;
               font-weight: bold;
