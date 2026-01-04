@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pip-Boy 2000 Character Sheet</title>
+    <!-- Tailwind CSS přes CDN pro rychlé použití -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide ikony -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
@@ -14,8 +16,9 @@
         .btn-admin { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold; font-size: 0.8rem; transition: all 0.2s; cursor: pointer; }
         .btn-admin:hover { opacity: 0.9; transform: translateY(-1px); }
         input:disabled, textarea:disabled { color: inherit; cursor: default; background: transparent; border: none; }
-        input { border-bottom: 1px solid #ccc; background: transparent; }
+        input { border-bottom: 1px solid rgba(0,0,0,0.1); background: transparent; transition: border-color 0.2s; }
         input:focus { outline: none; border-color: #d97706; }
+        .stat-box { border: 2px solid #292524; background: white; }
     </style>
 </head>
 <body class="bg-stone-200 text-stone-900 pb-20">
@@ -28,7 +31,7 @@
                 <span class="text-xl font-bold tracking-widest">PIP-BOY 2000</span>
             </div>
             <div class="flex flex-wrap gap-2 items-center">
-                <select id="charSelector" class="bg-stone-900 border border-amber-600 text-amber-500 p-2 rounded focus:outline-none">
+                <select id="charSelector" class="bg-stone-900 border border-amber-600 text-amber-500 p-2 rounded focus:outline-none min-w-[150px]">
                     <option value="">-- VYBER POSTAVU --</option>
                 </select>
                 <button id="btnNew" class="btn-admin bg-amber-700 text-stone-900"><i data-lucide="user-plus" class="w-4 h-4"></i> Nová</button>
@@ -41,10 +44,11 @@
 
     <!-- MAIN APP CONTAINER -->
     <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6">
+        <!-- Loader / No Data -->
         <div id="noData" class="text-center mt-20 opacity-40">
-            <i data-lucide="zap" class="w-16 h-16 mx-auto mb-4"></i>
-            <h2 class="text-2xl font-bold">ŽÁDNÁ DATA</h2>
-            <p>Vyberte postavu nebo vytvořte novou.</p>
+            <i data-lucide="radiation" class="w-16 h-16 mx-auto mb-4 animate-spin-slow"></i>
+            <h2 id="noDataTitle" class="text-2xl font-bold uppercase">Systém připraven</h2>
+            <p id="noDataDesc">Vyberte postavu z databáze nebo vytvořte novou záznamovou jednotku.</p>
         </div>
 
         <div id="charSheet" class="pipboy-screen shadow-xl p-4 sm:p-8 relative hidden">
@@ -58,7 +62,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // --- KONFIGURACE ---
         const firebaseConfig = {
             apiKey: "AIzaSyBJ7zMyfq1MjXTkvmeS4WCaWcixrrbqBnI",
             authDomain: "falloutpostava.firebaseapp.com",
@@ -69,17 +72,14 @@
         };
         const APP_ID = "fallout-rpg-v1";
 
-        // Inicializace
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
         let characters = [];
         let selectedChar = null;
         let isEditing = false;
 
-        // UI Elementy
         const charSelector = document.getElementById('charSelector');
         const charSheet = document.getElementById('charSheet');
         const noData = document.getElementById('noData');
@@ -88,13 +88,12 @@
         const btnSave = document.getElementById('btnSave');
         const btnDelete = document.getElementById('btnDelete');
 
-        // Auth
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                loadCharacters();
+        // Spuštění Auth
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                try { await signInAnonymously(auth); } catch (e) { console.error(e); }
             } else {
-                signInAnonymously(auth);
+                loadCharacters();
             }
         });
 
@@ -103,13 +102,18 @@
             onSnapshot(q, (snapshot) => {
                 characters = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderSelector();
-                if (selectedChar) {
+                
+                // Pokud máme vybranou postavu, aktualizujeme její data z DB (pokud zrovna needitujeme)
+                if (selectedChar && !isEditing) {
                     const updated = characters.find(c => c.id === selectedChar.id);
-                    if (updated && !isEditing) {
+                    if (updated) {
                         selectedChar = JSON.parse(JSON.stringify(updated));
                         renderSheet();
                     }
                 }
+            }, (err) => {
+                document.getElementById('noDataTitle').textContent = "Chyba spojení";
+                document.getElementById('noDataDesc').textContent = "Nepodařilo se připojit k Vault-Tec serveru.";
             });
         }
 
@@ -125,23 +129,24 @@
             charSelector.value = currentVal;
         }
 
-        // Akce
         btnNew.onclick = async () => {
             const id = crypto.randomUUID();
             const newChar = {
                 id: id,
                 name: "Nový Přeživší",
-                origin: "", level: "1", xp: "0", xpNext: "100",
-                strength: "5", perception: "5", endurance: "5", charisma: "5", intelligence: "5", agility: "5", luck: "5",
-                hpMax: "10", hpCurrent: "10", initiative: "0", defense: "0", meleeDamage: "0",
-                skills: {}, inventory: [], weapons: [], perks: [],
+                origin: "Poutník", level: 1, xp: 0, xpNext: 100,
+                strength: 5, perception: 5, endurance: 5, charisma: 5, intelligence: 5, agility: 5, luck: 5,
+                hpMax: 20, hpCurrent: 20, defense: 0, initiative: 0,
+                notes: "",
                 createdAt: serverTimestamp()
             };
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'fallout_characters', id), newChar);
-            selectedChar = newChar;
-            charSelector.value = id;
-            isEditing = true;
-            renderSheet();
+            try {
+                await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'fallout_characters', id), newChar);
+                selectedChar = JSON.parse(JSON.stringify(newChar));
+                charSelector.value = id;
+                isEditing = true;
+                renderSheet();
+            } catch (e) { alert("Chyba při vytváření."); }
         };
 
         btnEdit.onclick = () => {
@@ -151,14 +156,15 @@
 
         btnSave.onclick = async () => {
             if (!selectedChar) return;
-            // Posbírat data z inputů (zjednodušeno pro demo, v reálu by se bralo z objektu)
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'fallout_characters', selectedChar.id), selectedChar);
-            isEditing = false;
-            renderSheet();
+            try {
+                await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'fallout_characters', selectedChar.id), selectedChar);
+                isEditing = false;
+                renderSheet();
+            } catch (e) { alert("Chyba při ukládání."); }
         };
 
         btnDelete.onclick = async () => {
-            if (confirm("Smazat postavu?")) {
+            if (confirm("Opravdu smazat záznam postavy z paměti Pip-Boye?")) {
                 await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'fallout_characters', selectedChar.id));
                 selectedChar = null;
                 isEditing = false;
@@ -169,7 +175,7 @@
 
         charSelector.onchange = (e) => {
             const id = e.target.value;
-            selectedChar = characters.find(c => c.id === id) || null;
+            selectedChar = characters.find(c => c.id === id) ? JSON.parse(JSON.stringify(characters.find(c => c.id === id))) : null;
             isEditing = false;
             renderSheet();
         };
@@ -190,70 +196,96 @@
             btnSave.classList.toggle('hidden', !isEditing);
             btnDelete.classList.remove('hidden');
 
-            // Základní HTML šablona listu
             charSheet.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 border-b-2 border-stone-800 pb-6">
-                    <div class="flex justify-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/5/52/Fallout_Vault_Boy.png" class="w-24 opacity-60 mix-blend-multiply">
+                    <div class="flex justify-center items-center">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/5/52/Fallout_Vault_Boy.png" class="w-32 opacity-80 mix-blend-multiply grayscale">
                     </div>
-                    <div class="md:col-span-3 grid grid-cols-2 gap-4">
-                        <div class="flex flex-col col-span-2">
-                            <label class="text-[10px] uppercase font-bold text-stone-500">JMÉNO POSTAVY</label>
-                            <input type="text" value="${selectedChar.name}" onchange="updateVal('name', this.value)" ${!isEditing ? 'disabled' : ''} class="font-bold text-lg">
+                    <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex flex-col sm:col-span-2">
+                            <label class="text-[10px] uppercase font-bold text-stone-500">Jméno subjektu</label>
+                            <input type="text" value="${selectedChar.name}" oninput="updateVal('name', this.value)" ${!isEditing ? 'disabled' : ''} class="font-bold text-2xl uppercase tracking-tighter">
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-[10px] uppercase font-bold text-stone-500">ÚROVEŇ</label>
-                            <input type="number" value="${selectedChar.level}" onchange="updateVal('level', this.value)" ${!isEditing ? 'disabled' : ''}>
+                            <label class="text-[10px] uppercase font-bold text-stone-500">Původ / Frakce</label>
+                            <input type="text" value="${selectedChar.origin || ''}" oninput="updateVal('origin', this.value)" ${!isEditing ? 'disabled' : ''} class="text-lg">
                         </div>
-                        <div class="flex flex-col">
-                            <label class="text-[10px] uppercase font-bold text-stone-500">PŮVOD</label>
-                            <input type="text" value="${selectedChar.origin || ''}" onchange="updateVal('origin', this.value)" ${!isEditing ? 'disabled' : ''}>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="flex flex-col">
+                                <label class="text-[10px] uppercase font-bold text-stone-500">Úroveň</label>
+                                <input type="number" value="${selectedChar.level}" oninput="updateVal('level', this.value)" ${!isEditing ? 'disabled' : ''} class="font-bold">
+                            </div>
+                            <div class="flex flex-col col-span-2">
+                                <label class="text-[10px] uppercase font-bold text-stone-500">Zkušenosti (XP)</label>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" value="${selectedChar.xp}" oninput="updateVal('xp', this.value)" ${!isEditing ? 'disabled' : ''} class="w-full">
+                                    <span class="opacity-30">/</span>
+                                    <input type="number" value="${selectedChar.xpNext}" oninput="updateVal('xpNext', this.value)" ${!isEditing ? 'disabled' : ''} class="w-full">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-7 gap-2 mb-8 bg-stone-800 p-3 rounded shadow-inner text-amber-500">
-                    ${['strength', 'perception', 'endurance', 'charisma', 'intelligence', 'agility', 'luck'].map(s => `
-                        <div class="text-center">
-                            <div class="text-[10px] font-bold uppercase">${s.substring(0,3)}</div>
-                            <input type="number" value="${selectedChar[s]}" onchange="updateVal('${s}', this.value)" ${!isEditing ? 'disabled' : ''} class="w-full text-center bg-stone-100 text-stone-900 rounded font-bold">
-                        </div>
-                    `).join('')}
+                <div class="mb-8">
+                    <h3 class="section-title">S.P.E.C.I.A.L. Atributy</h3>
+                    <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 bg-stone-800 p-4 rounded shadow-inner text-amber-500">
+                        ${['strength', 'perception', 'endurance', 'charisma', 'intelligence', 'agility', 'luck'].map(s => `
+                            <div class="text-center">
+                                <div class="text-[10px] font-bold uppercase mb-1">${s.substring(0,3)}</div>
+                                <input type="number" value="${selectedChar[s]}" oninput="updateVal('${s}', this.value)" ${!isEditing ? 'disabled' : ''} class="w-full text-center bg-stone-100 text-stone-900 rounded font-bold text-xl py-1">
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <h3 class="section-title">STAV POSTAVY</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="border-2 border-stone-800 p-2 bg-white text-center">
-                                <div class="text-[10px] font-bold opacity-50 uppercase">ZDRAVÍ (HP)</div>
-                                <div class="flex justify-center items-center gap-1">
-                                    <input type="number" value="${selectedChar.hpCurrent}" onchange="updateVal('hpCurrent', this.value)" ${!isEditing ? 'disabled' : ''} class="w-10 text-center font-bold">
-                                    <span>/</span>
-                                    <input type="number" value="${selectedChar.hpMax}" onchange="updateVal('hpMax', this.value)" ${!isEditing ? 'disabled' : ''} class="w-10 text-center font-bold">
+                        <h3 class="section-title">Bojový status</h3>
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div class="stat-box p-2 text-center">
+                                <div class="text-[9px] font-bold opacity-50 uppercase">Zdraví (HP)</div>
+                                <div class="flex justify-center items-center font-bold text-lg">
+                                    <input type="number" value="${selectedChar.hpCurrent}" oninput="updateVal('hpCurrent', this.value)" ${!isEditing ? 'disabled' : ''} class="w-10 text-center">
+                                    <span class="mx-1">/</span>
+                                    <input type="number" value="${selectedChar.hpMax}" oninput="updateVal('hpMax', this.value)" ${!isEditing ? 'disabled' : ''} class="w-10 text-center">
                                 </div>
                             </div>
-                            <div class="border-2 border-stone-800 p-2 bg-white text-center">
-                                <div class="text-[10px] font-bold opacity-50 uppercase">OBRANA (DEF)</div>
-                                <input type="number" value="${selectedChar.defense}" onchange="updateVal('defense', this.value)" ${!isEditing ? 'disabled' : ''} class="w-full text-center font-bold text-xl">
+                            <div class="stat-box p-2 text-center">
+                                <div class="text-[9px] font-bold opacity-50 uppercase">Obrana (DEF)</div>
+                                <input type="number" value="${selectedChar.defense}" oninput="updateVal('defense', this.value)" ${!isEditing ? 'disabled' : ''} class="w-full text-center font-bold text-xl">
+                            </div>
+                            <div class="stat-box p-2 text-center">
+                                <div class="text-[9px] font-bold opacity-50 uppercase">Iniciativa</div>
+                                <input type="number" value="${selectedChar.initiative}" oninput="updateVal('initiative', this.value)" ${!isEditing ? 'disabled' : ''} class="w-full text-center font-bold text-xl">
                             </div>
                         </div>
                     </div>
                     <div>
-                        <h3 class="section-title">POZNÁMKY / PERKY</h3>
-                        <textarea class="w-full h-32 p-2 border border-stone-300 bg-stone-50 text-sm" ${!isEditing ? 'disabled' : ''} onchange="updateVal('notes', this.value)">${selectedChar.notes || ''}</textarea>
+                        <h3 class="section-title">Záznamy a Perky</h3>
+                        <textarea class="w-full h-32 p-3 border-2 border-stone-800 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" 
+                                  placeholder="Zde zapište schopnosti, vybavení nebo poznámky..."
+                                  oninput="updateVal('notes', this.value)" ${!isEditing ? 'disabled' : ''}>${selectedChar.notes || ''}</textarea>
                     </div>
                 </div>
+
+                <div class="mt-8 text-[10px] text-stone-400 text-center uppercase tracking-widest">
+                    Property of Vault-Tec Corporation © 2077
+                </div>
             `;
+            // Přegenerovat ikony po renderu
             lucide.createIcons();
         }
 
         // Pomocná funkce pro aktualizaci lokálního objektu
         window.updateVal = (field, val) => {
-            selectedChar[field] = val;
+            if (!selectedChar) return;
+            // Převod na číslo pokud jde o číselné pole
+            const numFields = ['level', 'xp', 'xpNext', 'strength', 'perception', 'endurance', 'charisma', 'intelligence', 'agility', 'luck', 'hpMax', 'hpCurrent', 'defense', 'initiative'];
+            selectedChar[field] = numFields.includes(field) ? parseInt(val) || 0 : val;
         };
 
-        window.renderSheet = renderSheet; // Export pro globální přístup
+        window.renderSheet = renderSheet;
     </script>
 </body>
 </html>
