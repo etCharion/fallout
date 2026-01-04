@@ -294,18 +294,18 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
         const base = JSON.parse(JSON.stringify(DEFAULT_CHARACTER));
         const c = { ...base, ...raw };
 
-        c.skills = { ...base.skills, ...((raw && raw.skills) || {}) };
+        c.skills = { ...base.skills, ...(raw?.skills || {}) };
 
-        c.resHead = { ...base.resHead, ...((raw && raw.resHead) || {}) };
-        c.resTorso = { ...base.resTorso, ...((raw && raw.resTorso) || {}) };
-        c.resLArm = { ...base.resLArm, ...((raw && raw.resLArm) || {}) };
-        c.resRArm = { ...base.resRArm, ...((raw && raw.resRArm) || {}) };
-        c.resLLeg = { ...base.resLLeg, ...((raw && raw.resLLeg) || {}) };
-        c.resRLeg = { ...base.resRLeg, ...((raw && raw.resRLeg) || {}) };
+        c.resHead = { ...base.resHead, ...(raw?.resHead || {}) };
+        c.resTorso = { ...base.resTorso, ...(raw?.resTorso || {}) };
+        c.resLArm = { ...base.resLArm, ...(raw?.resLArm || {}) };
+        c.resRArm = { ...base.resRArm, ...(raw?.resRArm || {}) };
+        c.resLLeg = { ...base.resLLeg, ...(raw?.resLLeg || {}) };
+        c.resRLeg = { ...base.resRLeg, ...(raw?.resRLeg || {}) };
 
-        c.weapons = Array.isArray(raw && raw.weapons) ? raw.weapons.map((w) => ({ assigned: false, ...w })) : [];
-        c.inventory = Array.isArray(raw && raw.inventory) ? raw.inventory.map((it) => ({ type: "other", quantity: "1", ...it })) : [];
-        c.perks = Array.isArray(raw && raw.perks) ? raw.perks.map((p) => ({ ...p })) : [];
+        c.weapons = Array.isArray(raw?.weapons) ? raw.weapons.map((w) => ({ assigned: false, ...w })) : [];
+        c.inventory = Array.isArray(raw?.inventory) ? raw.inventory.map((it) => ({ type: "other", quantity: "1", ...it })) : [];
+        c.perks = Array.isArray(raw?.perks) ? raw.perks.map((p) => ({ ...p })) : [];
 
         return c;
       }
@@ -788,7 +788,7 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
         };
 
         const handleImageUpload = async (event) => {
-          const file = (event.target.files && event.target.files[0]);
+          const file = event.target.files?.[0];
           if (!file || !localChar) return;
 
           const reader = new FileReader();
@@ -816,13 +816,13 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
               canvas.width = width;
               canvas.height = height;
               const ctx = canvas.getContext("2d");
-              if (ctx) ctx.drawImage(img, 0, 0, width, height);
+              ctx?.drawImage(img, 0, 0, width, height);
 
               const base64String = canvas.toDataURL("image/jpeg", 0.8);
               updateField("imageUrl", base64String);
               // Persist image immediately so it survives character switching even if the user forgets to press Save.
               try {
-                if (localChar && localChar.id) {
+                if (localChar?.id) {
                   await setDoc(
                     doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id),
                     { imageUrl: base64String },
@@ -833,7 +833,7 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                 console.error("Image save error:", err);
               }
             };
-            img.src = (e.target && e.target.result);
+            img.src = e.target?.result;
           };
           reader.readAsDataURL(file);
         };
@@ -853,7 +853,7 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
             { key: "science", label: t.s_science },
             { key: "smallGuns", label: t.s_smallGuns },
             { key: "sneak", label: t.s_sneak },
-            { key: "speech", label: (t.s_s_speech != null ? t.s_s_speech : t.s_speech) }, // defensive
+            { key: "speech", label: t.s_s_speech ?? t.s_speech }, // defensive
             { key: "survival", label: t.s_survival },
             { key: "throwing", label: t.s_throwing },
             { key: "unarmed", label: t.s_unarmed }
@@ -1005,7 +1005,7 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                           className:
                             `relative group w-32 h-32 flex items-center justify-center border-2 ` +
                             (isEditing ? "border-amber-400 border-dashed cursor-pointer bg-amber-50" : "border-transparent"),
-                          onClick: () => isEditing && fileInputRef.current && fileInputRef.current.click()
+                          onClick: () => isEditing && fileInputRef.current?.click()
                         },
                         localChar.imageUrl
                           ? React.createElement("img", {
@@ -2043,7 +2043,7 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                     const list = templates[picker.list] || [];
                     const q = (picker.query || "").trim().toLowerCase();
                     const filtered = list.filter((x) => {
-                      const name = ((x && x.name) || "").toLowerCase();
+                      const name = (x?.name || "").toLowerCase();
                       if (q && !name.includes(q)) return false;
                       if (picker.list === "inventory" && picker.type && (x.type || "other") !== picker.type) return false;
                       return true;
@@ -2074,7 +2074,9 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
               )
             )
 
-        );
+                  )
+        )
+);
       }
 
       // Mount
