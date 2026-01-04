@@ -730,9 +730,11 @@
         const saveTemplate = async (tab, draft) => {
           if (!draft) return;
           const colName = templateCollectionPath(tab);
-          const id = draft.id || crypto.randomUUID();
+          const docId = draft.id || crypto.randomUUID();
+          // Firestore does not allow 'undefined' values – strip the id field from stored data.
+          const { id, ...data } = draft;
           try {
-            await setDoc(doc(db, "artifacts", appId, "public", "data", colName, id), { ...draft, id: undefined }, { merge: true });
+            await setDoc(doc(db, "artifacts", appId, "public", "data", colName, docId), data, { merge: true });
             setTplDraft((p) => ({ ...p, [tab]: null }));
           } catch (e) {
             console.error(e);
