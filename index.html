@@ -634,10 +634,6 @@
           reader.readAsDataURL(file);
         };
 
-        if (loading) {
-          return React.createElement("div", { className: "p-10 text-center font-mono text-green-700" }, t.loading);
-        }
-
         const skillsList = useMemo(() => {
           return [
             { key: "athletics", label: t.s_athletics },
@@ -659,6 +655,11 @@
             { key: "unarmed", label: t.s_unarmed }
           ].sort((a, b) => a.label.localeCompare(b.label));
         }, [t]);
+
+
+        if (loading) {
+          return React.createElement("div", { className: "p-10 text-center font-mono text-green-700" }, t.loading);
+        }
 
         return React.createElement(
           "div",
