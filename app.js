@@ -360,7 +360,9 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
         weapons: [],
         inventory: [],
         perks: [],
-        caps: "0"
+        caps: "0",
+        about: "",
+        notes: ""
       };
 
       // Helper for auto-resizing textareas
@@ -471,6 +473,7 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
         const [templates, setTemplates] = useState({ weapons: [], inventory: [], perks: [] });
         const [tplTab, setTplTab] = useState("weapons");
         const [tplDraft, setTplDraft] = useState({ weapons: null, inventory: null, perks: null });
+        const [picker, setPicker] = useState({ open: false, list: "weapons", query: "", type: "" });
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
@@ -649,6 +652,11 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
           });
           setLocalChar({ ...localChar, [listName]: list });
         };
+        const openPicker = (listName) => {
+          if (!isEditing) return;
+          setPicker({ open: true, list: listName, query: "", type: "" });
+        };
+
         const addFromTemplate = (listName, templateId) => {
           if (!localChar) return;
           const tplList = templates[listName] || [];
@@ -1295,7 +1303,33 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                           )
                         )
                       )
-                    )
+                    
+                      ,
+
+                      // ABOUT + NOTES
+                      React.createElement(
+                        "div",
+                        { className: "border-2 border-stone-800 bg-white p-4" },
+                        React.createElement("h3", { className: "section-title" }, "O postavě"),
+                        React.createElement(AutoResizeTextarea, {
+                          className: "w-full min-h-[120px] border border-stone-300 p-2 text-sm",
+                          value: localChar.about || "",
+                          disabled: !isEditing,
+                          onChange: (e) => updateField("about", e.target.value)
+                        })
+                      ),
+                      React.createElement(
+                        "div",
+                        { className: "border-2 border-stone-800 bg-white p-4" },
+                        React.createElement("h3", { className: "section-title" }, "Poznámky"),
+                        React.createElement(AutoResizeTextarea, {
+                          className: "w-full min-h-[140px] border border-stone-300 p-2 text-sm",
+                          value: localChar.notes || "",
+                          disabled: !isEditing,
+                          onChange: (e) => updateField("notes", e.target.value)
+                        })
+                      )
+)
                   ),
 
                   // WEAPONS
@@ -1311,20 +1345,12 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                           "div",
                           { className: "flex gap-2 items-center" },
                           React.createElement(
-                            "select",
+                            "button",
                             {
-                              className: "bg-white border border-stone-300 text-xs p-1 rounded",
-                              defaultValue: "",
-                              onChange: (e) => {
-                                const val = e.target.value;
-                                if (val) addFromTemplate("weapons", val);
-                                e.target.value = "";
-                              }
+                              onClick: () => openPicker("weapons"),
+                              className: "btn-add bg-stone-200 text-stone-900 hover:bg-stone-300"
                             },
-                            React.createElement("option", { value: "" }, "Vložit ze seznamu…"),
-                            (templates.weapons || []).map((tpl) =>
-                              React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.skill ? " — " + tpl.skill : ""))
-                            )
+                            "Vložit…"
                           ),
                           React.createElement(
                             "button",
@@ -1333,8 +1359,7 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                             " ",
                             t.btnAdd
                           )
-                          )
-                    ),
+                        ),
                     React.createElement(
                       "div",
                       { className: "overflow-x-auto" },
@@ -1494,20 +1519,12 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                           }),
                           isEditing &&
                             React.createElement(
-                              "select",
+                              "button",
                               {
-                                className: "bg-white border border-stone-300 text-xs p-1 rounded",
-                                defaultValue: "",
-                                onChange: (e) => {
-                                  const val = e.target.value;
-                                  if (val) addFromTemplate("inventory", val);
-                                  e.target.value = "";
-                                }
+                                onClick: () => openPicker("inventory"),
+                                className: "btn-add bg-stone-200 text-stone-900 hover:bg-stone-300"
                               },
-                              React.createElement("option", { value: "" }, "Vložit…"),
-                              (templates.inventory || []).map((tpl) =>
-                                React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.type ? " — " + getTypeLabel(tpl.type, lang) : ""))
-                              )
+                              "Vložit…"
                             ),
                           isEditing &&
                             React.createElement(
@@ -1610,28 +1627,19 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                             "div",
                             { className: "flex gap-2 items-center" },
                             React.createElement(
-                              "select",
+                              "button",
                               {
-                                className: "bg-white border border-stone-300 text-xs p-1 rounded",
-                                defaultValue: "",
-                                onChange: (e) => {
-                                  const val = e.target.value;
-                                  if (val) addFromTemplate("perks", val);
-                                  e.target.value = "";
-                                }
+                                onClick: () => openPicker("perks"),
+                                className: "btn-add bg-stone-200 text-stone-900 hover:bg-stone-300"
                               },
-                              React.createElement("option", { value: "" }, "Vložit ze seznamu…"),
-                              (templates.perks || []).map((tpl) =>
-                                React.createElement("option", { key: tpl.id, value: tpl.id }, (tpl.name || "(beze jména)") + (tpl.rank ? " (" + tpl.rank + ")" : ""))
-                              )
+                              "Vložit…"
                             ),
                             React.createElement(
                               "button",
                               { onClick: () => addItem("perks"), className: "btn-add" },
                               React.createElement(Icon, { name: "Plus", size: 14 })
                             )
-                          )
-                      ),
+                          )),
                       React.createElement(
                         "table",
                         { className: "w-full text-left text-sm table-fixed" },
@@ -1971,10 +1979,103 @@ import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/reac
                   )
                 )
               )
-            ),
+            
+          ,
+
+          // TEMPLATE PICKER MODAL (search + type filter for inventory)
+          picker.open &&
+            React.createElement(
+              "div",
+              {
+                className: "fixed inset-0 z-[90] bg-black/50 flex items-center justify-center p-4 print:hidden",
+                onMouseDown: () => setPicker((p) => ({ ...p, open: false }))
+              },
+              React.createElement(
+                "div",
+                {
+                  className: "w-full max-w-3xl bg-[#fdfaf5] border-2 border-stone-800 shadow-2xl p-4 sm:p-6",
+                  onMouseDown: (e) => e.stopPropagation()
+                },
+                React.createElement(
+                  "div",
+                  { className: "flex items-center justify-between mb-3 border-b border-stone-300 pb-2" },
+                  React.createElement(
+                    "h2",
+                    { className: "text-lg font-bold uppercase tracking-wide" },
+                    picker.list === "weapons" ? "Vložit zbraň" : picker.list === "inventory" ? "Vložit vybavení" : "Vložit perk"
+                  ),
+                  React.createElement(
+                    "button",
+                    { className: "btn-admin bg-red-800 text-white", onClick: () => setPicker((p) => ({ ...p, open: false })) },
+                    React.createElement(Icon, { name: "X", size: 16 }),
+                    " Zavřít"
+                  )
+                ),
+                React.createElement(
+                  "div",
+                  { className: "flex flex-col sm:flex-row gap-2 mb-3" },
+                  React.createElement("input", {
+                    className: "w-full border border-stone-300 p-2 text-sm",
+                    placeholder: "Hledat…",
+                    value: picker.query,
+                    onChange: (e) => setPicker((p) => ({ ...p, query: e.target.value }))
+                  }),
+                  picker.list === "inventory" &&
+                    React.createElement(
+                      "select",
+                      {
+                        className: "border border-stone-300 p-2 text-sm bg-white",
+                        value: picker.type,
+                        onChange: (e) => setPicker((p) => ({ ...p, type: e.target.value }))
+                      },
+                      React.createElement("option", { value: "" }, "Všechny typy"),
+                      ITEM_TYPES.map((opt) =>
+                        React.createElement("option", { key: opt.key, value: opt.key }, lang === "en" ? opt.en : opt.cs)
+                      )
+                    )
+                ),
+                React.createElement(
+                  "div",
+                  { className: "max-h-[60vh] overflow-auto border border-stone-300 bg-white" },
+                  (() => {
+                    const list = templates[picker.list] || [];
+                    const q = (picker.query || "").trim().toLowerCase();
+                    const filtered = list.filter((x) => {
+                      const name = (x?.name || "").toLowerCase();
+                      if (q && !name.includes(q)) return false;
+                      if (picker.list === "inventory" && picker.type && (x.type || "other") !== picker.type) return false;
+                      return true;
+                    });
+                    if (filtered.length === 0) return React.createElement("div", { className: "p-3 text-sm text-stone-500" }, "Nic nenalezeno.");
+                    return filtered.map((row) =>
+                      React.createElement(
+                        "button",
+                        {
+                          key: row.id,
+                          className: "w-full text-left p-3 border-b border-stone-200 hover:bg-amber-50",
+                          onClick: () => {
+                            addFromTemplate(picker.list, row.id);
+                            setPicker((p) => ({ ...p, open: false }));
+                          }
+                        },
+                        React.createElement("div", { className: "font-bold text-sm" }, row.name || "(beze jména)"),
+                        picker.list === "weapons" &&
+                          React.createElement("div", { className: "text-xs text-stone-600" }, (row.skill || "") + (row.damage ? " • " + row.damage : "")),
+                        picker.list === "inventory" &&
+                          React.createElement("div", { className: "text-xs text-stone-600" }, (row.type ? getTypeLabel(row.type, lang) : getTypeLabel("other", lang)) + (row.weight ? " • " + row.weight : "")),
+                        picker.list === "perks" &&
+                          React.createElement("div", { className: "text-xs text-stone-600" }, row.rank ? "Rank " + row.rank : "")
+                      )
+                    );
+                  })()
+                )
+              )
+            )
+
           null
         );
       }
 
       // Mount
       createRoot(document.getElementById("root")).render(React.createElement(FalloutSheetApp));
+
