@@ -602,7 +602,7 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             const img = new Image();
-            img.onload = () => {
+            img.onload = async () => {
               const canvas = document.createElement("canvas");
               const MAX_WIDTH = 200;
               const MAX_HEIGHT = 200;
