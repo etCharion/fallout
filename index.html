@@ -595,7 +595,7 @@
           }
         };
 
-        const handleImageUpload = (event) => {
+        const handleImageUpload = async (event) => {
           const file = event.target.files?.[0];
           if (!file || !localChar) return;
 
@@ -628,6 +628,18 @@
 
               const base64String = canvas.toDataURL("image/jpeg", 0.8);
               updateField("imageUrl", base64String);
+              // Persist image immediately so it survives character switching even if the user forgets to press Save.
+              try {
+                if (localChar?.id) {
+                  await setDoc(
+                    doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id),
+                    { imageUrl: base64String },
+                    { merge: true }
+                  );
+                }
+              } catch (err) {
+                console.error("Image save error:", err);
+              }
             };
             img.src = e.target?.result;
           };
@@ -795,7 +807,7 @@
                           ? React.createElement("img", {
                               src: localChar.imageUrl,
                               alt: "Char",
-                              className: "w-full h-full object-cover grayscale contrast-125 sepia-50"
+                              className: "w-full h-full object-cover"
                             })
                           : React.createElement("img", {
                               src: "https://upload.wikimedia.org/wikipedia/en/5/52/Fallout_Vault_Boy.png",
