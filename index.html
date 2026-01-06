@@ -63,44 +63,64 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
 .section-hitlocs{ background: var(--pdf-lck) !important; color:#111 !important; }
 
 
-/* ===== v7: compact skills rows for PRINT (one line per skill) ===== */
+/* ===== v8: REAL compact skills for PRINT (because skills use div-grid, not table) ===== */
 @media print{
-  /* make the skills table denser */
-  .print-skills table{
-    table-layout: fixed;
-  }
-  .print-skills th,
-  .print-skills td{
+  /* Make each skill row one line: [checkbox] [NAME (TAG)] [value] */
+  .print-skills .grid.grid-cols-12.items-center{
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
     padding: 2px 4px !important;
-    font-size: 9px !important;
     line-height: 1.1 !important;
-    vertical-align: middle !important;
+    font-size: 9px !important;
   }
 
-  /* force stacked blocks inside cells to sit on one line */
-  .print-skills td *{
+  /* Checkbox cell */
+  .print-skills .grid.grid-cols-12.items-center > div.col-span-1{
+    flex: 0 0 14px !important;
+    width: 14px !important;
+  }
+
+  /* Name cell (was col-span-8) */
+  .print-skills .grid.grid-cols-12.items-center > div.col-span-8{
+    flex: 1 1 auto !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Value cell */
+  .print-skills .grid.grid-cols-12.items-center > div.col-span-3{
+    flex: 0 0 26px !important;
+    width: 26px !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+  }
+
+  /* Prevent inner spans from stacking */
+  .print-skills .grid.grid-cols-12.items-center *{
     display: inline !important;
     white-space: nowrap !important;
   }
 
-  /* keep checkbox small */
-  .print-skills input[type="checkbox"]{
-    transform: scale(0.75);
-    transform-origin: left center;
-    margin: 0 4px 0 0 !important;
+  /* Header row of the skills table */
+  .print-skills .grid.grid-cols-12.bg-stone-800{
+    display:flex !important;
+    align-items:center !important;
+    gap:6px !important;
+    padding: 2px 4px !important;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
   }
+  .print-skills .grid.grid-cols-12.bg-stone-800 > div.col-span-1{ flex:0 0 14px !important; width:14px !important; }
+  .print-skills .grid.grid-cols-12.bg-stone-800 > div.col-span-8{ flex:1 1 auto !important; }
+  .print-skills .grid.grid-cols-12.bg-stone-800 > div.col-span-3{ flex:0 0 26px !important; width:26px !important; text-align:right !important; }
 
-  /* reduce extra spacing from common utility classes */
-  .print-skills .gap-1,
-  .print-skills .gap-2,
-  .print-skills .space-y-1,
-  .print-skills .space-y-2{
-    gap: 0 !important;
-  }
-  .print-skills .mb-1,
-  .print-skills .mb-2,
-  .print-skills .mt-1,
-  .print-skills .mt-2{
+  /* Smaller checkbox */
+  .print-skills input[type="checkbox"]{
+    transform: scale(0.75) !important;
+    transform-origin: left center !important;
     margin: 0 !important;
   }
 }
