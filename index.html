@@ -20,7 +20,7 @@
   --pdf-lck:#bfb3e2;
   --pdf-paper:#f3f1ea;
   --pdf-ink:#171717;
-  --pdf-line:#a0a1a5;
+  --pdf-line:#111;
 }
 
 html, body{ background: var(--pdf-paper); color: var(--pdf-ink); }
@@ -53,6 +53,14 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
   .section-title{ background:#fff !important; color:#000 !important; }
   thead th{ background:#fff !important; color:#000 !important; }
 }
+
+
+/* ===== v6 fixes: hit-locations color + title padding ===== */
+.section-title{
+  padding: 6px 10px !important;
+  line-height: 1.2 !important;
+}
+.section-hitlocs{ background: var(--pdf-lck) !important; color:#111 !important; }
 
 </style>
   </head>
@@ -1327,7 +1335,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                         null,
                         React.createElement(
                           "h3",
-                          { className: "section-title flex justify-between" },
+                          { className: "section-title section-hitlocs flex justify-between" },
                           React.createElement("span", null, t.hitLocs)
                         ),
                         React.createElement(
