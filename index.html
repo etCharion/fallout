@@ -62,6 +62,49 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
 }
 .section-hitlocs{ background: var(--pdf-lck) !important; color:#111 !important; }
 
+
+/* ===== v7: compact skills rows for PRINT (one line per skill) ===== */
+@media print{
+  /* make the skills table denser */
+  .print-skills table{
+    table-layout: fixed;
+  }
+  .print-skills th,
+  .print-skills td{
+    padding: 2px 4px !important;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+    vertical-align: middle !important;
+  }
+
+  /* force stacked blocks inside cells to sit on one line */
+  .print-skills td *{
+    display: inline !important;
+    white-space: nowrap !important;
+  }
+
+  /* keep checkbox small */
+  .print-skills input[type="checkbox"]{
+    transform: scale(0.75);
+    transform-origin: left center;
+    margin: 0 4px 0 0 !important;
+  }
+
+  /* reduce extra spacing from common utility classes */
+  .print-skills .gap-1,
+  .print-skills .gap-2,
+  .print-skills .space-y-1,
+  .print-skills .space-y-2{
+    gap: 0 !important;
+  }
+  .print-skills .mb-1,
+  .print-skills .mb-2,
+  .print-skills .mt-1,
+  .print-skills .mt-2{
+    margin: 0 !important;
+  }
+}
+
 </style>
   </head>
   <body class="min-h-screen">
