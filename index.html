@@ -9,196 +9,21 @@
       /* Keep default browser styles minimal; Tailwind handles most UI. */
       html, body { height: 100%; }
     
-/* ===== Fallout-ish PDF-inspired look (screen), B/W print ===== */
-
-/* Screen palette */
+/* ===== PDF palette mapping (screen), monochrome print ===== */
 :root{
-  --paper:#f3f1ea;
-  --paper-2:#fbfaf6;
-  --ink:#171717;
-  --line:#111;
-  --muted:#5b5b5b;
-
-  /* subtle accents (screen only) */
-  --accent-1:#e5a35f;
-  --accent-2:#7fb69c;
-  --accent-3:#6fbfb3;
-  --accent-4:#6faecb;
+  --pdf-str:#6ac4a3;
+  --pdf-per:#a37d59;
+  --pdf-end:#5fc1cc;
+  --pdf-cha:#ef9723;
+  --pdf-int:#c2c4b6;
+  --pdf-agi:#e8b19d;
+  --pdf-lck:#bfb3e2;
+  --pdf-paper:#f3f1ea;
+  --pdf-ink:#171717;
+  --pdf-line:#111;
 }
 
-html, body{
-  background: var(--paper);
-  color: var(--ink);
-}
-
-body{
-  background-image:
-    linear-gradient(0deg, rgba(0,0,0,.03), rgba(0,0,0,0)),
-    repeating-linear-gradient(90deg, rgba(0,0,0,.012) 0, rgba(0,0,0,.012) 1px, transparent 1px, transparent 14px);
-  background-attachment: fixed;
-}
-
-*{ border-radius: 0 !important; }
-
-.section-title{
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  position: relative;
-  padding: 6px 10px;
-  border: 2px solid var(--line);
-  background: var(--paper-2);
-}
-
-.section-title::before{
-  content:"";
-  position:absolute;
-  left:-2px;
-  top:-2px;
-  bottom:-2px;
-  width: 10px;
-  background: var(--accent-3);
-  border-right: 2px solid var(--line);
-}
-
-.section-title:nth-of-type(4n+1)::before{ background: var(--accent-1); }
-.section-title:nth-of-type(4n+2)::before{ background: var(--accent-2); }
-.section-title:nth-of-type(4n+3)::before{ background: var(--accent-3); }
-.section-title:nth-of-type(4n+4)::before{ background: var(--accent-4); }
-
-table{ border-collapse: collapse; }
-th, td{ border: 1px solid var(--line); }
-
-thead th{
-  background: #111;
-  color: #fff;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-}
-
-input, select, textarea{
-  background: transparent !important;
-  color: var(--ink) !important;
-  border-color: var(--line) !important;
-}
-
-input:focus, select:focus, textarea:focus{
-  outline: none !important;
-  box-shadow: inset 0 0 0 2px rgba(0,0,0,.15) !important;
-}
-
-.btn-admin, .btn-add, button{
-  border: 2px solid var(--line) !important;
-}
-
-.shadow, .shadow-lg, .shadow-xl{
-  box-shadow: 0 1px 0 rgba(0,0,0,.15) !important;
-}
-
-@media print{
-  html, body{
-    background: #fff !important;
-    background-image: none !important;
-    color: #000 !important;
-  }
-
-  .section-title{
-    background: #fff !important;
-    color: #000 !important;
-  }
-  .section-title::before{ display:none !important; }
-
-  thead th{
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  *{
-    -webkit-print-color-adjust: economy !important;
-    print-color-adjust: economy !important;
-    color: #000 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  th, td, .section-title{
-    border-color: #000 !important;
-  }
-}
-
-
-/* ===== v2: stronger PDF-inspired colors for SPECIAL + categories (screen), B/W print ===== */
-
-:root{
-  --c-special-1:#e6a15a; /* STR */
-  --c-special-2:#6faecb; /* PER */
-  --c-special-3:#7fb69c; /* END */
-  --c-special-4:#e5b7a3; /* CHA */
-  --c-special-5:#e4d07a; /* INT */
-  --c-special-6:#6fbfb3; /* AGI */
-  --c-special-7:#b8a6d9; /* LCK */
-
-  --c-cat-1:#e6a15a; /* skills */
-  --c-cat-2:#2b2b2b; /* weapons */
-  --c-cat-3:#7fb69c; /* inventory */
-  --c-cat-4:#6fbfb3; /* perks */
-  --c-cat-5:#6faecb; /* other */
-  --c-cat-6:#e4d07a; /* other */
-  --c-cat-7:#d98a7a; /* other */
-}
-
-/* SPECIAL: color the 7 stat boxes (likely unique grid-cols-7 on page) */
-.grid.grid-cols-7 > div:nth-child(1) input{ background: var(--c-special-1) !important; }
-.grid.grid-cols-7 > div:nth-child(2) input{ background: var(--c-special-2) !important; }
-.grid.grid-cols-7 > div:nth-child(3) input{ background: var(--c-special-3) !important; }
-.grid.grid-cols-7 > div:nth-child(4) input{ background: var(--c-special-4) !important; }
-.grid.grid-cols-7 > div:nth-child(5) input{ background: var(--c-special-5) !important; }
-.grid.grid-cols-7 > div:nth-child(6) input{ background: var(--c-special-6) !important; }
-.grid.grid-cols-7 > div:nth-child(7) input{ background: var(--c-special-7) !important; }
-
-/* keep input text readable on colored backgrounds */
-.grid.grid-cols-7 input{
-  color: #111 !important;
-  font-weight: 800;
-}
-
-/* Category headers: map first 7 section titles to distinct PDF-like colors */
-.section-title{
-  color:#111 !important;
-  background: var(--paper-2) !important;
-}
-.section-title::before{ display:none !important; } /* remove the thin bar; use full color */
-
-.section-title:nth-of-type(7n+1){ background: var(--c-cat-1) !important; }
-.section-title:nth-of-type(7n+2){ background: var(--c-cat-2) !important; color:#fff !important; }
-.section-title:nth-of-type(7n+3){ background: var(--c-cat-3) !important; }
-.section-title:nth-of-type(7n+4){ background: var(--c-cat-4) !important; }
-.section-title:nth-of-type(7n+5){ background: var(--c-cat-5) !important; }
-.section-title:nth-of-type(7n+6){ background: var(--c-cat-6) !important; }
-.section-title:nth-of-type(7n+0){ background: var(--c-cat-7) !important; }
-
-/* Slightly stronger lines like the PDF */
-.section-title{ border-width: 2px !important; }
-th, td{ border-width: 1px !important; }
-
-/* PRINT: force monochrome everywhere (including SPECIAL backgrounds and category bars) */
-@media print{
-  .grid.grid-cols-7 input{ background: transparent !important; }
-  .section-title{ background: #fff !important; color:#000 !important; }
-}
-
-
-/* ===== v3: exact PDF palette mapping (screen), B/W print ===== */
-:root{
-  --pdf-str:#6ac4a3; /* Síla; vybavení */
-  --pdf-per:#a37d59; /* Vnímavost; zbraně */
-  --pdf-end:#5fc1cc; /* Odolnost; perky */
-  --pdf-cha:#ef9723; /* Charisma; dovednosti */
-  --pdf-int:#c2c4b6; /* Inteligence */
-  --pdf-agi:#e8b19d; /* Hbitost */
-  --pdf-lck:#bfb3e2; /* Štěstí; zásahové zóny */
-}
+html, body{ background: var(--pdf-paper); color: var(--pdf-ink); }
 
 /* SPECIAL boxes (7) */
 .grid.grid-cols-7 > div:nth-child(1) input{ background: var(--pdf-str) !important; }
@@ -208,86 +33,25 @@ th, td{ border-width: 1px !important; }
 .grid.grid-cols-7 > div:nth-child(5) input{ background: var(--pdf-int) !important; }
 .grid.grid-cols-7 > div:nth-child(6) input{ background: var(--pdf-agi) !important; }
 .grid.grid-cols-7 > div:nth-child(7) input{ background: var(--pdf-lck) !important; }
+.grid.grid-cols-7 input{ color:#111 !important; font-weight:800; }
 
-.grid.grid-cols-7 input{
-  color:#111 !important;
-  font-weight:800;
-}
+/* Category headers */
+.section-title{ border:2px solid var(--pdf-line) !important; letter-spacing:.06em; text-transform:uppercase; }
+.section-skills{ background: var(--pdf-cha) !important; color:#111 !important; }
+.section-weapons{ background: var(--pdf-per) !important; color:#111 !important; }
+.section-inventory{ background: var(--pdf-str) !important; color:#111 !important; }
+.section-perks{ background: var(--pdf-end) !important; color:#111 !important; }
+.section-hitlocs{ background: var(--pdf-lck) !important; color:#111 !important; }
 
-/* Category header bars (use layout containers from the sheet) */
-.print-skills .section-title{
-  background: var(--pdf-cha) !important;
-  color:#111 !important;
-  border-color:#111 !important;
-}
+/* Table headers like PDF */
+thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
 
-/* Right column: order is Weapons; Perks; Equipment; Hit locations (then others if any) */
-.print-right .section-title{
-  border-color:#111 !important;
-}
-
-/* 1) Weapons */
-.print-right .section-title:nth-of-type(1){
-  background: var(--pdf-per) !important;
-  color:#fff !important;
-}
-
-/* 2) Perks */
-.print-right .section-title:nth-of-type(2){
-  background: var(--pdf-end) !important;
-  color:#111 !important;
-}
-
-/* 3) Equipment / inventory */
-.print-right .section-title:nth-of-type(3){
-  background: var(--pdf-str) !important;
-  color:#111 !important;
-}
-
-/* 4) Hit locations */
-.print-right .section-title:nth-of-type(4){
-  background: var(--pdf-lck) !important;
-  color:#111 !important;
-}
-
-/* If there are more section titles on the right, use INT then AGI as extra palette */
-.print-right .section-title:nth-of-type(5){
-  background: var(--pdf-int) !important;
-  color:#111 !important;
-}
-.print-right .section-title:nth-of-type(6){
-  background: var(--pdf-agi) !important;
-  color:#111 !important;
-}
-
-/* Remove the decorative left bar from earlier styles (we now color the whole title) */
-.section-title::before{ display:none !important; }
-
-/* PRINT: strictly B/W */
+/* Print: force monochrome */
 @media print{
-  .grid.grid-cols-7 input{ background: transparent !important; }
+  *{ color:#000 !important; background:transparent !important; box-shadow:none !important; text-shadow:none !important; }
+  .grid.grid-cols-7 input{ background:transparent !important; }
   .section-title{ background:#fff !important; color:#000 !important; }
-}
-
-
-/* ===== v3.1 override: map section-title colors by actual DOM order ===== */
-@media screen {
-  /* Force colored bars for all section titles (even those with border-none) */
-  h3.section-title{ background: var(--pdf-cha) !important; color:#111 !important; }
-  h3.section-title.mb-0.border-none{ background: var(--pdf-cha) !important; color:#111 !important; }
-  .section-title::before{ display:none !important; }
-
-  /* Order of section titles in v27 layout:
-     1 Skills; 2 Hit Locations; 3 Weapons; 4 Inventory; 5 Perks (+ optional more). */
-  h3.section-title:nth-of-type(1){ background: var(--pdf-cha) !important; } /* DOVEDNOSTI */
-  h3.section-title:nth-of-type(2){ background: var(--pdf-lck) !important; } /* ZÁSAHOVÉ ZÓNY */
-  h3.section-title:nth-of-type(3){ background: var(--pdf-per) !important; color:#111 !important; } /* ZBRANĚ */
-  h3.section-title:nth-of-type(4){ background: var(--pdf-str) !important; } /* VYBAVENÍ */
-  h3.section-title:nth-of-type(5){ background: var(--pdf-end) !important; } /* PERKY A RYSY */
-
-  /* If more titles exist, continue palette */
-  h3.section-title:nth-of-type(6){ background: var(--pdf-int) !important; }
-  h3.section-title:nth-of-type(7){ background: var(--pdf-agi) !important; }
+  thead th{ background:#fff !important; color:#000 !important; }
 }
 
 </style>
@@ -1426,7 +1190,7 @@ th, td{ border-width: 1px !important; }
                     React.createElement(
                       "div",
                       { className: "print-skills" },
-                      React.createElement("h3", { className: "section-title" }, t.skillsTitle),
+                      React.createElement("h3", { className: "section-title section-skills" }, t.skillsTitle),
                       React.createElement(
                         "div",
                         { className: "border-2 border-stone-800 bg-white" },
@@ -1603,7 +1367,7 @@ th, td{ border-width: 1px !important; }
                     React.createElement(
                       "div",
                       { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
-                      React.createElement("h3", { className: "section-title mb-0 border-none" }, t.weaponsTitle),
+                      React.createElement("h3", { className: "section-title section-weapons mb-0 border-none" }, t.weaponsTitle),
                       isEditing &&
                         React.createElement(
                           "div",
@@ -1779,7 +1543,7 @@ th, td{ border-width: 1px !important; }
                       React.createElement(
                         "div",
                         { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
-                        React.createElement("h3", { className: "section-title mb-0 border-none" }, t.invTitle),
+                        React.createElement("h3", { className: "section-title section-inventory mb-0 border-none" }, t.invTitle),
                         React.createElement(
                           "div",
                           { className: "flex gap-2 items-center" },
@@ -1902,7 +1666,7 @@ th, td{ border-width: 1px !important; }
                       React.createElement(
                         "div",
                         { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
-                        React.createElement("h3", { className: "section-title mb-0 border-none" }, t.perksTitle),
+                        React.createElement("h3", { className: "section-title section-perks mb-0 border-none" }, t.perksTitle),
                         isEditing &&
                           React.createElement(
                             "div",
