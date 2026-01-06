@@ -269,6 +269,27 @@ th, td{ border-width: 1px !important; }
   .section-title{ background:#fff !important; color:#000 !important; }
 }
 
+
+/* ===== v3.1 override: map section-title colors by actual DOM order ===== */
+@media screen {
+  /* Force colored bars for all section titles (even those with border-none) */
+  h3.section-title{ background: var(--pdf-cha) !important; color:#111 !important; }
+  h3.section-title.mb-0.border-none{ background: var(--pdf-cha) !important; color:#111 !important; }
+  .section-title::before{ display:none !important; }
+
+  /* Order of section titles in v27 layout:
+     1 Skills; 2 Hit Locations; 3 Weapons; 4 Inventory; 5 Perks (+ optional more). */
+  h3.section-title:nth-of-type(1){ background: var(--pdf-cha) !important; } /* DOVEDNOSTI */
+  h3.section-title:nth-of-type(2){ background: var(--pdf-lck) !important; } /* ZÁSAHOVÉ ZÓNY */
+  h3.section-title:nth-of-type(3){ background: var(--pdf-per) !important; color:#111 !important; } /* ZBRANĚ */
+  h3.section-title:nth-of-type(4){ background: var(--pdf-str) !important; } /* VYBAVENÍ */
+  h3.section-title:nth-of-type(5){ background: var(--pdf-end) !important; } /* PERKY A RYSY */
+
+  /* If more titles exist, continue palette */
+  h3.section-title:nth-of-type(6){ background: var(--pdf-int) !important; }
+  h3.section-title:nth-of-type(7){ background: var(--pdf-agi) !important; }
+}
+
 </style>
   </head>
   <body class="min-h-screen">
