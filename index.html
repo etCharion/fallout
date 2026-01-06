@@ -188,6 +188,87 @@ th, td{ border-width: 1px !important; }
   .section-title{ background: #fff !important; color:#000 !important; }
 }
 
+
+/* ===== v3: exact PDF palette mapping (screen), B/W print ===== */
+:root{
+  --pdf-str:#6ac4a3; /* Síla; vybavení */
+  --pdf-per:#a37d59; /* Vnímavost; zbraně */
+  --pdf-end:#5fc1cc; /* Odolnost; perky */
+  --pdf-cha:#ef9723; /* Charisma; dovednosti */
+  --pdf-int:#c2c4b6; /* Inteligence */
+  --pdf-agi:#e8b19d; /* Hbitost */
+  --pdf-lck:#bfb3e2; /* Štěstí; zásahové zóny */
+}
+
+/* SPECIAL boxes (7) */
+.grid.grid-cols-7 > div:nth-child(1) input{ background: var(--pdf-str) !important; }
+.grid.grid-cols-7 > div:nth-child(2) input{ background: var(--pdf-per) !important; }
+.grid.grid-cols-7 > div:nth-child(3) input{ background: var(--pdf-end) !important; }
+.grid.grid-cols-7 > div:nth-child(4) input{ background: var(--pdf-cha) !important; }
+.grid.grid-cols-7 > div:nth-child(5) input{ background: var(--pdf-int) !important; }
+.grid.grid-cols-7 > div:nth-child(6) input{ background: var(--pdf-agi) !important; }
+.grid.grid-cols-7 > div:nth-child(7) input{ background: var(--pdf-lck) !important; }
+
+.grid.grid-cols-7 input{
+  color:#111 !important;
+  font-weight:800;
+}
+
+/* Category header bars (use layout containers from the sheet) */
+.print-skills .section-title{
+  background: var(--pdf-cha) !important;
+  color:#111 !important;
+  border-color:#111 !important;
+}
+
+/* Right column: order is Weapons; Perks; Equipment; Hit locations (then others if any) */
+.print-right .section-title{
+  border-color:#111 !important;
+}
+
+/* 1) Weapons */
+.print-right .section-title:nth-of-type(1){
+  background: var(--pdf-per) !important;
+  color:#fff !important;
+}
+
+/* 2) Perks */
+.print-right .section-title:nth-of-type(2){
+  background: var(--pdf-end) !important;
+  color:#111 !important;
+}
+
+/* 3) Equipment / inventory */
+.print-right .section-title:nth-of-type(3){
+  background: var(--pdf-str) !important;
+  color:#111 !important;
+}
+
+/* 4) Hit locations */
+.print-right .section-title:nth-of-type(4){
+  background: var(--pdf-lck) !important;
+  color:#111 !important;
+}
+
+/* If there are more section titles on the right, use INT then AGI as extra palette */
+.print-right .section-title:nth-of-type(5){
+  background: var(--pdf-int) !important;
+  color:#111 !important;
+}
+.print-right .section-title:nth-of-type(6){
+  background: var(--pdf-agi) !important;
+  color:#111 !important;
+}
+
+/* Remove the decorative left bar from earlier styles (we now color the whole title) */
+.section-title::before{ display:none !important; }
+
+/* PRINT: strictly B/W */
+@media print{
+  .grid.grid-cols-7 input{ background: transparent !important; }
+  .section-title{ background:#fff !important; color:#000 !important; }
+}
+
 </style>
   </head>
   <body class="min-h-screen">
