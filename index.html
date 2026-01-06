@@ -889,7 +889,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         const handleSave = async () => {
           if (!user || !localChar) return;
           try {
-            await setDoc(doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id), localChar, { merge: true });
+            await setDoc(doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id), localChar);
             setIsEditing(false);
           } catch (e) {
             console.error(e);
@@ -919,8 +919,8 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             const img = new Image();
             img.onload = async () => {
               const canvas = document.createElement("canvas");
-              const MAX_WIDTH = 160;
-              const MAX_HEIGHT = 160;
+              const MAX_WIDTH = 200;
+              const MAX_HEIGHT = 200;
               let width = img.width;
               let height = img.height;
 
@@ -941,13 +941,13 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
               const ctx = canvas.getContext("2d");
               ctx?.drawImage(img, 0, 0, width, height);
 
-              const base64String = canvas.toDataURL("image/jpeg", 0.7);
-              // Firestore doc size limit is ~1 MiB; keep images small.
-              if (base64String.length > 250000) {
-                console.warn("Image is still quite large after resize; consider using a smaller image.");
+              const base64String = canvas.toDataURL("image/jpeg", 0.8);
+              updateField("imageUrl", base64String);
+              // Optimistically update list state so switching characters keeps the image even before snapshot refresh.
+              if (localChar?.id) {
+                setCharacters((prev) => prev.map((c) => (c.id === localChar.id ? { ...c, imageUrl: base64String } : c)));
               }
 
-              updateField("imageUrl", base64String);
               // Persist image immediately so it survives character switching even if the user forgets to press Save.
               try {
                 if (localChar?.id) {
@@ -964,6 +964,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             img.src = e.target?.result;
           };
           reader.readAsDataURL(file);
+          try { event.target.value = ""; } catch (e) {}
         };
 
         const skillsList = useMemo(() => {
