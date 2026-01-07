@@ -607,7 +607,6 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
-        const imageCacheRef = useRef({});
 
         const dragRef = useRef({ draggedId: null });
 
@@ -672,7 +671,6 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             q,
             (snapshot) => {
               const chars = snapshot.docs.map((d) => normalizeCharacter({ id: d.id, ...d.data() }));
-              chars.forEach((c) => { if (c?.id && c?.imageUrl) imageCacheRef.current[c.id] = c.imageUrl; });
               setCharacters(chars);
               setLoading(false);
             },
@@ -709,24 +707,37 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         }, [user]);
 
 
-        // Sync local state
+        // Sync selected character (listen to the doc directly so imageUrl doesn't "disappear" on switching)
         useEffect(() => {
-          if (selectedCharId) {
-            const found = characters.find((c) => c.id === selectedCharId);
-            if (found && !isEditing) {
-              const normalized = normalizeCharacter(found);
-              // If Firestore snapshot is briefly missing the image field, keep a local cache by character id.
-              if (!normalized.imageUrl && normalized.id && imageCacheRef.current[normalized.id]) {
-                normalized.imageUrl = imageCacheRef.current[normalized.id];
-              } else if (normalized.imageUrl && normalized.id) {
-                imageCacheRef.current[normalized.id] = normalized.imageUrl;
-              }
-              setLocalChar(normalized);
-            }
-          } else {
-            setLocalChar(null);
+          if (!user) return;
+
+          if (!selectedCharId) {
+            if (!isEditing) setLocalChar(null);
+            return;
           }
-        }, [selectedCharId, characters, isEditing]);
+
+          const ref = doc(
+            db,
+            "artifacts",
+            appId,
+            "public",
+            "data",
+            "fallout_characters",
+            selectedCharId
+          );
+
+          const unsub = onSnapshot(
+            ref,
+            (snap) => {
+              if (!snap.exists()) return;
+              if (isEditing) return; // don't overwrite while editing
+              setLocalChar(normalizeCharacter({ id: snap.id, ...snap.data() }));
+            },
+            (err) => console.error("Char doc snapshot error:", err)
+          );
+
+          return () => unsub();
+        }, [user, selectedCharId, isEditing]);
 
         const updateField = (path, value) => {
           if (!localChar) return;
@@ -900,7 +911,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         const handleSave = async () => {
           if (!user || !localChar) return;
           try {
-            await setDoc(doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id), localChar);
+            await setDoc(doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id), localChar, { merge: true });
             setIsEditing(false);
           } catch (e) {
             console.error(e);
@@ -952,9 +963,8 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
               const ctx = canvas.getContext("2d");
               ctx?.drawImage(img, 0, 0, width, height);
 
-              const base64String = canvas.toDataURL("image/jpeg", 0.7);
+              const base64String = canvas.toDataURL("image/jpeg", 0.8);
               updateField("imageUrl", base64String);
-              if (localChar?.id) imageCacheRef.current[localChar.id] = base64String;
               // Persist image immediately so it survives character switching even if the user forgets to press Save.
               try {
                 if (localChar?.id) {
