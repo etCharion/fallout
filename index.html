@@ -607,6 +607,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
+        const imageCacheRef = useRef({});
 
         const dragRef = useRef({ draggedId: null });
 
@@ -671,6 +672,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             q,
             (snapshot) => {
               const chars = snapshot.docs.map((d) => normalizeCharacter({ id: d.id, ...d.data() }));
+              chars.forEach((c) => { if (c?.id && c?.imageUrl) imageCacheRef.current[c.id] = c.imageUrl; });
               setCharacters(chars);
               setLoading(false);
             },
@@ -711,7 +713,16 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         useEffect(() => {
           if (selectedCharId) {
             const found = characters.find((c) => c.id === selectedCharId);
-            if (found && !isEditing) setLocalChar(normalizeCharacter(found));
+            if (found && !isEditing) {
+              const normalized = normalizeCharacter(found);
+              // If Firestore snapshot is briefly missing the image field, keep a local cache by character id.
+              if (!normalized.imageUrl && normalized.id && imageCacheRef.current[normalized.id]) {
+                normalized.imageUrl = imageCacheRef.current[normalized.id];
+              } else if (normalized.imageUrl && normalized.id) {
+                imageCacheRef.current[normalized.id] = normalized.imageUrl;
+              }
+              setLocalChar(normalized);
+            }
           } else {
             setLocalChar(null);
           }
@@ -941,13 +952,9 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
               const ctx = canvas.getContext("2d");
               ctx?.drawImage(img, 0, 0, width, height);
 
-              const base64String = canvas.toDataURL("image/jpeg", 0.8);
+              const base64String = canvas.toDataURL("image/jpeg", 0.7);
               updateField("imageUrl", base64String);
-              // Optimistically update list state so switching characters keeps the image even before snapshot refresh.
-              if (localChar?.id) {
-                setCharacters((prev) => prev.map((c) => (c.id === localChar.id ? { ...c, imageUrl: base64String } : c)));
-              }
-
+              if (localChar?.id) imageCacheRef.current[localChar.id] = base64String;
               // Persist image immediately so it survives character switching even if the user forgets to press Save.
               try {
                 if (localChar?.id) {
@@ -964,7 +971,6 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             img.src = e.target?.result;
           };
           reader.readAsDataURL(file);
-          try { event.target.value = ""; } catch (e) {}
         };
 
         const skillsList = useMemo(() => {
