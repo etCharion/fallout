@@ -707,37 +707,15 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         }, [user]);
 
 
-        // Sync selected character (listen to the doc directly so imageUrl doesn't "disappear" on switching)
+        // Sync local state
         useEffect(() => {
-          if (!user) return;
-
-          if (!selectedCharId) {
-            if (!isEditing) setLocalChar(null);
-            return;
+          if (selectedCharId) {
+            const found = characters.find((c) => c.id === selectedCharId);
+            if (found && !isEditing) setLocalChar(normalizeCharacter(found));
+          } else {
+            setLocalChar(null);
           }
-
-          const ref = doc(
-            db,
-            "artifacts",
-            appId,
-            "public",
-            "data",
-            "fallout_characters",
-            selectedCharId
-          );
-
-          const unsub = onSnapshot(
-            ref,
-            (snap) => {
-              if (!snap.exists()) return;
-              if (isEditing) return; // don't overwrite while editing
-              setLocalChar(normalizeCharacter({ id: snap.id, ...snap.data() }));
-            },
-            (err) => console.error("Char doc snapshot error:", err)
-          );
-
-          return () => unsub();
-        }, [user, selectedCharId, isEditing]);
+        }, [selectedCharId, characters, isEditing]);
 
         const updateField = (path, value) => {
           if (!localChar) return;
@@ -911,7 +889,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         const handleSave = async () => {
           if (!user || !localChar) return;
           try {
-            await setDoc(doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id), localChar, { merge: true });
+            await setDoc(doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id), localChar);
             setIsEditing(false);
           } catch (e) {
             console.error(e);
@@ -1154,11 +1132,13 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                         },
                         localChar.imageUrl
                           ? React.createElement("img", {
+                              key: "portrait-" + localChar.id,
                               src: localChar.imageUrl,
                               alt: "Char",
                               className: "w-full h-full object-cover"
                             })
                           : React.createElement("img", {
+                              key: "fallback-" + localChar.id,
                               src: "https://upload.wikimedia.org/wikipedia/en/5/52/Fallout_Vault_Boy.png",
                               alt: "Vault Boy",
                               className: "w-24 h-auto opacity-80 mix-blend-multiply",
