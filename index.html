@@ -311,7 +311,9 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
           uploadImg: "Nahrát obrázek",
           i_type: "TYP",
           w_assigned: "PŘIŘ.",
-          dragTip: "Chyť a přetáhni"
+          dragTip: "Chyť a přetáhni",
+          btnAbout: "O POSTAVĚ",
+          aboutTitle: "O POSTAVĚ"
         },
         en: {
           headerTitle: "THE ROLEPLAYING GAME",
@@ -399,7 +401,9 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
           uploadImg: "Upload Image",
           i_type: "TYPE",
           w_assigned: "ASSN.",
-          dragTip: "Drag to reorder"
+          dragTip: "Drag to reorder",
+          btnAbout: "ABOUT CHARACTER",
+          aboutTitle: "ABOUT CHARACTER"
         }
       };
 
@@ -493,7 +497,8 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         weapons: [],
         inventory: [],
         perks: [],
-        caps: "0"
+        caps: "0",
+        about: ""
       };
 
       // Helper for auto-resizing textareas
@@ -604,6 +609,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         const [templates, setTemplates] = useState({ weapons: [], inventory: [], perks: [] });
         const [tplTab, setTplTab] = useState("weapons");
         const [tplDraft, setTplDraft] = useState({ weapons: null, inventory: null, perks: null });
+        const [isAboutExpanded, setIsAboutExpanded] = useState(false);
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
@@ -1216,8 +1222,33 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                         value: localChar.xpNext,
                         onChange: (v) => updateField("xpNext", v),
                         isEditing
-                      })
+                      }),
+                      React.createElement(
+                        "div",
+                        { className: "flex items-end pb-1" },
+                        React.createElement(
+                          "button",
+                          {
+                            onClick: () => setIsAboutExpanded(!isAboutExpanded),
+                            className: "w-full border-2 border-stone-800 py-1 px-2 font-bold text-xs hover:bg-stone-800 hover:text-white transition-colors uppercase tracking-wider"
+                          },
+                          t.btnAbout
+                        )
+                      )
                     )
+                  ),
+
+                  // ABOUT EXPANDABLE
+                  isAboutExpanded && React.createElement(
+                    "div",
+                    { className: "mb-6 p-4 border-2 border-stone-800 bg-white" },
+                    React.createElement("h3", { className: "text-xs font-bold uppercase mb-2 text-stone-500" }, t.aboutTitle),
+                    React.createElement(AutoResizeTextarea, {
+                      value: localChar.about || "",
+                      onChange: (e) => updateField("about", e.target.value),
+                      disabled: !isEditing,
+                      className: "w-full min-h-[100px] bg-transparent border-none focus:outline-none font-bold text-stone-800"
+                    })
                   ),
 
                   // SPECIAL
@@ -1228,7 +1259,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                       "div",
                       {
                         className:
-                          "grid grid-cols-7 gap-1 sm:gap-4 text-center bg-stone-200 p-2 rounded border border-stone-400 print:bg-transparent print:border-none print:p-0"
+                          "grid grid-cols-7 gap-1 sm:gap-4 text-center bg-white p-2 border-2 border-stone-800 print:bg-transparent print:border-none print:p-0"
                       },
                       [t.strength, t.perception, t.endurance, t.charisma, t.intelligence, t.agility, t.luck].map(
                         (stat, idx) => {
@@ -1247,7 +1278,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                               onChange: (e) => updateField(key, e.target.value),
                               disabled: !isEditing,
                               className:
-                                "w-full text-center text-xl sm:text-2xl font-bold bg-white border-2 border-stone-400 p-1 rounded focus:border-amber-500 focus:outline-none print:border print:border-stone-800"
+                                "w-full text-center text-xl sm:text-2xl font-bold bg-white border-2 border-stone-800 p-1 focus:border-amber-500 focus:outline-none print:border print:border-stone-800"
                             })
                           );
                         }
