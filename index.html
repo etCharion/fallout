@@ -148,7 +148,12 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         setDoc,
         deleteDoc,
         onSnapshot,
-        serverTimestamp
+        serverTimestamp,
+        query,
+        orderBy,
+        limit,
+        getDocs,
+        addDoc
       } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
       // --- FIREBASE SETUP ---
@@ -313,7 +318,9 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
           w_assigned: "PŘIŘ.",
           dragTip: "Chyť a přetáhni",
           btnAbout: "O POSTAVĚ",
-          aboutTitle: "O POSTAVĚ"
+          aboutTitle: "O POSTAVĚ",
+          historyTitle: "HISTORIE VERZÍ",
+          confirmLoad: "Opravdu chcete načíst tuto verzi? Neuložené změny budou ztraceny."
         },
         en: {
           headerTitle: "THE ROLEPLAYING GAME",
@@ -403,7 +410,9 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
           w_assigned: "ASSN.",
           dragTip: "Drag to reorder",
           btnAbout: "ABOUT CHARACTER",
-          aboutTitle: "ABOUT CHARACTER"
+          aboutTitle: "ABOUT CHARACTER",
+          historyTitle: "VERSION HISTORY",
+          confirmLoad: "Are you sure you want to load this version? Unsaved changes will be lost."
         }
       };
 
@@ -547,6 +556,18 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         );
       }
 
+      function formatDate(ts) {
+        if (!ts) return "";
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, "0");
+        const minutes = String(d.getMinutes()).padStart(2, "0");
+        return `${day}.${month}.${year} ${hours}:${minutes}`;
+      }
+
       function BodyPartCard({ name, data, field, update, edit, t }) {
         return React.createElement(
           "div",
@@ -610,6 +631,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         const [tplTab, setTplTab] = useState("weapons");
         const [tplDraft, setTplDraft] = useState({ weapons: null, inventory: null, perks: null });
         const [isAboutExpanded, setIsAboutExpanded] = useState(false);
+        const [history, setHistory] = useState([]);
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
@@ -722,6 +744,28 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             setLocalChar(null);
           }
         }, [selectedCharId, characters, isEditing]);
+
+        // Fetch history
+        useEffect(() => {
+          if (!user || !selectedCharId) {
+            setHistory([]);
+            return;
+          }
+          const q = query(
+            collection(db, "artifacts", appId, "public", "data", "fallout_characters", selectedCharId, "history"),
+            orderBy("timestamp", "desc"),
+            limit(25)
+          );
+          const unsubscribe = onSnapshot(
+            q,
+            (snapshot) => {
+              const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+              setHistory(rows);
+            },
+            (error) => console.error("History fetch error:", error)
+          );
+          return () => unsubscribe();
+        }, [user, selectedCharId]);
 
         const updateField = (path, value) => {
           if (!localChar) return;
@@ -894,11 +938,56 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
 
         const handleSave = async () => {
           if (!user || !localChar) return;
+
+          const hasChanged = (curr, orig) => {
+            if (!orig) return true;
+            const clean = (obj) => {
+              const { id, createdAt, updatedAt, history, ...rest } = obj;
+              return JSON.stringify(rest);
+            };
+            return clean(curr) !== clean(orig);
+          };
+
           try {
-            await setDoc(doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id), localChar);
+            const charRef = doc(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id);
+            const original = characters.find((c) => c.id === localChar.id);
+
+            // 1. Save main doc
+            await setDoc(charRef, localChar);
+
+            // 2. Save to history if changed
+            if (hasChanged(localChar, original)) {
+              const histRef = collection(db, "artifacts", appId, "public", "data", "fallout_characters", localChar.id, "history");
+              await addDoc(histRef, {
+                ...localChar,
+                timestamp: serverTimestamp()
+              });
+
+              // Prune old versions (keep 25)
+              const q = query(histRef, orderBy("timestamp", "desc"));
+              const snap = await getDocs(q);
+              if (snap.size > 25) {
+                const toDelete = snap.docs.slice(25);
+                for (const d of toDelete) {
+                  await deleteDoc(d.ref);
+                }
+              }
+            }
+
             setIsEditing(false);
           } catch (e) {
             console.error(e);
+          }
+        };
+
+        const handleLoadHistory = (versionId) => {
+          if (!versionId) return;
+          const ver = history.find((h) => h.id === versionId);
+          if (!ver) return;
+
+          if (window.confirm(t.confirmLoad)) {
+            setLocalChar(normalizeCharacter(ver));
+            setIsEditing(true);
           }
         };
 
@@ -1179,7 +1268,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                       { className: "md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4" },
                       React.createElement(
                         "div",
-                        { className: "col-span-2 md:col-span-4 mb-2" },
+                        { className: "col-span-2 md:col-span-4 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2" },
                         React.createElement(
                           "h1",
                           { className: "font-bold text-2xl tracking-tighter uppercase text-stone-800" },
@@ -1188,6 +1277,18 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                             "span",
                             { className: "text-sm font-normal block sm:inline sm:ml-2 text-stone-500" },
                             t.headerTitle
+                          )
+                        ),
+                        localChar && history.length > 0 && React.createElement(
+                          "select",
+                          {
+                            className: "text-[10px] uppercase font-bold border-2 border-stone-800 bg-white px-2 py-1 focus:outline-none print:hidden",
+                            value: "",
+                            onChange: (e) => handleLoadHistory(e.target.value)
+                          },
+                          React.createElement("option", { value: "" }, t.historyTitle),
+                          history.map((h) =>
+                            React.createElement("option", { key: h.id, value: h.id }, formatDate(h.timestamp))
                           )
                         )
                       ),
