@@ -995,6 +995,17 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
           }
         };
 
+        const handleLoadHistory = (versionId) => {
+          if (!versionId) return;
+          const ver = history.find((h) => h.id === versionId);
+          if (!ver) return;
+
+          if (window.confirm(t.confirmLoad)) {
+            setLocalChar(normalizeCharacter(ver));
+            setIsEditing(true);
+          }
+        };
+
         const handleDelete = async () => {
           if (!user || !selectedCharId) return;
           if (window.confirm(t.confirmDelete)) {
