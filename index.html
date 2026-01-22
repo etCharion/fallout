@@ -632,6 +632,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         const [tplDraft, setTplDraft] = useState({ weapons: null, inventory: null, perks: null });
         const [isAboutExpanded, setIsAboutExpanded] = useState(false);
         const [history, setHistory] = useState([]);
+        const [isSaving, setIsSaving] = useState(false);
 
         const t = TRANSLATIONS[lang];
         const fileInputRef = useRef(null);
@@ -937,7 +938,8 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
         };
 
         const handleSave = async () => {
-          if (!user || !localChar) return;
+          if (!user || !localChar || isSaving) return;
+          setIsSaving(true);
 
           const hasChanged = (curr, orig) => {
             if (!orig) return true;
@@ -977,6 +979,19 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             setIsEditing(false);
           } catch (e) {
             console.error(e);
+          } finally {
+            setIsSaving(false);
+          }
+        };
+
+        const handleLoadHistory = (versionId) => {
+          if (!versionId) return;
+          const ver = history.find((h) => h.id === versionId);
+          if (!ver) return;
+
+          if (window.confirm(t.confirmLoad)) {
+            setLocalChar(normalizeCharacter(ver));
+            setIsEditing(true);
           }
         };
 
@@ -1169,10 +1184,14 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                         )
                       : React.createElement(
                           "button",
-                          { onClick: handleSave, className: "btn-admin bg-green-700 text-white animate-pulse" },
+                          {
+                            onClick: handleSave,
+                            className: `btn-admin bg-green-700 text-white ${isSaving ? "opacity-50 cursor-wait" : "animate-pulse"}`,
+                            disabled: isSaving
+                          },
                           React.createElement(Icon, { name: "Save", size: 16 }),
                           " ",
-                          t.btnSave
+                          isSaving ? (lang === "en" ? "Saving..." : "Ukládání...") : t.btnSave
                         ),
                     React.createElement(
                       "button",
@@ -1279,14 +1298,14 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                             t.headerTitle
                           )
                         ),
-                        localChar && history.length > 0 && React.createElement(
+                        localChar && React.createElement(
                           "select",
                           {
                             className: "text-[10px] uppercase font-bold border-2 border-stone-800 bg-white px-2 py-1 focus:outline-none print:hidden",
                             value: "",
                             onChange: (e) => handleLoadHistory(e.target.value)
                           },
-                          React.createElement("option", { value: "" }, t.historyTitle),
+                          React.createElement("option", { value: "" }, history.length > 0 ? t.historyTitle : (lang === "en" ? "-- NO HISTORY --" : "-- ŽÁDNÁ HISTORIE --")),
                           history.map((h) =>
                             React.createElement("option", { key: h.id, value: h.id }, formatDate(h.timestamp))
                           )
@@ -1607,7 +1626,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                       { className: "overflow-x-auto" },
                       React.createElement(
                         "table",
-                        { className: "w-full text-left text-xs sm:text-sm border-collapse table-fixed" },
+                        { className: "w-full text-left text-xs sm:text-sm border-collapse table-fixed mt-2" },
                         React.createElement(
                           "thead",
                           null,
@@ -1786,7 +1805,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                       ),
                       React.createElement(
                         "table",
-                        { className: "w-full text-left text-sm table-fixed" },
+                        { className: "w-full text-left text-sm table-fixed mt-2" },
                         React.createElement(
                           "thead",
                           null,
@@ -1901,7 +1920,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                       ),
                       React.createElement(
                         "table",
-                        { className: "w-full text-left text-sm table-fixed" },
+                        { className: "w-full text-left text-sm table-fixed mt-2" },
                         React.createElement(
                           "thead",
                           null,
