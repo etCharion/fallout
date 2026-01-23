@@ -63,6 +63,9 @@ body {
   text-transform: uppercase;
   padding: 6px 10px !important;
   line-height: 1.2 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
 }
 .section-skills {
   background: var(--pdf-cha) !important;
@@ -204,33 +207,31 @@ thead th,
     max-width: 900px !important;
   }
 
-  /* Inverted solid headers (Solid Green background, Black text) */
+  /* Inverted solid headers (Solid Green background, Black text) for Section Titles */
   html.theme-pipboy h2,
   html.theme-pipboy h3,
-  html.theme-pipboy thead tr,
-  html.theme-pipboy .bg-stone-800,
   html.theme-pipboy .section-title {
     background-color: var(--pb-green) !important;
     color: #000000 !important;
     text-shadow: none !important;
     border: none !important;
-    display: block !important;
-    width: 100% !important;
     padding: 4px 8px !important;
     text-transform: uppercase;
     font-weight: bold !important;
     margin-bottom: 0.5rem !important;
     box-shadow: 0 0 4px var(--pb-green-glow) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
   }
 
   /* Ensure text inside inverted headers is black */
   html.theme-pipboy h2 *,
   html.theme-pipboy h3 *,
-  html.theme-pipboy thead tr *,
-  html.theme-pipboy .bg-stone-800 *,
   html.theme-pipboy .section-title * {
     color: #000000 !important;
     text-shadow: none !important;
+    border-color: #000000 !important;
   }
 
   /* Tables */
@@ -238,24 +239,170 @@ thead th,
     border-collapse: collapse !important;
     width: 100% !important;
     margin-bottom: 1rem !important;
+    table-layout: fixed !important;
   }
+
+  /* Precise Column Widths for Weapons Table */
+  html.theme-pipboy .weapons-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-top: none !important;
+  }
+  html.theme-pipboy .weapons-table th:nth-child(1),
+  html.theme-pipboy .weapons-table td:nth-child(1) {
+    width: 18%;
+  } /* Název */
+  html.theme-pipboy .weapons-table th:nth-child(2),
+  html.theme-pipboy .weapons-table td:nth-child(2) {
+    width: 8%;
+  } /* Doved. */
+  html.theme-pipboy .weapons-table th:nth-child(3),
+  html.theme-pipboy .weapons-table td:nth-child(3) {
+    width: 4%;
+  } /* Pří. */
+  html.theme-pipboy .weapons-table th:nth-child(4),
+  html.theme-pipboy .weapons-table td:nth-child(4) {
+    width: 4%;
+  } /* CČ */
+  html.theme-pipboy .weapons-table th:nth-child(5),
+  html.theme-pipboy .weapons-table td:nth-child(5) {
+    width: 7%;
+  } /* Pošk. */
+  html.theme-pipboy .weapons-table th:nth-child(6),
+  html.theme-pipboy .weapons-table td:nth-child(6) {
+    width: 18%;
+  } /* Účinky */
+  html.theme-pipboy .weapons-table th:nth-child(7),
+  html.theme-pipboy .weapons-table td:nth-child(7) {
+    width: 7%;
+  } /* Druh */
+  html.theme-pipboy .weapons-table th:nth-child(8),
+  html.theme-pipboy .weapons-table td:nth-child(8) {
+    width: 4%;
+  } /* Ryc */
+  html.theme-pipboy .weapons-table th:nth-child(9),
+  html.theme-pipboy .weapons-table td:nth-child(9) {
+    width: 4%;
+  } /* Dos */
+  html.theme-pipboy .weapons-table th:nth-child(10),
+  html.theme-pipboy .weapons-table td:nth-child(10) {
+    width: 8%;
+  } /* Atributy */
+  html.theme-pipboy .weapons-table th:nth-child(11),
+  html.theme-pipboy .weapons-table td:nth-child(11) {
+    width: 8%;
+  } /* Munice */
+  html.theme-pipboy .weapons-table th:nth-child(12),
+  html.theme-pipboy .weapons-table td:nth-child(12) {
+    width: 5%;
+  } /* Váha */
+  html.theme-pipboy .weapons-table th:nth-child(13),
+  html.theme-pipboy .weapons-table td:nth-child(13) {
+    width: 5%;
+  } /* Delete */
+
+  /* Precise Column Widths for Inventory Table */
+  html.theme-pipboy .inventory-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-top: none !important;
+  }
+  html.theme-pipboy .inventory-table th:nth-child(1),
+  html.theme-pipboy .inventory-table td:nth-child(1) {
+    width: 50%;
+  } /* Předmět */
+  html.theme-pipboy .inventory-table th:nth-child(2),
+  html.theme-pipboy .inventory-table td:nth-child(2) {
+    width: 25%;
+  } /* Typ */
+  html.theme-pipboy .inventory-table th:nth-child(3),
+  html.theme-pipboy .inventory-table td:nth-child(3) {
+    width: 10%;
+  } /* Váha */
+  html.theme-pipboy .inventory-table th:nth-child(4),
+  html.theme-pipboy .inventory-table td:nth-child(4) {
+    width: 10%;
+  } /* Ks */
+  html.theme-pipboy .inventory-table th:nth-child(5),
+  html.theme-pipboy .inventory-table td:nth-child(5) {
+    width: 5%;
+  } /* Delete */
+
+  /* Precise Column Widths for Perks Table */
+  html.theme-pipboy .perks-table {
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-top: none !important;
+  }
+  html.theme-pipboy .perks-table th:nth-child(1),
+  html.theme-pipboy .perks-table td:nth-child(1) {
+    width: 30%;
+  } /* Název */
+  html.theme-pipboy .perks-table th:nth-child(2),
+  html.theme-pipboy .perks-table td:nth-child(2) {
+    width: 10%;
+  } /* St. */
+  html.theme-pipboy .perks-table th:nth-child(3),
+  html.theme-pipboy .perks-table td:nth-child(3) {
+    width: 55%;
+  } /* Účinek */
+  html.theme-pipboy .perks-table th:nth-child(4),
+  html.theme-pipboy .perks-table td:nth-child(4) {
+    width: 5%;
+  } /* Delete */
 
   html.theme-pipboy thead {
     display: table-header-group !important;
     width: 100% !important;
   }
 
+  /* Table Headers (Skills, Weapons, Inventory, Perks) */
   html.theme-pipboy thead tr {
     display: table-row !important;
+    background-color: transparent !important;
+    border-bottom: 2px solid var(--pb-green) !important;
+    box-shadow: none !important;
+  }
+
+  html.theme-pipboy .grid.grid-cols-12.bg-stone-800 {
+    display: grid !important;
+    background-color: transparent !important;
+    border-bottom: 2px solid var(--pb-green) !important;
+    box-shadow: none !important;
   }
 
   html.theme-pipboy thead th {
     display: table-cell !important;
-    background-color: var(--pb-green) !important;
-    color: #000000 !important;
-    padding: 4px !important;
+    background-color: transparent !important;
+    color: var(--pb-green) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(32, 255, 32, 0.4) !important;
+    padding: 6px 4px !important;
     text-align: left !important;
-    border: 1px solid #000000 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    font-weight: bold !important;
+    text-shadow: 0 0 2px var(--pb-green-glow) !important;
+  }
+
+  html.theme-pipboy .grid.grid-cols-12.bg-stone-800 > div {
+    background-color: transparent !important;
+    color: var(--pb-green) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(32, 255, 32, 0.4) !important;
+    padding: 6px 4px !important;
+    text-align: left !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    font-weight: bold !important;
+    text-shadow: 0 0 2px var(--pb-green-glow) !important;
+  }
+
+  html.theme-pipboy h2 input,
+  html.theme-pipboy h3 input,
+  html.theme-pipboy .section-title input {
+    color: #000000 !important;
+    border-bottom: 1px solid #000000 !important;
   }
 
   html.theme-pipboy tr {
@@ -264,6 +411,16 @@ thead th,
 
   html.theme-pipboy td {
     padding: 4px !important;
+  }
+
+  html.theme-pipboy .btn-add-header {
+    border: none !important;
+    padding: 2px 6px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    color: #000 !important;
   }
 
   /* Inputs & Textareas */
@@ -278,6 +435,24 @@ thead th,
     padding: 2px 4px !important;
   }
 
+  html.theme-pipboy select option {
+    background-color: #000000 !important;
+    color: var(--pb-green) !important;
+  }
+
+  /* Admin Modal Tabs and Buttons */
+  html.theme-pipboy .admin-tabs-container button {
+    border-color: var(--pb-green) !important;
+    color: var(--pb-green) !important;
+    background: transparent !important;
+  }
+
+  html.theme-pipboy .admin-tabs-container button.active,
+  html.theme-pipboy .admin-tabs-container button:hover {
+    background-color: var(--pb-green) !important;
+    color: #000000 !important;
+  }
+
   /* SPECIAL Attributes - Terminal Style Lines */
   /* HIGH SPECIFICITY TO OVERRIDE BASE STYLES */
   html.theme-pipboy .grid.grid-cols-7 > div {
@@ -285,6 +460,9 @@ thead th,
     margin: 0 4px !important;
     padding-bottom: 4px !important;
     background: transparent !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
 
   html.theme-pipboy .grid.grid-cols-7 div input,
@@ -329,6 +507,19 @@ thead th,
     box-shadow: 0 0 6px var(--pb-green-glow) !important;
   }
 
+  html.theme-pipboy .hover\:bg-amber-50:hover,
+  html.theme-pipboy .hover\:bg-stone-200:hover,
+  html.theme-pipboy button.w-full:hover {
+    background-color: var(--pb-green) !important;
+    color: #000000 !important;
+  }
+
+  html.theme-pipboy .hover\:bg-amber-50:hover *,
+  html.theme-pipboy .hover\:bg-stone-200:hover *,
+  html.theme-pipboy button.w-full:hover * {
+    color: #000000 !important;
+  }
+
   /* Checkboxes */
   html.theme-pipboy input[type="checkbox"] {
     appearance: none;
@@ -359,6 +550,18 @@ thead th,
   html.theme-pipboy .border-2,
   html.theme-pipboy .p-4 {
     border: none !important;
+    background-color: transparent !important;
+  }
+
+  /* Modals/Pickers Backdrop Blur */
+  html.theme-pipboy .fixed.inset-0.bg-black\/60,
+  html.theme-pipboy .fixed.inset-0.bg-black\/50 {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  html.theme-pipboy .bg-white,
+  html.theme-pipboy .bg-stone-100 {
     background-color: transparent !important;
   }
 
