@@ -18,9 +18,9 @@ body {
 
   --pb-green: #20ff20;
   --pb-green-dim: #108010;
-  --pb-green-glow: rgba(32, 255, 32, 0.6);
-  --pb-bg: #050a05;
-  --pb-scanline: rgba(32, 255, 32, 0.12);
+  --pb-green-glow: rgba(32, 255, 32, 0.8);
+  --pb-bg: #000000;
+  --pb-scanline: rgba(32, 255, 32, 0.15);
 }
 
 html,
@@ -158,10 +158,11 @@ thead th,
     background-color: transparent !important;
     color: var(--pb-green) !important;
     border-color: var(--pb-green) !important;
-    box-shadow: 0 0 2px var(--pb-green-glow) !important;
+    box-shadow: 0 0 4px var(--pb-green-glow) !important;
     text-shadow:
+      0 0 2px var(--pb-green),
       0 0 8px var(--pb-green-glow),
-      0 0 2px var(--pb-green) !important;
+      0 0 12px var(--pb-green-glow) !important;
   }
 
   /* Force background on specific containers in Pip-Boy mode */
@@ -275,7 +276,9 @@ thead th,
 
   .theme-pipboy .character-sheet-container {
     border: 4px solid var(--pb-green) !important;
-    box-shadow: 0 0 15px var(--pb-green-glow) !important;
+    box-shadow:
+      0 0 25px var(--pb-green-glow),
+      inset 0 0 15px var(--pb-green-glow) !important;
     animation: flicker 0.1s infinite;
   }
 

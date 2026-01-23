@@ -196,6 +196,9 @@ const TRANSLATIONS = {
     dragTip: "Chyť a přetáhni",
     btnNotes: "POZNÁMKY",
     notesTitle: "POZNÁMKY A HISTORIE",
+    btnAdmin: "Administrace",
+    adminTitle: "Administrace – databáze",
+    btnClose: "Zavřít",
   },
   en: {
     headerTitle: "THE ROLEPLAYING GAME",
@@ -286,6 +289,9 @@ const TRANSLATIONS = {
     dragTip: "Drag to reorder",
     btnNotes: "NOTES",
     notesTitle: "NOTES & HISTORY",
+    btnAdmin: "Admin",
+    adminTitle: "Administration – Database",
+    btnClose: "Close",
   },
 };
 
@@ -1208,7 +1214,7 @@ function FalloutSheetApp() {
                 "btn-admin bg-stone-700 text-amber-200 hover:bg-stone-600",
             },
             React.createElement(Icon, { name: "Settings", size: 16 }),
-            " Administrace",
+            " " + t.btnAdmin,
           ),
           React.createElement(
             "button",
@@ -2501,7 +2507,7 @@ function FalloutSheetApp() {
             React.createElement(
               "h2",
               { className: "text-lg font-bold uppercase tracking-wide" },
-              "Administrace – databáze",
+              t.adminTitle,
             ),
             React.createElement(
               "button",
@@ -2510,7 +2516,7 @@ function FalloutSheetApp() {
                 onClick: () => setIsAdminOpen(false),
               },
               React.createElement(Icon, { name: "X", size: 16 }),
-              " Zavřít",
+              " " + t.btnClose,
             ),
           ),
           React.createElement(
