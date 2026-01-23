@@ -132,111 +132,46 @@ thead th,
 }
 
 @media screen {
-  /* PIP-BOY THEME */
-  .theme-pipboy {
-    background-color: var(--pb-bg) !important;
+  /* PIP-BOY THEME - CLEANED & REFINED */
+  html.theme-pipboy,
+  html.theme-pipboy body {
+    background-color: #000000 !important;
     color: var(--pb-green) !important;
     font-family: "Courier New", Courier, monospace !important;
   }
 
-  /* Universal reset for Pip-Boy mode */
-  .theme-pipboy * {
+  /* Global Pip-Boy reset: transparency and green text */
+  html.theme-pipboy * {
     background-color: transparent !important;
     color: var(--pb-green) !important;
-    border-color: var(--pb-green) !important;
-    text-shadow: 0 0 4px var(--pb-green-glow) !important;
+    text-shadow: 0 0 1px var(--pb-green-glow) !important;
     box-shadow: none !important;
+    border-color: transparent !important;
   }
 
-  /* Remove borders from most elements for a cleaner look */
-  .theme-pipboy input,
-  .theme-pipboy select,
-  .theme-pipboy textarea,
-  .theme-pipboy table,
-  .theme-pipboy tr,
-  .theme-pipboy td,
-  .theme-pipboy th {
-    border: none !important;
+  /* CRT Animations */
+  @keyframes flicker {
+    0% {
+      opacity: 1;
+    }
+    3% {
+      opacity: 0.98;
+    }
+    6% {
+      opacity: 1;
+    }
+    45% {
+      opacity: 0.96;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
-  /* Specific overrides for tables to remove all inner lines */
-  .theme-pipboy table,
-  .theme-pipboy thead,
-  .theme-pipboy tbody,
-  .theme-pipboy tr,
-  .theme-pipboy th,
-  .theme-pipboy td {
-    border: none !important;
-    border-bottom: none !important;
-  }
-
-  /* Keep borders only for main structural elements */
-  .theme-pipboy .character-sheet-container,
-  .theme-pipboy section,
-  .theme-pipboy .section-title,
-  .theme-pipboy .border-2,
-  .theme-pipboy .border-4 {
-    border-color: var(--pb-green) !important;
-  }
-
-  /* Less aggressive box shadow for structural elements */
-  .theme-pipboy .character-sheet-container,
-  .theme-pipboy section,
-  .theme-pipboy .section-title {
-    box-shadow: 0 0 10px var(--pb-green-glow) !important;
-  }
-
-  /* Attribute inputs: ensure no background and no border - higher specificity to beat base styles */
-  .theme-pipboy .grid.grid-cols-7 > div > input,
-  .theme-pipboy .grid.grid-cols-7 input {
-    background-color: transparent !important;
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 1px solid var(--pb-green) !important;
-    box-shadow: none !important;
-    font-weight: 900 !important;
-    color: var(--pb-green) !important;
-  }
-
-  /* Force background */
-  .theme-pipboy,
-  .theme-pipboy .min-h-screen,
-  .theme-pipboy div,
-  .theme-pipboy section,
-  .theme-pipboy header.bg-stone-800,
-  .theme-pipboy main,
-  .theme-pipboy table,
-  .theme-pipboy input,
-  .theme-pipboy textarea,
-  .theme-pipboy select,
-  .theme-pipboy button {
-    background-color: var(--pb-bg) !important;
-  }
-
-  /* Inverted elements */
-  .theme-pipboy thead th,
-  .theme-pipboy div.bg-stone-800,
-  .theme-pipboy .section-title,
-  .theme-pipboy .btn-admin:hover,
-  .theme-pipboy button:hover,
-  .theme-pipboy .bg-amber-600,
-  .theme-pipboy .bg-green-700,
-  .theme-pipboy .bg-red-800,
-  .theme-pipboy .bg-blue-700,
-  .theme-pipboy .bg-amber-700,
-  .theme-pipboy .bg-stone-300 {
-    background-color: var(--pb-green) !important;
-    color: var(--pb-bg) !important;
-    text-shadow: none !important;
-  }
-
-  .theme-pipboy svg {
-    stroke: var(--pb-green) !important;
-  }
-  .theme-pipboy button:hover svg {
-    stroke: var(--pb-bg) !important;
-  }
-
+  /* Scanline Overlay */
   .pipboy-overlay {
     position: fixed;
     top: 0;
@@ -255,53 +190,182 @@ thead th,
     opacity: 0.1;
   }
 
-  @keyframes flicker {
-    0% {
-      opacity: 1;
-    }
-    3% {
-      opacity: 0.94;
-    }
-    6% {
-      opacity: 1;
-    }
-    15% {
-      opacity: 0.97;
-    }
-    18% {
-      opacity: 1;
-    }
-    30% {
-      opacity: 1;
-    }
-    45% {
-      opacity: 0.92;
-    }
-    50% {
-      opacity: 1;
-    }
-    70% {
-      opacity: 1;
-    }
-    85% {
-      opacity: 0.95;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-
-  .theme-pipboy .character-sheet-container {
-    border: 4px solid var(--pb-green) !important;
+  /* Main Container */
+  html.theme-pipboy .character-sheet-container {
+    background-color: #000000 !important;
+    border: 2px solid var(--pb-green) !important;
     box-shadow:
-      0 0 15px var(--pb-green-glow),
-      inset 0 0 10px var(--pb-green-glow) !important;
-    animation: flicker 6s infinite;
+      0 0 8px var(--pb-green-glow),
+      inset 0 0 4px var(--pb-green-glow) !important;
+    padding: 1.5rem !important;
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+    animation: flicker 10s infinite;
+    max-width: 900px !important;
   }
 
-  .theme-pipboy .character-portrait {
-    filter: sepia(100%) hue-rotate(60deg) saturate(1000%) brightness(0.6)
-      contrast(1.5);
+  /* Inverted solid headers (Solid Green background, Black text) */
+  html.theme-pipboy h2,
+  html.theme-pipboy h3,
+  html.theme-pipboy thead tr,
+  html.theme-pipboy .bg-stone-800,
+  html.theme-pipboy .section-title {
+    background-color: var(--pb-green) !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+    border: none !important;
+    display: block !important;
+    width: 100% !important;
+    padding: 4px 8px !important;
+    text-transform: uppercase;
+    font-weight: bold !important;
+    margin-bottom: 0.5rem !important;
+    box-shadow: 0 0 4px var(--pb-green-glow) !important;
+  }
+
+  /* Ensure text inside inverted headers is black */
+  html.theme-pipboy h2 *,
+  html.theme-pipboy h3 *,
+  html.theme-pipboy thead tr *,
+  html.theme-pipboy .bg-stone-800 *,
+  html.theme-pipboy .section-title * {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  /* Tables */
+  html.theme-pipboy table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+
+  html.theme-pipboy thead {
+    display: table-header-group !important;
+    width: 100% !important;
+  }
+
+  html.theme-pipboy thead tr {
+    display: table-row !important;
+  }
+
+  html.theme-pipboy thead th {
+    display: table-cell !important;
+    background-color: var(--pb-green) !important;
+    color: #000000 !important;
+    padding: 4px !important;
+    text-align: left !important;
+    border: 1px solid #000000 !important;
+  }
+
+  html.theme-pipboy tr {
+    border-bottom: 1px solid rgba(32, 255, 32, 0.2) !important;
+  }
+
+  html.theme-pipboy td {
+    padding: 4px !important;
+  }
+
+  /* Inputs & Textareas */
+  html.theme-pipboy input,
+  html.theme-pipboy select,
+  html.theme-pipboy textarea {
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--pb-green) !important;
+    color: var(--pb-green) !important;
+    border-radius: 0 !important;
+    padding: 2px 4px !important;
+  }
+
+  /* SPECIAL Attributes - Terminal Style Lines */
+  /* HIGH SPECIFICITY TO OVERRIDE BASE STYLES */
+  html.theme-pipboy .grid.grid-cols-7 > div {
+    border-bottom: 2px solid var(--pb-green) !important;
+    margin: 0 4px !important;
+    padding-bottom: 4px !important;
+    background: transparent !important;
+  }
+
+  html.theme-pipboy .grid.grid-cols-7 div input,
+  html.theme-pipboy .grid.grid-cols-7 > div:nth-child(n) input {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.75rem !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+    width: 100% !important;
+    padding: 0 !important;
+    color: var(--pb-green) !important;
+    box-shadow: none !important;
+  }
+
+  /* Hit Zones (Zásahové zóny) */
+  html.theme-pipboy .grid-cols-2 > div {
+    border: none !important;
+    border-bottom: 1px solid rgba(32, 255, 32, 0.3) !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Buttons */
+  html.theme-pipboy button,
+  html.theme-pipboy .btn-add,
+  html.theme-pipboy .btn-admin {
+    border: 1px solid var(--pb-green) !important;
+    background-color: transparent !important;
+    color: var(--pb-green) !important;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 4px 12px !important;
+    font-size: 0.8rem !important;
+    transition: all 0.2s;
+  }
+
+  html.theme-pipboy button:hover {
+    background-color: var(--pb-green) !important;
+    color: #000000 !important;
+    box-shadow: 0 0 6px var(--pb-green-glow) !important;
+  }
+
+  /* Checkboxes */
+  html.theme-pipboy input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid var(--pb-green) !important;
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+    position: relative;
+    cursor: pointer;
+    background-color: transparent !important;
+  }
+
+  html.theme-pipboy input[type="checkbox"]:checked {
+    background-color: var(--pb-green) !important;
+  }
+
+  /* SVGs */
+  html.theme-pipboy svg {
+    stroke: var(--pb-green) !important;
+  }
+  html.theme-pipboy button:hover svg {
+    stroke: #000000 !important;
+  }
+
+  /* Remove all generic section boxes */
+  html.theme-pipboy section,
+  html.theme-pipboy .section,
+  html.theme-pipboy .border-2,
+  html.theme-pipboy .p-4 {
+    border: none !important;
+    background-color: transparent !important;
+  }
+
+  /* Portraits */
+  html.theme-pipboy .character-portrait {
+    filter: sepia(100%) hue-rotate(60deg) saturate(600%) brightness(0.7)
+      contrast(1.2);
     border: 2px solid var(--pb-green) !important;
   }
 }
