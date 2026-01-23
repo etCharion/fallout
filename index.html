@@ -201,6 +201,10 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
           "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
           "M17 8l-5-5-5 5",
           "M12 3v12"
+        ],
+        Settings: [
+          "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+          "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
         ]
       };
 
@@ -542,7 +546,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
             onChange: (e) => onChange(e.target.value),
             disabled: !isEditing,
             className:
-              "border-b-2 border-stone-400 bg-transparent px-1 py-1 font-bold text-stone-800 focus:border-amber-600 focus:outline-none disabled:border-stone-200"
+              "border-b-2 border-stone-800 bg-transparent px-1 py-1 font-bold text-stone-800 focus:border-amber-600 focus:outline-none disabled:border-stone-200"
           })
         );
       }
@@ -550,10 +554,10 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
       function BodyPartCard({ name, data, field, update, edit, t }) {
         return React.createElement(
           "div",
-          { className: "border border-stone-400 p-2 bg-stone-100 print:border-black print:bg-white" },
+          { className: "border-2 border-stone-800 p-2 bg-stone-100 print:border-black print:bg-white" },
           React.createElement(
             "div",
-            { className: "text-[10px] font-bold uppercase mb-1 border-b border-stone-300 pb-1" },
+            { className: "text-[10px] font-bold uppercase mb-1 border-b-2 border-stone-800 pb-1" },
             name
           ),
           React.createElement(
@@ -566,7 +570,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                   key: k,
                   className:
                     k === "bz"
-                      ? "flex flex-col items-center border-l border-stone-300 pl-1"
+                      ? "flex flex-col items-center border-l-2 border-stone-800 pl-1"
                       : "flex flex-col items-center"
                 },
                 React.createElement(
@@ -586,7 +590,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                 React.createElement("input", {
                   type: "number",
                   className:
-                    "w-full text-center bg-white border border-stone-300 text-sm font-bold p-1 print:border-black",
+                    "w-full text-center bg-white border-2 border-stone-800 text-sm font-bold p-1 print:border-black",
                   value: data[k],
                   onChange: (e) => update(`${field}.${k}`, e.target.value),
                   disabled: !edit
@@ -1025,7 +1029,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                   {
                     onClick: () => setLang(lang === "cs" ? "en" : "cs"),
                     className:
-                      "flex items-center gap-1 bg-stone-900 border border-amber-600 px-3 py-1 rounded text-sm hover:bg-stone-700"
+                      "flex items-center gap-1 bg-stone-900 border-2 border-amber-600 px-3 py-1 text-sm hover:bg-stone-700"
                   },
                   React.createElement(Icon, { name: "Globe", size: 14 }),
                   " ",
@@ -1035,7 +1039,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                 React.createElement(
                   "select",
                   {
-                    className: "bg-stone-900 border border-amber-600 text-amber-500 p-2 rounded focus:outline-none",
+                    className: "bg-stone-900 border-2 border-amber-600 text-amber-500 p-2 focus:outline-none",
                     value: selectedCharId || "",
                     onChange: (e) => {
                       setSelectedCharId(e.target.value || null);
@@ -1115,7 +1119,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                   "div",
                   {
                     className:
-                      `bg-[#fdfaf5] shadow-2xl border-2 border-stone-400 p-4 sm:p-8 relative print:shadow-none print:border-none print:p-0 ` +
+                      `bg-[#fdfaf5] shadow-2xl border-4 border-stone-800 p-4 sm:p-8 relative print:shadow-none print:border-none print:p-0 ` +
                       (isEditing ? "ring-4 ring-amber-400/30" : "")
                   },
 
@@ -1310,7 +1314,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                             "div",
                             {
                               key: skill.key,
-                              className: "grid grid-cols-12 items-center border-b border-stone-200 py-1 px-2 hover:bg-amber-50"
+                            className: "grid grid-cols-12 items-center border-b-2 border-stone-800 py-1 px-2 hover:bg-amber-50"
                             },
                             React.createElement(
                               "div",
@@ -1333,7 +1337,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                                 onChange: (e) => updateField(`skills.${skill.key}Val`, e.target.value),
                                 disabled: !isEditing,
                                 className:
-                                  "w-full text-center bg-transparent border-b border-stone-300 focus:border-amber-500 focus:outline-none"
+                                  "w-full text-center bg-transparent border-b-2 border-stone-800 focus:border-amber-500 focus:outline-none"
                               })
                             )
                           )
@@ -1470,7 +1474,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                     { className: "mt-8" },
                     React.createElement(
                       "div",
-                      { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
+                      { className: "flex items-center justify-between border-b-2 border-stone-800 mb-3" },
                       React.createElement("h3", { className: "section-title section-weapons mb-0 border-none" }, t.weaponsTitle),
                       isEditing &&
                         React.createElement(
@@ -1479,7 +1483,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                           React.createElement(
                             "select",
                             {
-                              className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                              className: "bg-white border-2 border-stone-800 text-xs p-1 max-w-[150px]",
                               defaultValue: "",
                               onChange: (e) => {
                                 const val = e.target.value;
@@ -1494,7 +1498,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                           ),
                           React.createElement(
                             "button",
-                            { onClick: () => addItem("weapons"), className: "btn-add" },
+                            { onClick: () => addItem("weapons"), className: "btn-add min-w-[40px] justify-center" },
                             React.createElement(Icon, { name: "Plus", size: 14 }),
                             " ",
                             t.btnAdd
@@ -1503,7 +1507,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                     ),
                     React.createElement(
                       "div",
-                      { className: "overflow-x-auto" },
+                      { className: "overflow-x-auto mt-2" },
                       React.createElement(
                         "table",
                         { className: "w-full text-left text-xs sm:text-sm border-collapse table-fixed" },
@@ -1536,7 +1540,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                               "tr",
                               {
                                 key: w.id,
-                                className: "border-b border-stone-300 hover:bg-stone-100 align-top" + (isEditing ? " cursor-move" : ""),
+                                className: "border-b-2 border-stone-800 hover:bg-stone-100 align-top" + (isEditing ? " cursor-move" : ""),
                                 draggable: isEditing,
                                 title: isEditing ? t.dragTip : "",
                                 onDragStart: onDragStartRow("weapons", w.id),
@@ -1646,14 +1650,14 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                       null,
                       React.createElement(
                         "div",
-                        { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
+                          { className: "flex items-center justify-between border-b-2 border-stone-800 mb-3" },
                         React.createElement("h3", { className: "section-title section-inventory mb-0 border-none" }, t.invTitle),
                         React.createElement(
                           "div",
-                          { className: "flex gap-2 items-center" },
-                          React.createElement("span", { className: "text-xs font-bold text-amber-700" }, t.caps, ":"),
+                            { className: "flex gap-2 items-center overflow-hidden" },
+                            React.createElement("span", { className: "text-xs font-bold text-amber-700 whitespace-nowrap" }, t.caps, ":"),
                           React.createElement("input", {
-                            className: "w-16 border-b border-stone-400 bg-transparent text-right font-mono",
+                              className: "w-12 border-b-2 border-stone-800 bg-transparent text-right font-mono",
                             value: localChar.caps,
                             onChange: (e) => updateField("caps", e.target.value),
                             disabled: !isEditing
@@ -1662,7 +1666,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                             React.createElement(
                               "select",
                               {
-                                className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                                  className: "bg-white border-2 border-stone-800 text-xs p-1 max-w-[120px]",
                                 defaultValue: "",
                                 onChange: (e) => {
                                   const val = e.target.value;
@@ -1678,14 +1682,14 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                           isEditing &&
                             React.createElement(
                               "button",
-                              { onClick: () => addItem("inventory"), className: "btn-add" },
+                                { onClick: () => addItem("inventory"), className: "btn-add min-w-[32px] justify-center" },
                               React.createElement(Icon, { name: "Plus", size: 14 })
                             )
                         )
                       ),
                       React.createElement(
                         "table",
-                        { className: "w-full text-left text-sm table-fixed" },
+                          { className: "w-full text-left text-sm table-fixed mt-2" },
                         React.createElement(
                           "thead",
                           null,
@@ -1707,7 +1711,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                               "tr",
                               {
                                 key: item.id,
-                                className: "border-b border-stone-200 align-top" + (isEditing ? " cursor-move" : ""),
+                                  className: "border-b-2 border-stone-800 align-top" + (isEditing ? " cursor-move" : ""),
                                 draggable: isEditing,
                                 title: isEditing ? t.dragTip : "",
                                 onDragStart: onDragStartRow("inventory", item.id),
@@ -1723,7 +1727,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                               React.createElement("td", { className: "p-1" },
                                 isEditing
                                   ? React.createElement("select", {
-                                      className: "tbl-inp border border-stone-200 bg-transparent text-xs",
+                                      className: "tbl-inp border-2 border-stone-800 bg-transparent text-xs",
                                       value: item.type || "other",
                                       onChange: (e) => updateListItem("inventory", item.id, "type", e.target.value)
                                     },
@@ -1769,7 +1773,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                       null,
                       React.createElement(
                         "div",
-                        { className: "flex justify-between items-end border-b-2 border-stone-800 mb-2" },
+                          { className: "flex items-center justify-between border-b-2 border-stone-800 mb-3" },
                         React.createElement("h3", { className: "section-title section-perks mb-0 border-none" }, t.perksTitle),
                         isEditing &&
                           React.createElement(
@@ -1778,7 +1782,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                             React.createElement(
                               "select",
                               {
-                                className: "bg-white border border-stone-300 text-xs p-1 rounded",
+                                  className: "bg-white border-2 border-stone-800 text-xs p-1 max-w-[150px]",
                                 defaultValue: "",
                                 onChange: (e) => {
                                   const val = e.target.value;
@@ -1793,14 +1797,14 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                             ),
                             React.createElement(
                               "button",
-                              { onClick: () => addItem("perks"), className: "btn-add" },
+                              { onClick: () => addItem("perks"), className: "btn-add min-w-[32px] justify-center" },
                               React.createElement(Icon, { name: "Plus", size: 14 })
                             )
                           )
                       ),
                       React.createElement(
                         "table",
-                        { className: "w-full text-left text-sm table-fixed" },
+                        { className: "w-full text-left text-sm table-fixed mt-2" },
                         React.createElement(
                           "thead",
                           null,
@@ -1821,7 +1825,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                               "tr",
                               {
                                 key: perk.id,
-                                className: "border-b border-stone-200 align-top" + (isEditing ? " cursor-move" : ""),
+                                  className: "border-b-2 border-stone-800 align-top" + (isEditing ? " cursor-move" : ""),
                                 draggable: isEditing,
                                 title: isEditing ? t.dragTip : "",
                                 onDragStart: onDragStartRow("perks", perk.id),
@@ -1883,7 +1887,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                 },
                 React.createElement(
                   "div",
-                  { className: "flex items-center justify-between mb-4 border-b border-stone-300 pb-2" },
+                  { className: "flex items-center justify-between mb-4 border-b-2 border-stone-800 pb-2" },
                   React.createElement("h2", { className: "text-lg font-bold uppercase tracking-wide" }, "Administrace – databáze"),
                   React.createElement(
                     "button",
@@ -1921,7 +1925,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                   // LEFT: LIST
                   React.createElement(
                     "div",
-                    { className: "border border-stone-400 bg-white" },
+                    { className: "border-2 border-stone-800 bg-white" },
                     React.createElement(
                       "div",
                       { className: "flex justify-between items-center p-2 bg-stone-800 text-stone-100" },
@@ -1946,7 +1950,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                               "div",
                               {
                                 key: row.id,
-                                className: "p-2 border-b border-stone-200 flex items-start justify-between gap-2 hover:bg-amber-50"
+                                className: "p-2 border-b-2 border-stone-800 flex items-start justify-between gap-2 hover:bg-amber-50"
                               },
                               React.createElement(
                                 "button",
@@ -1977,7 +1981,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                   // RIGHT: EDIT FORM
                   React.createElement(
                     "div",
-                    { className: "border border-stone-400 bg-white p-3" },
+                    { className: "border-2 border-stone-800 bg-white p-3" },
                     !tplDraft[tplTab]
                       ? React.createElement("div", { className: "text-sm text-stone-500" }, "Vyber položku vlevo, nebo vytvoř novou.")
                       : React.createElement(
@@ -2003,7 +2007,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                                 React.createElement(
                                   "select",
                                   {
-                                    className: "border-b-2 border-stone-400 bg-transparent px-1 py-1 font-bold text-stone-800 focus:border-amber-600 focus:outline-none",
+                                    className: "border-b-2 border-stone-800 bg-transparent px-1 py-1 font-bold text-stone-800 focus:border-amber-600 focus:outline-none",
                                     value: tplDraft[tplTab].type || "other",
                                     onChange: (e) => setTplDraft((p) => ({ ...p, inventory: { ...p.inventory, type: e.target.value } }))
                                   },
@@ -2035,7 +2039,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
                                 { className: "flex flex-col" },
                                 React.createElement("label", { className: "text-[10px] uppercase font-bold text-stone-500 mb-1" }, "Účinek"),
                                 React.createElement(AutoResizeTextarea, {
-                                  className: "border border-stone-300 p-2 text-sm",
+                                  className: "border-2 border-stone-800 p-2 text-sm",
                                   value: tplDraft[tplTab].effect || "",
                                   onChange: (e) => setTplDraft((p) => ({ ...p, perks: { ...p.perks, effect: e.target.value } })),
                                   disabled: false
@@ -2122,7 +2126,7 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
 
                           React.createElement(
                             "div",
-                            { className: "flex justify-end gap-2 pt-2 border-t border-stone-200" },
+                            { className: "flex justify-end gap-2 pt-2 border-t-2 border-stone-800" },
                             React.createElement(
                               "button",
                               {
@@ -2154,21 +2158,22 @@ thead th, .bg-stone-800{ background:#111 !important; color:#fff !important; }
               align-items: center;
               gap: 0.5rem;
               padding: 0.5rem 1rem;
-              border-radius: 0.25rem;
+              border-radius: 0;
               font-weight: bold;
               font-size: 0.875rem;
               transition: all 0.2s;
-              border: 1px solid rgba(0,0,0,0.2);
+              border: 2px solid #171717;
             }
             .btn-add {
               background: #d97706;
               color: white;
               padding: 0.1rem 0.5rem;
               font-size: 0.75rem;
-              border-radius: 2px;
+              border-radius: 0;
               display: flex;
               align-items: center;
               gap: 2px;
+              border: 1px solid #171717;
             }
             .stat-input-lg {
               background: transparent;
