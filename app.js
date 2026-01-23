@@ -691,6 +691,15 @@ function FalloutSheetApp() {
   });
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const [theme, setTheme] = useState("paper");
+
+  useEffect(() => {
+    if (theme === "pipboy") {
+      document.documentElement.classList.add("theme-pipboy");
+    } else {
+      document.documentElement.classList.remove("theme-pipboy");
+    }
+  }, [theme]);
+
   const [pickerConfig, setPickerConfig] = useState({
     isOpen: false,
     type: "weapons",
