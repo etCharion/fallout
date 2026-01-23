@@ -1136,13 +1136,13 @@ function FalloutSheetApp() {
       "header",
       {
         className:
-          "bg-stone-800 text-amber-500 p-4 sticky top-0 z-50 shadow-md border-b-4 border-amber-600 print:hidden",
+          "bg-stone-800 text-amber-500 p-4 sticky top-0 z-50 shadow-md border-b-4 border-amber-600 print:hidden overflow-x-auto",
       },
       React.createElement(
         "div",
         {
           className:
-            "max-w-6xl mx-auto flex flex-wrap gap-4 items-center justify-between",
+            "max-w-6xl mx-auto flex flex-nowrap gap-4 items-center justify-between min-w-max",
         },
         React.createElement(
           "div",
@@ -1160,7 +1160,7 @@ function FalloutSheetApp() {
         ),
         React.createElement(
           "div",
-          { className: "flex flex-wrap gap-2 items-center" },
+          { className: "flex flex-nowrap gap-1 items-center" },
           React.createElement(
             "button",
             {
