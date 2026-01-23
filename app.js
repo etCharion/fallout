@@ -1801,18 +1801,11 @@ function FalloutSheetApp() {
               "section",
               { className: "mt-8" },
               React.createElement(
-                "div",
+                "h3",
                 {
-                  className:
-                    "flex items-center justify-between border-b-2 border-stone-800 mb-3",
+                  className: "section-title section-weapons mb-3",
                 },
-                React.createElement(
-                  "h3",
-                  {
-                    className: "section-title section-weapons mb-0 border-none",
-                  },
-                  t.weaponsTitle,
-                ),
+                React.createElement("span", null, t.weaponsTitle),
                 isEditing &&
                   React.createElement(
                     "div",
@@ -1822,30 +1815,30 @@ function FalloutSheetApp() {
                       {
                         onClick: () =>
                           setPickerConfig({ isOpen: true, type: "weapons" }),
-                        className: "btn-add min-w-[120px] justify-center",
+                        className: "btn-add-header",
+                        title: "Vybrat šablonu",
                       },
                       React.createElement(Icon, { name: "Search", size: 14 }),
-                      " Vybrat šablonu",
                     ),
                     React.createElement(
                       "button",
                       {
                         onClick: () => addItem("weapons"),
-                        className: "btn-add min-w-[40px] justify-center",
+                        className: "btn-add-header",
+                        title: t.btnAdd,
                       },
                       React.createElement(Icon, { name: "Plus", size: 14 }),
-                      t.btnAdd,
                     ),
                   ),
               ),
               React.createElement(
                 "div",
-                { className: "overflow-x-auto mt-2" },
+                { className: "overflow-x-auto mt-2 weapons-table-container" },
                 React.createElement(
                   "table",
                   {
                     className:
-                      "w-full text-left text-xs sm:text-sm border-collapse table-fixed",
+                      "w-full text-left text-xs sm:text-sm border-collapse weapons-table",
                   },
                   React.createElement(
                     "thead",
@@ -1874,13 +1867,12 @@ function FalloutSheetApp() {
                           "th",
                           {
                             key: i,
-                            className: `p-1 ${i === 0 ? "w-[15%]" : i === 1 ? "w-[10%]" : i === 2 ? "w-[5%]" : i === 3 ? "w-[5%]" : i === 4 ? "w-[8%]" : i === 5 ? "w-[15%]" : i === 6 ? "w-[8%]" : i === 7 ? "w-[5%]" : i === 8 ? "w-[5%]" : i === 9 ? "w-[10%]" : i === 10 ? "w-[8%]" : "w-[5%]"}`,
+                            className: `p-1 ${i === 0 ? "w-[14%]" : i === 1 ? "w-[8%]" : i === 2 ? "w-[4%]" : i === 3 ? "w-[4%]" : i === 4 ? "w-[6%]" : i === 5 ? "w-[16%]" : i === 6 ? "w-[8%]" : i === 7 ? "w-[4%]" : i === 8 ? "w-[4%]" : i === 9 ? "w-[14%]" : i === 10 ? "w-[8%]" : "w-[4%]"}`,
                           },
                           h,
                         ),
                       ),
-                      isEditing &&
-                        React.createElement("th", { className: "p-1 w-6" }),
+                      React.createElement("th", { className: "p-1 w-[6%]" }),
                     ),
                   ),
                   React.createElement(
@@ -2090,10 +2082,10 @@ function FalloutSheetApp() {
                               ),
                           }),
                         ),
-                        isEditing &&
-                          React.createElement(
-                            "td",
-                            { className: "p-1 text-center" },
+                        React.createElement(
+                          "td",
+                          { className: "p-1 text-center" },
+                          isEditing &&
                             React.createElement(
                               "button",
                               {
@@ -2105,7 +2097,7 @@ function FalloutSheetApp() {
                                 size: 16,
                               }),
                             ),
-                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -2119,34 +2111,28 @@ function FalloutSheetApp() {
                 "section",
                 null,
                 React.createElement(
-                  "div",
+                  "h3",
                   {
-                    className:
-                      "flex items-center justify-between border-b-2 border-stone-800 mb-3",
+                    className: "section-title section-inventory mb-3",
                   },
-                  React.createElement(
-                    "h3",
-                    {
-                      className:
-                        "section-title section-inventory mb-0 border-none",
-                    },
-                    t.invTitle,
-                  ),
+                  React.createElement("span", null, t.invTitle),
                   React.createElement(
                     "div",
-                    { className: "flex gap-2 items-center overflow-hidden" },
+                    {
+                      className:
+                        "flex gap-2 items-center overflow-hidden font-bold",
+                    },
                     React.createElement(
                       "span",
                       {
-                        className:
-                          "text-xs font-bold text-amber-700 whitespace-nowrap",
+                        className: "text-xs whitespace-nowrap",
                       },
                       t.caps,
                       ":",
                     ),
                     React.createElement("input", {
                       className:
-                        "w-12 border-b-2 border-stone-800 bg-transparent text-right font-mono",
+                        "w-12 border-b-2 border-current bg-transparent text-right font-mono",
                       value: localChar.caps,
                       onChange: (e) => updateField("caps", e.target.value),
                       disabled: !isEditing,
@@ -2163,7 +2149,7 @@ function FalloutSheetApp() {
                                 isOpen: true,
                                 type: "inventory",
                               }),
-                            className: "btn-add min-w-[32px] justify-center",
+                            className: "btn-add-header",
                           },
                           React.createElement(Icon, {
                             name: "Search",
@@ -2174,7 +2160,7 @@ function FalloutSheetApp() {
                           "button",
                           {
                             onClick: () => addItem("inventory"),
-                            className: "btn-add min-w-[32px] justify-center",
+                            className: "btn-add-header",
                           },
                           React.createElement(Icon, { name: "Plus", size: 14 }),
                         ),
@@ -2183,7 +2169,9 @@ function FalloutSheetApp() {
                 ),
                 React.createElement(
                   "table",
-                  { className: "w-full text-left text-sm table-fixed mt-2" },
+                  {
+                    className: "w-full text-left text-sm inventory-table mt-2",
+                  },
                   React.createElement(
                     "thead",
                     null,
@@ -2210,8 +2198,7 @@ function FalloutSheetApp() {
                         { className: "p-1 w-[15%] text-center" },
                         t.i_qty,
                       ),
-                      isEditing &&
-                        React.createElement("th", { className: "w-[5%]" }),
+                      React.createElement("th", { className: "w-[5%]" }),
                     ),
                   ),
                   React.createElement(
@@ -2310,10 +2297,10 @@ function FalloutSheetApp() {
                               ),
                           }),
                         ),
-                        isEditing &&
-                          React.createElement(
-                            "td",
-                            { className: "p-1 text-center" },
+                        React.createElement(
+                          "td",
+                          { className: "p-1 text-center" },
+                          isEditing &&
                             React.createElement(
                               "button",
                               {
@@ -2325,7 +2312,7 @@ function FalloutSheetApp() {
                                 size: 14,
                               }),
                             ),
-                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -2335,18 +2322,11 @@ function FalloutSheetApp() {
                 "section",
                 null,
                 React.createElement(
-                  "div",
+                  "h3",
                   {
-                    className:
-                      "flex items-center justify-between border-b-2 border-stone-800 mb-3",
+                    className: "section-title section-perks mb-3",
                   },
-                  React.createElement(
-                    "h3",
-                    {
-                      className: "section-title section-perks mb-0 border-none",
-                    },
-                    t.perksTitle,
-                  ),
+                  React.createElement("span", null, t.perksTitle),
                   isEditing &&
                     React.createElement(
                       "div",
@@ -2356,7 +2336,7 @@ function FalloutSheetApp() {
                         {
                           onClick: () =>
                             setPickerConfig({ isOpen: true, type: "perks" }),
-                          className: "btn-add min-w-[32px] justify-center",
+                          className: "btn-add-header",
                         },
                         React.createElement(Icon, { name: "Search", size: 14 }),
                       ),
@@ -2364,7 +2344,7 @@ function FalloutSheetApp() {
                         "button",
                         {
                           onClick: () => addItem("perks"),
-                          className: "btn-add min-w-[32px] justify-center",
+                          className: "btn-add-header",
                         },
                         React.createElement(Icon, { name: "Plus", size: 14 }),
                       ),
@@ -2372,7 +2352,7 @@ function FalloutSheetApp() {
                 ),
                 React.createElement(
                   "table",
-                  { className: "w-full text-left text-sm table-fixed mt-2" },
+                  { className: "w-full text-left text-sm perks-table mt-2" },
                   React.createElement(
                     "thead",
                     null,
@@ -2394,8 +2374,7 @@ function FalloutSheetApp() {
                         { className: "p-1 w-[50%]" },
                         t.p_effect,
                       ),
-                      isEditing &&
-                        React.createElement("th", { className: "w-[5%]" }),
+                      React.createElement("th", { className: "w-[5%]" }),
                     ),
                   ),
                   React.createElement(
@@ -2460,10 +2439,10 @@ function FalloutSheetApp() {
                               ),
                           }),
                         ),
-                        isEditing &&
-                          React.createElement(
-                            "td",
-                            { className: "p-1 text-center" },
+                        React.createElement(
+                          "td",
+                          { className: "p-1 text-center" },
+                          isEditing &&
                             React.createElement(
                               "button",
                               {
@@ -2475,7 +2454,7 @@ function FalloutSheetApp() {
                                 size: 14,
                               }),
                             ),
-                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -2530,7 +2509,7 @@ function FalloutSheetApp() {
           ),
           React.createElement(
             "div",
-            { className: "flex gap-2 mb-4" },
+            { className: "admin-tabs-container flex gap-2 mb-4" },
             ["weapons", "inventory", "perks"].map((tab) =>
               React.createElement(
                 "button",
