@@ -158,7 +158,8 @@ thead th,
   }
 
   /* Specific transparency overrides for elements inside the character sheet and header */
-  html.theme-pipboy .character-sheet-container div,
+  /* We exclude .section-title and buttons from global transparency to keep their solid backgrounds */
+  html.theme-pipboy .character-sheet-container div:not(.section-title),
   html.theme-pipboy .character-sheet-container section,
   html.theme-pipboy .character-sheet-container table,
   html.theme-pipboy .character-sheet-container thead,
@@ -168,7 +169,7 @@ thead th,
   html.theme-pipboy .character-sheet-container input,
   html.theme-pipboy .character-sheet-container select,
   html.theme-pipboy .character-sheet-container textarea,
-  html.theme-pipboy header div,
+  html.theme-pipboy header div:not(button),
   html.theme-pipboy header span {
     background-color: transparent !important;
   }
