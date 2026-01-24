@@ -204,7 +204,7 @@ thead th,
     margin-top: 1rem !important;
     margin-bottom: 1rem !important;
     animation: flicker 10s infinite;
-    max-width: 900px !important;
+    max-width: 1280px !important;
   }
 
   /* Inverted solid headers (Solid Green background, Black text) for Section Titles */
@@ -309,7 +309,7 @@ thead th,
   }
   html.theme-pipboy .inventory-table th:nth-child(1),
   html.theme-pipboy .inventory-table td:nth-child(1) {
-    width: 50%;
+    width: 45%;
   } /* Předmět */
   html.theme-pipboy .inventory-table th:nth-child(2),
   html.theme-pipboy .inventory-table td:nth-child(2) {
@@ -325,7 +325,7 @@ thead th,
   } /* Ks */
   html.theme-pipboy .inventory-table th:nth-child(5),
   html.theme-pipboy .inventory-table td:nth-child(5) {
-    width: 5%;
+    width: 10%;
   } /* Delete */
 
   /* Precise Column Widths for Perks Table */
@@ -344,11 +344,11 @@ thead th,
   } /* St. */
   html.theme-pipboy .perks-table th:nth-child(3),
   html.theme-pipboy .perks-table td:nth-child(3) {
-    width: 55%;
+    width: 50%;
   } /* Účinek */
   html.theme-pipboy .perks-table th:nth-child(4),
   html.theme-pipboy .perks-table td:nth-child(4) {
-    width: 5%;
+    width: 10%;
   } /* Delete */
 
   html.theme-pipboy thead {
@@ -536,12 +536,30 @@ thead th,
     background-color: var(--pb-green) !important;
   }
 
-  /* SVGs */
+  /* SVGs - Default to green stroke */
   html.theme-pipboy svg {
     stroke: var(--pb-green) !important;
   }
+  /* Buttons: Invert colors on hover */
   html.theme-pipboy button:hover svg {
     stroke: #000000 !important;
+  }
+
+  /* Header buttons (Add, Search) - they are inside solid green bars, so they should be black by default */
+  html.theme-pipboy .btn-add-header,
+  html.theme-pipboy .btn-add-header svg {
+    color: #000000 !important;
+    stroke: #000000 !important;
+  }
+
+  html.theme-pipboy .btn-add-header:hover {
+    background-color: #000000 !important;
+    color: var(--pb-green) !important;
+    box-shadow: 0 0 4px var(--pb-green-glow) !important;
+  }
+
+  html.theme-pipboy .btn-add-header:hover svg {
+    stroke: var(--pb-green) !important;
   }
 
   /* Remove all generic section boxes */
@@ -570,5 +588,28 @@ thead th,
     filter: sepia(100%) hue-rotate(60deg) saturate(600%) brightness(0.7)
       contrast(1.2);
     border: 2px solid var(--pb-green) !important;
+  }
+
+  /* Custom Scrollbar for Pip-Boy */
+  html.theme-pipboy ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  html.theme-pipboy ::-webkit-scrollbar-track {
+    background: #000000;
+    border-left: 1px solid var(--pb-green);
+  }
+  html.theme-pipboy ::-webkit-scrollbar-thumb {
+    background: var(--pb-green-dim);
+    border: 1px solid var(--pb-green);
+  }
+  html.theme-pipboy ::-webkit-scrollbar-thumb:hover {
+    background: var(--pb-green);
+  }
+
+  /* Firefox Scrollbar */
+  html.theme-pipboy {
+    scrollbar-width: thin;
+    scrollbar-color: var(--pb-green-dim) #000000;
   }
 }
