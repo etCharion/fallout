@@ -1547,7 +1547,7 @@ function FalloutSheetApp() {
                       {
                         key: sk.key,
                         className:
-                          "grid grid-cols-12 items-center border-b-2 border-stone-800 py-1 px-2 hover:bg-amber-50",
+                          "grid grid-cols-12 items-center border-b-2 border-stone-800 py-1 px-2",
                       },
                       React.createElement(
                         "div",
