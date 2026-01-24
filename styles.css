@@ -147,9 +147,15 @@ thead th,
   html.theme-pipboy * {
     background-color: transparent !important;
     color: var(--pb-green) !important;
-    text-shadow: 0 0 1px var(--pb-green-glow) !important;
+    text-shadow: 0 0 2px var(--pb-green-glow) !important;
     box-shadow: none !important;
     border-color: transparent !important;
+  }
+
+  html.theme-pipboy header {
+    background-color: #000000 !important;
+    border-bottom: 2px solid var(--pb-green) !important;
+    box-shadow: 0 0 10px var(--pb-green-glow) !important;
   }
 
   /* CRT Animations */
@@ -213,22 +219,25 @@ thead th,
   html.theme-pipboy .section-title {
     background-color: var(--pb-green) !important;
     color: #000000 !important;
-    text-shadow: none !important;
+    text-shadow: none !important; /* No glow for black text */
     border: none !important;
     padding: 4px 8px !important;
     text-transform: uppercase;
     font-weight: bold !important;
     margin-bottom: 0.5rem !important;
-    box-shadow: 0 0 4px var(--pb-green-glow) !important;
+    box-shadow: 0 0 8px var(--pb-green-glow) !important; /* Glow for green fill */
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
   }
 
-  /* Ensure text inside inverted headers is black */
+  /* Ensure text inside inverted headers is black and DOES NOT GLOW */
   html.theme-pipboy h2 *,
   html.theme-pipboy h3 *,
-  html.theme-pipboy .section-title * {
+  html.theme-pipboy .section-title *,
+  html.theme-pipboy h2 span,
+  html.theme-pipboy h3 span,
+  html.theme-pipboy .section-title span {
     color: #000000 !important;
     text-shadow: none !important;
     border-color: #000000 !important;
@@ -550,12 +559,14 @@ thead th,
   html.theme-pipboy .btn-add-header svg {
     color: #000000 !important;
     stroke: #000000 !important;
+    text-shadow: none !important;
   }
 
   html.theme-pipboy .btn-add-header:hover {
     background-color: #000000 !important;
     color: var(--pb-green) !important;
-    box-shadow: 0 0 4px var(--pb-green-glow) !important;
+    box-shadow: 0 0 8px var(--pb-green-glow) !important;
+    text-shadow: 0 0 2px var(--pb-green-glow) !important;
   }
 
   html.theme-pipboy .btn-add-header:hover svg {
