@@ -1811,13 +1811,13 @@ function FalloutSheetApp() {
               "section",
               { className: "mt-8" },
               React.createElement(
-                "div",
+                "h3",
                 {
                   className: "section-title section-weapons mb-3",
                 },
                 React.createElement(
                   "span",
-                  { className: "text-xl font-bold" },
+                  null,
                   t.weaponsTitle,
                 ),
                 isEditing &&
@@ -2125,13 +2125,13 @@ function FalloutSheetApp() {
                 "section",
                 null,
                 React.createElement(
-                  "div",
+                  "h3",
                   {
                     className: "section-title section-inventory mb-3",
                   },
                   React.createElement(
                     "span",
-                    { className: "text-xl font-bold" },
+                    null,
                     t.invTitle,
                   ),
                   React.createElement(
@@ -2340,13 +2340,13 @@ function FalloutSheetApp() {
                 "section",
                 null,
                 React.createElement(
-                  "div",
+                  "h3",
                   {
                     className: "section-title section-perks mb-3",
                   },
                   React.createElement(
                     "span",
-                    { className: "text-xl font-bold" },
+                    null,
                     t.perksTitle,
                   ),
                   isEditing &&
