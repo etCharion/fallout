@@ -153,12 +153,11 @@ thead th,
   /* Ensure main opaque surfaces are SOLID BLACK */
   html.theme-pipboy,
   html.theme-pipboy body,
-  html.theme-pipboy header,
   html.theme-pipboy .character-sheet-container {
     background-color: #000000 !important;
   }
 
-  /* Specific transparency overrides for elements inside the character sheet */
+  /* Specific transparency overrides for elements inside the character sheet and header */
   html.theme-pipboy .character-sheet-container div,
   html.theme-pipboy .character-sheet-container section,
   html.theme-pipboy .character-sheet-container table,
@@ -168,7 +167,9 @@ thead th,
   html.theme-pipboy .character-sheet-container td,
   html.theme-pipboy .character-sheet-container input,
   html.theme-pipboy .character-sheet-container select,
-  html.theme-pipboy .character-sheet-container textarea {
+  html.theme-pipboy .character-sheet-container textarea,
+  html.theme-pipboy header div,
+  html.theme-pipboy header span {
     background-color: transparent !important;
   }
 
@@ -188,15 +189,14 @@ thead th,
     background-color: transparent !important;
   }
 
-  /* Keep the header and sheet container opaque */
+  /* Keep the header and sheet container opaque - higher specificity for header to override .bg-stone-800 */
+  html.theme-pipboy header.bg-stone-800,
   html.theme-pipboy header,
-  html.theme-pipboy header *,
   html.theme-pipboy .character-sheet-container {
     background-color: #000000 !important;
   }
 
   html.theme-pipboy header {
-    background-color: #000000 !important;
     border-bottom: 2px solid var(--pb-green) !important;
     box-shadow: 0 0 15px var(--pb-green-glow) !important;
     z-index: 9999 !important;
@@ -565,6 +565,13 @@ thead th,
     background-color: var(--pb-green) !important;
     color: #000000 !important;
     box-shadow: 0 0 6px var(--pb-green-glow) !important;
+  }
+
+  /* Ensure children of hovered buttons (icons, text) are transparent and black */
+  html.theme-pipboy button:hover * {
+    background-color: transparent !important;
+    color: #000000 !important;
+    stroke: #000000 !important;
   }
 
   html.theme-pipboy .hover\:bg-amber-50:hover,

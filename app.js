@@ -676,7 +676,14 @@ function FalloutSheetApp() {
   const [isEditing, setIsEditing] = useState(false);
   const [localChar, setLocalChar] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [lang, setLang] = useState("cs");
+  const [lang, setLang] = useState(
+    () => localStorage.getItem("fallout_lang") || "cs",
+  );
+
+  useEffect(() => {
+    localStorage.setItem("fallout_lang", lang);
+  }, [lang]);
+
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [templates, setTemplates] = useState({
     weapons: [],
@@ -690,9 +697,12 @@ function FalloutSheetApp() {
     perks: null,
   });
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
-  const [theme, setTheme] = useState("paper");
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("fallout_theme") || "paper",
+  );
 
   useEffect(() => {
+    localStorage.setItem("fallout_theme", theme);
     if (theme === "pipboy") {
       document.documentElement.classList.add("theme-pipboy");
     } else {
