@@ -1852,7 +1852,7 @@ function FalloutSheetApp() {
                   "table",
                   {
                     className:
-                      "w-full text-left text-xs sm:text-sm border-collapse weapons-table",
+                      "w-full text-left text-sm border-collapse weapons-table",
                   },
                   React.createElement(
                     "thead",
@@ -1861,7 +1861,7 @@ function FalloutSheetApp() {
                       "tr",
                       {
                         className:
-                          "bg-stone-800 text-stone-100 print:bg-stone-300 print:text-black",
+                            "bg-stone-800 text-stone-100 text-xs print:bg-stone-300 print:text-black",
                       },
                       [
                         t.w_name,

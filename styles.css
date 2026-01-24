@@ -130,7 +130,6 @@ thead th,
   width: 100%;
   background: transparent;
   border: none;
-  font-family: monospace;
   min-height: 1.5rem;
 }
 
@@ -140,7 +139,6 @@ thead th,
   html.theme-pipboy body {
     background-color: #000000 !important;
     color: var(--pb-green) !important;
-    font-family: "Courier New", Courier, monospace !important;
   }
 
   /* Global Pip-Boy reset: Green text and minimal borders */
