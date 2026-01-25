@@ -1822,7 +1822,7 @@ function FalloutSheetApp() {
                 ),
                 isEditing &&
                   React.createElement(
-                    "div",
+                    "span",
                     { className: "flex gap-2 items-center" },
                     React.createElement(
                       "button",
@@ -2135,7 +2135,7 @@ function FalloutSheetApp() {
                     t.invTitle,
                   ),
                   React.createElement(
-                    "div",
+                    "span",
                     {
                       className:
                         "flex gap-2 items-center overflow-hidden font-bold",
@@ -2351,7 +2351,7 @@ function FalloutSheetApp() {
                   ),
                   isEditing &&
                     React.createElement(
-                      "div",
+                      "span",
                       { className: "flex gap-2 items-center" },
                       React.createElement(
                         "button",
