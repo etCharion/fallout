@@ -144,7 +144,7 @@ thead th,
   /* Global Pip-Boy reset: Green text and minimal borders */
   html.theme-pipboy * {
     color: var(--pb-green) !important;
-    text-shadow: 0 0 2px var(--pb-green-glow) !important;
+    text-shadow: 0 0 2px rgba(32, 255, 32, 0.5), 0 0 5px rgba(32, 255, 32, 0.2) !important;
     border-color: transparent !important;
   }
 
@@ -209,25 +209,24 @@ thead th,
   }
 
   /* CRT Animations */
-  @keyframes flicker {
-    0% {
-      opacity: 1;
-    }
-    3% {
-      opacity: 0.98;
-    }
-    6% {
-      opacity: 1;
-    }
-    45% {
-      opacity: 0.96;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 1;
-    }
+  @keyframes crt-flicker {
+    0% { opacity: 1; filter: brightness(1); }
+    1% { opacity: 0.98; filter: brightness(1.05); }
+    2% { opacity: 1; filter: brightness(1); }
+    30% { opacity: 0.99; filter: brightness(1); }
+    31% { opacity: 0.96; filter: brightness(1.1); transform: translateX(1px); }
+    32% { opacity: 1; filter: brightness(1); transform: translateX(0); }
+    60% { opacity: 0.99; filter: brightness(1); }
+    61% { opacity: 0.98; filter: brightness(1.05); }
+    62% { opacity: 1; filter: brightness(1); }
+    98% { opacity: 1; filter: brightness(1); transform: translateY(0); }
+    99% { opacity: 0.95; filter: brightness(1.1); transform: translateY(-1px); }
+    100% { opacity: 1; filter: brightness(1); transform: translateY(0); }
+  }
+
+  @keyframes scanline-roll {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(500%); }
   }
 
   /* Scanline Overlay */
@@ -239,14 +238,50 @@ thead th,
     height: 100%;
     background: repeating-linear-gradient(
       0deg,
-      var(--pb-scanline),
-      var(--pb-scanline) 1px,
+      rgba(32, 255, 32, 0.08) 0px,
+      rgba(32, 255, 32, 0.08) 1px,
       transparent 1px,
-      transparent 2px
+      transparent 3px
     );
     pointer-events: none;
-    z-index: 9999;
-    opacity: 0.1;
+    z-index: 10000;
+    overflow: hidden;
+  }
+
+  /* Moving scanline roll effect */
+  .pipboy-overlay::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20%;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(32, 255, 32, 0.02) 10%,
+      rgba(32, 255, 32, 0.05) 50%,
+      rgba(32, 255, 32, 0.02) 90%,
+      transparent 100%
+    );
+    animation: scanline-roll 10s linear infinite;
+    pointer-events: none;
+  }
+
+  /* Screen curvature / Vignette effect */
+  .pipboy-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle,
+      transparent 50%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+    pointer-events: none;
   }
 
   /* Main Container */
@@ -254,13 +289,14 @@ thead th,
     background-color: #000000 !important;
     border: 2px solid var(--pb-green) !important;
     box-shadow:
-      0 0 8px var(--pb-green-glow),
-      inset 0 0 4px var(--pb-green-glow) !important;
+      0 0 10px var(--pb-green-glow),
+      inset 0 0 5px var(--pb-green-glow) !important;
     padding: 1.5rem !important;
     margin-top: 1rem !important;
     margin-bottom: 1rem !important;
-    animation: flicker 10s infinite;
+    animation: crt-flicker 8s infinite;
     max-width: 1280px !important;
+    position: relative;
   }
 
   /* Inverted solid headers (Solid Green background, Black text) for Section Titles */
