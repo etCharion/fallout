@@ -1364,11 +1364,11 @@ function FalloutSheetApp() {
                 "div",
                 {
                   className:
-                    "md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4",
+                    "md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 char-info-grid",
                 },
                 React.createElement(
                   "div",
-                  { className: "col-span-2 md:col-span-4 mb-2" },
+                  { className: "col-span-2 md:col-span-4 mb-2 print:hidden" },
                   React.createElement(
                     "h1",
                     {
@@ -1391,36 +1391,39 @@ function FalloutSheetApp() {
                   value: localChar.name,
                   onChange: (v) => updateField("name", v),
                   isEditing: isEditing,
-                  className: "col-span-2",
+                  className: "col-span-2 char-field-name",
                 }),
                 React.createElement(InputGroup, {
                   label: t.origin,
                   value: localChar.origin,
                   onChange: (v) => updateField("origin", v),
                   isEditing: isEditing,
-                  className: "col-span-2",
+                  className: "col-span-2 char-field-origin",
                 }),
                 React.createElement(InputGroup, {
                   label: t.level,
                   value: localChar.level,
                   onChange: (v) => updateField("level", v),
                   isEditing: isEditing,
+                  className: "char-field-level",
                 }),
                 React.createElement(InputGroup, {
                   label: t.xp,
                   value: localChar.xp,
                   onChange: (v) => updateField("xp", v),
                   isEditing: isEditing,
+                  className: "char-field-xp",
                 }),
                 React.createElement(InputGroup, {
                   label: t.xpNext,
                   value: localChar.xpNext,
                   onChange: (v) => updateField("xpNext", v),
                   isEditing: isEditing,
+                  className: "char-field-xpnext",
                 }),
                 React.createElement(
                   "div",
-                  { className: "flex items-end pb-1" },
+                  { className: "flex items-end pb-1 print:hidden" },
                   React.createElement(
                     "button",
                     {
@@ -1433,26 +1436,26 @@ function FalloutSheetApp() {
                 ),
               ),
             ),
-            isNotesExpanded &&
+            React.createElement(
+              "section",
+              {
+                className: `mb-6 p-4 border-2 border-stone-800 bg-white print-notes-section ${!isNotesExpanded ? "hidden print:block" : ""}`,
+              },
               React.createElement(
-                "section",
-                { className: "mb-6 p-4 border-2 border-stone-800 bg-white" },
-                React.createElement(
-                  "h3",
-                  {
-                    className:
-                      "text-xs font-bold uppercase mb-2 text-stone-500",
-                  },
-                  t.notesTitle,
-                ),
-                React.createElement(AutoResizeTextarea, {
-                  value: localChar.notes || "",
-                  onChange: (e) => updateField("notes", e.target.value),
-                  disabled: !isEditing,
-                  className:
-                    "w-full min-h-[100px] bg-transparent border-none focus:outline-none font-bold text-stone-800",
-                }),
+                "h3",
+                {
+                  className: "text-xs font-bold uppercase mb-2 text-stone-500",
+                },
+                t.notesTitle,
               ),
+              React.createElement(AutoResizeTextarea, {
+                value: localChar.notes || "",
+                onChange: (e) => updateField("notes", e.target.value),
+                disabled: !isEditing,
+                className:
+                  "w-full min-h-[100px] bg-transparent border-none focus:outline-none font-bold text-stone-800",
+              }),
+            ),
             React.createElement(
               "section",
               { className: "mb-6 special-section" },
@@ -1579,7 +1582,10 @@ function FalloutSheetApp() {
                             type: "number",
                             value: localChar.skills[`${sk.key}Val`],
                             onChange: (e) =>
-                              updateField(`skills.${sk.key}Val`, e.target.value),
+                              updateField(
+                                `skills.${sk.key}Val`,
+                                e.target.value,
+                              ),
                             disabled: !isEditing,
                             className:
                               "w-full text-center bg-transparent border-b-2 border-stone-800 focus:border-amber-500 focus:outline-none",
@@ -1595,7 +1601,10 @@ function FalloutSheetApp() {
                 { className: "flex flex-col gap-6 print-right print:gap-2" },
                 React.createElement(
                   "section",
-                  { className: "grid grid-cols-2 gap-4 print:grid-cols-4 print:gap-1" },
+                  {
+                    className:
+                      "grid grid-cols-2 gap-4 print:grid-cols-4 print:gap-1",
+                  },
                   React.createElement(
                     "div",
                     {
@@ -1732,7 +1741,10 @@ function FalloutSheetApp() {
                   ),
                   React.createElement(
                     "div",
-                      { className: "grid grid-cols-2 gap-2 text-sm print:grid-cols-3 print:gap-1" },
+                    {
+                      className:
+                        "grid grid-cols-2 gap-2 text-sm print:grid-cols-3 print:gap-1",
+                    },
                     React.createElement(BodyPartCard, {
                       name: t.loc_head,
                       data: localChar.resHead,
@@ -1819,11 +1831,7 @@ function FalloutSheetApp() {
                 {
                   className: "section-title section-weapons mb-3",
                 },
-                React.createElement(
-                  "span",
-                  null,
-                  t.weaponsTitle,
-                ),
+                React.createElement("span", null, t.weaponsTitle),
                 isEditing &&
                   React.createElement(
                     "span",
@@ -1865,7 +1873,7 @@ function FalloutSheetApp() {
                       "tr",
                       {
                         className:
-                            "bg-stone-800 text-stone-100 text-xs print:bg-stone-300 print:text-black",
+                          "bg-stone-800 text-stone-100 text-xs print:bg-stone-300 print:text-black",
                       },
                       [
                         t.w_name,
@@ -2133,11 +2141,7 @@ function FalloutSheetApp() {
                   {
                     className: "section-title section-inventory mb-3",
                   },
-                  React.createElement(
-                    "span",
-                    null,
-                    t.invTitle,
-                  ),
+                  React.createElement("span", null, t.invTitle),
                   React.createElement(
                     "span",
                     {
@@ -2348,11 +2352,7 @@ function FalloutSheetApp() {
                   {
                     className: "section-title section-perks mb-3",
                   },
-                  React.createElement(
-                    "span",
-                    null,
-                    t.perksTitle,
-                  ),
+                  React.createElement("span", null, t.perksTitle),
                   isEditing &&
                     React.createElement(
                       "span",
