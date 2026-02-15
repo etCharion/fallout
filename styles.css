@@ -832,6 +832,12 @@ thead th,
   .header-info-section > div {
     grid-column: auto !important;
     width: auto !important;
+    border: none !important;
+  }
+
+  .header-info-section > div:first-child {
+    width: 80px !important;
+    min-width: 80px !important;
   }
 
   /* Portrait adjustment */
@@ -839,6 +845,14 @@ thead th,
   .character-portrait-fallback {
     max-width: 80px !important;
     max-height: 80px !important;
+    border: none !important;
+  }
+
+  /* Force the portrait container (w-32 h-32) to shrink in print */
+  .header-info-section div[class*="w-32"] {
+    width: 80px !important;
+    height: 80px !important;
+    border: none !important;
   }
 
   .char-info-grid {
@@ -972,6 +986,7 @@ thead th,
     height: auto !important;
     border-bottom: 1px solid #ccc !important;
     width: 100% !important;
+    text-align: center !important;
   }
   /* Stat boxes print optimization */
   .stat-box-print {
@@ -981,18 +996,23 @@ thead th,
     padding: 2px !important;
   }
   .stat-flex-print {
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 2px !important;
+    gap: 1px !important;
+    width: 100% !important;
   }
   .stat-flex-print .stat-input-lg {
-    width: 25px !important;
+    width: 20px !important;
     font-size: 10pt !important;
     padding: 0 !important;
+    border-bottom: 1px solid #000 !important;
+    text-align: center !important;
   }
   .stat-flex-print span {
-    font-size: 10pt !important;
+    font-size: 9pt !important;
     line-height: 1 !important;
+    padding: 0 1px !important;
   }
 
   .print-right div[class*="border-2"] {
@@ -1015,6 +1035,7 @@ thead th,
     font-size: 9pt !important;
     padding: 1px !important;
     border-width: 1px !important;
+    text-align: center !important;
   }
 
   /* Tables */
