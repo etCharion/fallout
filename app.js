@@ -24,6 +24,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 // --- FIREBASE SETUP ---
+// NOTE: The apiKey is intentionally public as this is a frontend-only application.
+// It is secured via domain restrictions and API service restrictions in the Google Cloud Console.
 const firebaseConfig = {
   apiKey: "AIzaSyBJ7zMyfq1MjXTkvmeS4WCaWcixrrbqBnI",
   authDomain: "falloutpostava.firebaseapp.com",
