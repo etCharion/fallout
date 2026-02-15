@@ -144,7 +144,9 @@ thead th,
   /* Global Pip-Boy reset: Green text and minimal borders */
   html.theme-pipboy * {
     color: var(--pb-green) !important;
-    text-shadow: 0 0 2px rgba(32, 255, 32, 0.5), 0 0 5px rgba(32, 255, 32, 0.2) !important;
+    text-shadow:
+      0 0 2px rgba(32, 255, 32, 0.5),
+      0 0 5px rgba(32, 255, 32, 0.2) !important;
     border-color: transparent !important;
   }
 
@@ -210,23 +212,68 @@ thead th,
 
   /* CRT Animations */
   @keyframes crt-flicker {
-    0% { opacity: 1; filter: brightness(1); }
-    1% { opacity: 0.98; filter: brightness(1.05); }
-    2% { opacity: 1; filter: brightness(1); }
-    30% { opacity: 0.99; filter: brightness(1); }
-    31% { opacity: 0.96; filter: brightness(1.1); transform: translateX(1px); }
-    32% { opacity: 1; filter: brightness(1); transform: translateX(0); }
-    60% { opacity: 0.99; filter: brightness(1); }
-    61% { opacity: 0.98; filter: brightness(1.05); }
-    62% { opacity: 1; filter: brightness(1); }
-    98% { opacity: 1; filter: brightness(1); transform: translateY(0); }
-    99% { opacity: 0.95; filter: brightness(1.1); transform: translateY(-1px); }
-    100% { opacity: 1; filter: brightness(1); transform: translateY(0); }
+    0% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    1% {
+      opacity: 0.98;
+      filter: brightness(1.05);
+    }
+    2% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    30% {
+      opacity: 0.99;
+      filter: brightness(1);
+    }
+    31% {
+      opacity: 0.96;
+      filter: brightness(1.1);
+      transform: translateX(1px);
+    }
+    32% {
+      opacity: 1;
+      filter: brightness(1);
+      transform: translateX(0);
+    }
+    60% {
+      opacity: 0.99;
+      filter: brightness(1);
+    }
+    61% {
+      opacity: 0.98;
+      filter: brightness(1.05);
+    }
+    62% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    98% {
+      opacity: 1;
+      filter: brightness(1);
+      transform: translateY(0);
+    }
+    99% {
+      opacity: 0.95;
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    100% {
+      opacity: 1;
+      filter: brightness(1);
+      transform: translateY(0);
+    }
   }
 
   @keyframes scanline-roll {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(500%); }
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(500%);
+    }
   }
 
   /* Scanline Overlay */
@@ -727,7 +774,8 @@ thead th,
     size: A4;
   }
 
-  html, body {
+  html,
+  body {
     background: white !important;
     color: black !important;
     font-size: 10pt !important;
@@ -774,16 +822,68 @@ thead th,
   /* Header section adjustment */
   .header-info-section {
     display: grid !important;
-    grid-template-columns: 100px 1fr !important;
-    gap: 15px !important;
+    grid-template-columns: 80px 1fr !important;
+    gap: 10px !important;
     border-bottom: 1px solid black !important;
-    padding-bottom: 10px !important;
+    padding-bottom: 5px !important;
+    margin-bottom: 5px !important;
   }
 
   /* Portrait adjustment */
-  .character-portrait, .character-portrait-fallback {
-    max-width: 100px !important;
-    max-height: 100px !important;
+  .character-portrait,
+  .character-portrait-fallback {
+    max-width: 80px !important;
+    max-height: 80px !important;
+  }
+
+  .char-info-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 5px !important;
+    align-items: end !important;
+  }
+
+  .char-field-name {
+    grid-column: span 3 !important;
+  }
+  .char-field-origin {
+    grid-column: span 3 !important;
+  }
+  .char-field-level {
+    grid-column: span 1 !important;
+  }
+  .char-field-xp {
+    grid-column: span 1 !important;
+  }
+  .char-field-xpnext {
+    grid-column: span 1 !important;
+  }
+
+  .char-info-grid label {
+    font-size: 7pt !important;
+    margin-bottom: 0 !important;
+  }
+  .char-info-grid input {
+    font-size: 10pt !important;
+    font-weight: bold !important;
+    padding: 0 !important;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  /* Notes Print Optimization */
+  .print-notes-section {
+    padding: 4px !important;
+    margin-bottom: 5px !important;
+    border: 1px solid #ccc !important;
+  }
+  .print-notes-section h3 {
+    font-size: 8pt !important;
+    margin-bottom: 2px !important;
+  }
+  .print-notes-section textarea {
+    min-height: 20px !important;
+    font-size: 9pt !important;
+    line-height: 1.2 !important;
   }
 
   /* Section Titles */
@@ -899,7 +999,8 @@ thead th,
   thead tr {
     background-color: #eee !important;
   }
-  th, td {
+  th,
+  td {
     padding: 1px 2px !important;
     border-bottom: 1px solid #ccc !important;
     border-right: 1px solid #eee !important;
@@ -912,7 +1013,10 @@ thead th,
   }
 
   /* Specific table column adjustments for print */
-  .weapons-table th, .weapons-table td { font-size: 8pt !important; }
+  .weapons-table th,
+  .weapons-table td {
+    font-size: 8pt !important;
+  }
 
   /* Inputs */
   input[type="text"],
@@ -924,11 +1028,21 @@ thead th,
   }
 
   /* Layout cleanup */
-  .mb-6 { margin-bottom: 0.5rem !important; }
-  .mt-8 { margin-top: 0.5rem !important; }
-  .p-8 { padding: 0.5rem !important; }
-  .p-4 { padding: 0.25rem !important; }
-  .gap-8 { gap: 0.5rem !important; }
+  .mb-6 {
+    margin-bottom: 0.5rem !important;
+  }
+  .mt-8 {
+    margin-top: 0.5rem !important;
+  }
+  .p-8 {
+    padding: 0.5rem !important;
+  }
+  .p-4 {
+    padding: 0.25rem !important;
+  }
+  .gap-8 {
+    gap: 0.5rem !important;
+  }
 
   /* Ensure the main grid is compact */
   .print-maingrid {
