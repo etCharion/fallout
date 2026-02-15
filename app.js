@@ -1609,7 +1609,7 @@ function FalloutSheetApp() {
                     "div",
                     {
                       className:
-                        "border-2 border-stone-800 p-2 text-center bg-white",
+                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
                     },
                     React.createElement(
                       "div",
@@ -1620,7 +1620,7 @@ function FalloutSheetApp() {
                     ),
                     React.createElement(
                       "div",
-                      { className: "flex gap-2 justify-center items-end" },
+                      { className: "flex gap-2 justify-center items-end stat-flex-print" },
                       React.createElement("input", {
                         type: "number",
                         className: "stat-input-lg w-12",
@@ -1647,7 +1647,7 @@ function FalloutSheetApp() {
                     "div",
                     {
                       className:
-                        "border-2 border-stone-800 p-2 text-center bg-white",
+                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
                     },
                     React.createElement(
                       "div",
@@ -1669,7 +1669,7 @@ function FalloutSheetApp() {
                     "div",
                     {
                       className:
-                        "border-2 border-stone-800 p-2 text-center bg-white",
+                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
                     },
                     React.createElement(
                       "div",
@@ -1690,7 +1690,7 @@ function FalloutSheetApp() {
                     "div",
                     {
                       className:
-                        "border-2 border-stone-800 p-2 text-center bg-white",
+                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
                     },
                     React.createElement(
                       "div",
@@ -1713,7 +1713,7 @@ function FalloutSheetApp() {
                   "section",
                   {
                     className:
-                      "border-2 border-stone-800 p-2 text-center bg-white",
+                      "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
                   },
                   React.createElement(
                     "div",
@@ -2132,7 +2132,7 @@ function FalloutSheetApp() {
             ),
             React.createElement(
               "div",
-              { className: "grid grid-cols-1 md:grid-cols-2 gap-8 mt-8" },
+              { className: "grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 print-maingrid" },
               React.createElement(
                 "section",
                 null,
