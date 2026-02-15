@@ -1304,7 +1304,7 @@ function FalloutSheetApp() {
               "section",
               {
                 className:
-                  "grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 border-b-2 border-stone-800 pb-6 items-start",
+                  "grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 border-b-2 border-stone-800 pb-6 items-start header-info-section",
               },
               React.createElement(
                 "div",
@@ -1455,7 +1455,7 @@ function FalloutSheetApp() {
               ),
             React.createElement(
               "section",
-              { className: "mb-6" },
+              { className: "mb-6 special-section" },
               React.createElement(
                 "div",
                 {
@@ -1523,7 +1523,7 @@ function FalloutSheetApp() {
                     "div",
                     {
                       className:
-                        "grid grid-cols-12 bg-stone-800 text-stone-100 text-xs py-1 px-2 font-bold print:bg-stone-300 print:text-black",
+                        "grid grid-cols-12 bg-stone-800 text-stone-100 text-xs py-1 px-2 font-bold print:hidden",
                     },
                     React.createElement(
                       "div",
@@ -1541,46 +1541,50 @@ function FalloutSheetApp() {
                       t.skillVal,
                     ),
                   ),
-                  skillsList.map((sk) =>
-                    React.createElement(
-                      "div",
-                      {
-                        key: sk.key,
-                        className:
-                          "grid grid-cols-12 items-center border-b-2 border-stone-800 py-1 px-2",
-                      },
-                      React.createElement(
-                        "div",
-                        { className: "col-span-1 flex justify-center" },
-                        React.createElement("input", {
-                          type: "checkbox",
-                          checked: !!localChar.skills[sk.key],
-                          onChange: (e) =>
-                            updateField(`skills.${sk.key}`, e.target.checked),
-                          disabled: !isEditing,
-                          className: "accent-amber-600 w-4 h-4",
-                        }),
-                      ),
+                  React.createElement(
+                    "div",
+                    { className: "skills-grid-container" },
+                    skillsList.map((sk) =>
                       React.createElement(
                         "div",
                         {
+                          key: sk.key,
                           className:
-                            "col-span-8 text-sm uppercase font-semibold",
+                            "grid grid-cols-12 items-center border-b-2 border-stone-800 py-1 px-2 skill-row",
                         },
-                        sk.label,
-                      ),
-                      React.createElement(
-                        "div",
-                        { className: "col-span-3" },
-                        React.createElement("input", {
-                          type: "number",
-                          value: localChar.skills[`${sk.key}Val`],
-                          onChange: (e) =>
-                            updateField(`skills.${sk.key}Val`, e.target.value),
-                          disabled: !isEditing,
-                          className:
-                            "w-full text-center bg-transparent border-b-2 border-stone-800 focus:border-amber-500 focus:outline-none",
-                        }),
+                        React.createElement(
+                          "div",
+                          { className: "col-span-1 flex justify-center" },
+                          React.createElement("input", {
+                            type: "checkbox",
+                            checked: !!localChar.skills[sk.key],
+                            onChange: (e) =>
+                              updateField(`skills.${sk.key}`, e.target.checked),
+                            disabled: !isEditing,
+                            className: "accent-amber-600 w-4 h-4",
+                          }),
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className:
+                              "col-span-8 text-sm uppercase font-semibold print:text-[11px]",
+                          },
+                          sk.label,
+                        ),
+                        React.createElement(
+                          "div",
+                          { className: "col-span-3" },
+                          React.createElement("input", {
+                            type: "number",
+                            value: localChar.skills[`${sk.key}Val`],
+                            onChange: (e) =>
+                              updateField(`skills.${sk.key}Val`, e.target.value),
+                            disabled: !isEditing,
+                            className:
+                              "w-full text-center bg-transparent border-b-2 border-stone-800 focus:border-amber-500 focus:outline-none",
+                          }),
+                        ),
                       ),
                     ),
                   ),
@@ -1588,10 +1592,10 @@ function FalloutSheetApp() {
               ),
               React.createElement(
                 "div",
-                { className: "flex flex-col gap-6 print-right" },
+                { className: "flex flex-col gap-6 print-right print:gap-2" },
                 React.createElement(
                   "section",
-                  { className: "grid grid-cols-2 gap-4" },
+                  { className: "grid grid-cols-2 gap-4 print:grid-cols-4 print:gap-1" },
                   React.createElement(
                     "div",
                     {
@@ -1728,7 +1732,7 @@ function FalloutSheetApp() {
                   ),
                   React.createElement(
                     "div",
-                    { className: "grid grid-cols-2 gap-2 text-sm" },
+                      { className: "grid grid-cols-2 gap-2 text-sm print:grid-cols-3 print:gap-1" },
                     React.createElement(BodyPartCard, {
                       name: t.loc_head,
                       data: localChar.resHead,
