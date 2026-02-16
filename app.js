@@ -1352,11 +1352,6 @@ function FalloutSheetApp() {
                   title: t.btnUndo,
                 },
                 React.createElement(Icon, { name: "Undo", size: 16 }),
-                React.createElement(
-                  "span",
-                  { className: "hidden md:inline" },
-                  t.btnUndo,
-                ),
               ),
               React.createElement(
                 "button",
@@ -1367,11 +1362,6 @@ function FalloutSheetApp() {
                   title: t.btnRedo,
                 },
                 React.createElement(Icon, { name: "Redo", size: 16 }),
-                React.createElement(
-                  "span",
-                  { className: "hidden md:inline" },
-                  t.btnRedo,
-                ),
               ),
               !isEditing
                 ? React.createElement(
