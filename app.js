@@ -18,12 +18,8 @@ import {
   collection,
   doc,
   setDoc,
-  addDoc,
   deleteDoc,
   onSnapshot,
-  query,
-  orderBy,
-  limit,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -396,6 +392,7 @@ const DEFAULT_CHARACTER = {
   perks: [],
   caps: "0",
   notes: "",
+  history: [],
 };
 
 function normalizeCharacter(raw) {
@@ -418,6 +415,7 @@ function normalizeCharacter(raw) {
     ? raw.inventory.map((it) => ({ type: "other", quantity: "1", ...it }))
     : [];
   c.perks = Array.isArray(raw?.perks) ? raw.perks.map((p) => ({ ...p })) : [];
+  c.history = Array.isArray(raw?.history) ? raw.history : [];
   return c;
 }
 
@@ -687,7 +685,6 @@ function FalloutSheetApp() {
   const [selectedCharId, setSelectedCharId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [localChar, setLocalChar] = useState(null);
-  const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState(
@@ -798,7 +795,7 @@ function FalloutSheetApp() {
         setLoading(false);
       },
       (error) => {
-        console.error(error);
+        console.error("Characters fetch error:", error);
         setLoading(false);
       },
     );
@@ -855,36 +852,6 @@ function FalloutSheetApp() {
     };
   }, [user]);
 
-  useEffect(() => {
-    if (!user || !selectedCharId) {
-      setHistory([]);
-      setHistoryIndex(0);
-      return;
-    }
-    const q = query(
-      collection(
-        db,
-        "artifacts",
-        appId,
-        "public",
-        "data",
-        "fallout_characters",
-        selectedCharId,
-        "history",
-      ),
-      orderBy("timestamp", "desc"),
-      limit(50),
-    );
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const h = snapshot.docs.map((d) => d.data().data);
-        setHistory(h);
-      },
-      (err) => console.error("History fetch error:", err),
-    );
-    return () => unsubscribe();
-  }, [user, selectedCharId]);
 
   useEffect(() => {
     if (selectedCharId) {
@@ -1049,13 +1016,18 @@ function FalloutSheetApp() {
   };
   const handleCreate = async () => {
     if (!user) return;
+    const id = crypto.randomUUID();
     const nc = {
       ...DEFAULT_CHARACTER,
       name: lang === "en" ? "New Character" : "Nová Postava",
-      id: crypto.randomUUID(),
+      id: id,
       createdAt: serverTimestamp(),
     };
     try {
+      // Create initial snapshot (exclude large/circular/invalid fields)
+      const { imageUrl, history, createdAt, ...snapshot } = nc;
+      nc.history = [snapshot];
+
       await setDoc(
         doc(
           db,
@@ -1064,45 +1036,52 @@ function FalloutSheetApp() {
           "public",
           "data",
           "fallout_characters",
-          nc.id,
+          id,
         ),
-        nc,
+        nc
       );
-      // Record history
-      const hCol = collection(
-        db,
-        "artifacts",
-        appId,
-        "public",
-        "data",
-        "fallout_characters",
-        nc.id,
-        "history",
-      );
-      await addDoc(hCol, { data: nc, timestamp: serverTimestamp() });
 
-      setSelectedCharId(nc.id);
+      setSelectedCharId(id);
       setIsEditing(true);
-      setLocalChar(nc);
+      setLocalChar(normalizeCharacter(nc));
       setHistoryIndex(0);
     } catch (e) {
-      console.error(e);
+      console.error("Create error:", e);
+      alert("Chyba při vytváření: " + e.message);
     }
   };
   const handleUndo = () => {
-    if (history.length > 0 && historyIndex < history.length - 1) {
+    const h = localChar?.history || [];
+    if (h.length > 0 && historyIndex < h.length - 1) {
       const nextIndex = historyIndex + 1;
+      const entry = h[nextIndex];
+      const img = localChar.imageUrl;
+      const hist = localChar.history;
+
+      const restored = normalizeCharacter({ ...entry, id: localChar.id });
+      restored.imageUrl = img;
+      restored.history = hist;
+
       setHistoryIndex(nextIndex);
-      setLocalChar(normalizeCharacter(history[nextIndex]));
+      setLocalChar(restored);
       setIsEditing(true);
     }
   };
 
   const handleRedo = () => {
-    if (history.length > 0 && historyIndex > 0) {
+    const h = localChar?.history || [];
+    if (h.length > 0 && historyIndex > 0) {
       const nextIndex = historyIndex - 1;
+      const entry = h[nextIndex];
+      const img = localChar.imageUrl;
+      const hist = localChar.history;
+
+      const restored = normalizeCharacter({ ...entry, id: localChar.id });
+      restored.imageUrl = img;
+      restored.history = hist;
+
       setHistoryIndex(nextIndex);
-      setLocalChar(normalizeCharacter(history[nextIndex]));
+      setLocalChar(restored);
       setIsEditing(true);
     }
   };
@@ -1110,6 +1089,11 @@ function FalloutSheetApp() {
   const handleSave = async () => {
     if (!user || !localChar) return;
     try {
+      // Prepare snapshot - strip unnecessary/large fields
+      const { imageUrl, history, createdAt, ...snapshot } = localChar;
+
+      const newHistory = [snapshot, ...(localChar.history || [])].slice(0, 50);
+
       await setDoc(
         doc(
           db,
@@ -1120,25 +1104,15 @@ function FalloutSheetApp() {
           "fallout_characters",
           localChar.id,
         ),
-        localChar,
+        { ...localChar, history: newHistory },
+        { merge: true }
       );
-      // Record history
-      const hCol = collection(
-        db,
-        "artifacts",
-        appId,
-        "public",
-        "data",
-        "fallout_characters",
-        localChar.id,
-        "history",
-      );
-      await addDoc(hCol, { data: localChar, timestamp: serverTimestamp() });
 
       setIsEditing(false);
       setHistoryIndex(0);
     } catch (e) {
-      console.error(e);
+      console.error("Save error:", e);
+      alert("Chyba při ukládání: " + (e.message || "Nedostatečná oprávnění"));
     }
   };
   const handleDelete = async () => {
@@ -1347,8 +1321,8 @@ function FalloutSheetApp() {
                 "button",
                 {
                   onClick: handleUndo,
-                  disabled: historyIndex >= history.length - 1,
-                  className: `btn-admin bg-stone-600 text-white ${historyIndex >= history.length - 1 ? "opacity-50 cursor-not-allowed" : ""}`,
+                  disabled: historyIndex >= (localChar?.history?.length || 0) - 1,
+                  className: `btn-admin bg-stone-600 text-white ${historyIndex >= (localChar?.history?.length || 0) - 1 ? "opacity-50 cursor-not-allowed" : ""}`,
                   title: t.btnUndo,
                 },
                 React.createElement(Icon, { name: "Undo", size: 16 }),
