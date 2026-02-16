@@ -18,8 +18,12 @@ import {
   collection,
   doc,
   setDoc,
+  addDoc,
   deleteDoc,
   onSnapshot,
+  query,
+  orderBy,
+  limit,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -87,6 +91,8 @@ const ICONS = {
     "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
   ],
   Search: ["M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"],
+  Undo: ["M3 7v6h6", "M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"],
+  Redo: ["M21 7v6h-6", "M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"],
 };
 
 function Icon({ name, size = 16, className = "" }) {
@@ -201,6 +207,8 @@ const TRANSLATIONS = {
     btnAdmin: "Administrace",
     adminTitle: "Administrace – databáze",
     btnClose: "Zavřít",
+    btnUndo: "Zpět",
+    btnRedo: "Znovu",
   },
   en: {
     headerTitle: "THE ROLEPLAYING GAME",
@@ -294,6 +302,8 @@ const TRANSLATIONS = {
     btnAdmin: "Admin",
     adminTitle: "Administration – Database",
     btnClose: "Close",
+    btnUndo: "Undo",
+    btnRedo: "Redo",
   },
 };
 
@@ -677,6 +687,8 @@ function FalloutSheetApp() {
   const [selectedCharId, setSelectedCharId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [localChar, setLocalChar] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState(
     () => localStorage.getItem("fallout_lang") || "cs",
@@ -844,11 +856,46 @@ function FalloutSheetApp() {
   }, [user]);
 
   useEffect(() => {
+    if (!user || !selectedCharId) {
+      setHistory([]);
+      setHistoryIndex(0);
+      return;
+    }
+    const q = query(
+      collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "fallout_characters",
+        selectedCharId,
+        "history",
+      ),
+      orderBy("timestamp", "desc"),
+      limit(50),
+    );
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const h = snapshot.docs.map((d) => d.data().data);
+        setHistory(h);
+      },
+      (err) => console.error("History fetch error:", err),
+    );
+    return () => unsubscribe();
+  }, [user, selectedCharId]);
+
+  useEffect(() => {
     if (selectedCharId) {
       const found = characters.find((c) => c.id === selectedCharId);
-      if (found && !isEditing) setLocalChar(normalizeCharacter(found));
+      if (found && !isEditing) {
+        setLocalChar(normalizeCharacter(found));
+        setHistoryIndex(0);
+      }
     } else {
       setLocalChar(null);
+      setHistoryIndex(0);
     }
   }, [selectedCharId, characters, isEditing]);
 
@@ -1021,13 +1068,45 @@ function FalloutSheetApp() {
         ),
         nc,
       );
+      // Record history
+      const hCol = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "fallout_characters",
+        nc.id,
+        "history",
+      );
+      await addDoc(hCol, { data: nc, timestamp: serverTimestamp() });
+
       setSelectedCharId(nc.id);
       setIsEditing(true);
       setLocalChar(nc);
+      setHistoryIndex(0);
     } catch (e) {
       console.error(e);
     }
   };
+  const handleUndo = () => {
+    if (history.length > 0 && historyIndex < history.length - 1) {
+      const nextIndex = historyIndex + 1;
+      setHistoryIndex(nextIndex);
+      setLocalChar(normalizeCharacter(history[nextIndex]));
+      setIsEditing(true);
+    }
+  };
+
+  const handleRedo = () => {
+    if (history.length > 0 && historyIndex > 0) {
+      const nextIndex = historyIndex - 1;
+      setHistoryIndex(nextIndex);
+      setLocalChar(normalizeCharacter(history[nextIndex]));
+      setIsEditing(true);
+    }
+  };
+
   const handleSave = async () => {
     if (!user || !localChar) return;
     try {
@@ -1043,7 +1122,21 @@ function FalloutSheetApp() {
         ),
         localChar,
       );
+      // Record history
+      const hCol = collection(
+        db,
+        "artifacts",
+        appId,
+        "public",
+        "data",
+        "fallout_characters",
+        localChar.id,
+        "history",
+      );
+      await addDoc(hCol, { data: localChar, timestamp: serverTimestamp() });
+
       setIsEditing(false);
+      setHistoryIndex(0);
     } catch (e) {
       console.error(e);
     }
@@ -1250,6 +1343,36 @@ function FalloutSheetApp() {
             React.createElement(
               React.Fragment,
               null,
+              React.createElement(
+                "button",
+                {
+                  onClick: handleUndo,
+                  disabled: historyIndex >= history.length - 1,
+                  className: `btn-admin bg-stone-600 text-white ${historyIndex >= history.length - 1 ? "opacity-50 cursor-not-allowed" : ""}`,
+                  title: t.btnUndo,
+                },
+                React.createElement(Icon, { name: "Undo", size: 16 }),
+                React.createElement(
+                  "span",
+                  { className: "hidden md:inline" },
+                  t.btnUndo,
+                ),
+              ),
+              React.createElement(
+                "button",
+                {
+                  onClick: handleRedo,
+                  disabled: historyIndex <= 0,
+                  className: `btn-admin bg-stone-600 text-white ${historyIndex <= 0 ? "opacity-50 cursor-not-allowed" : ""}`,
+                  title: t.btnRedo,
+                },
+                React.createElement(Icon, { name: "Redo", size: 16 }),
+                React.createElement(
+                  "span",
+                  { className: "hidden md:inline" },
+                  t.btnRedo,
+                ),
+              ),
               !isEditing
                 ? React.createElement(
                     "button",
