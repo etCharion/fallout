@@ -18,12 +18,8 @@ import {
   collection,
   doc,
   setDoc,
-  addDoc,
   deleteDoc,
   onSnapshot,
-  query,
-  orderBy,
-  limit,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -799,7 +795,7 @@ function FalloutSheetApp() {
         setLoading(false);
       },
       (error) => {
-        console.error(error);
+        console.error("Characters fetch error:", error);
         setLoading(false);
       },
     );
@@ -1020,17 +1016,16 @@ function FalloutSheetApp() {
   };
   const handleCreate = async () => {
     if (!user) return;
+    const id = crypto.randomUUID();
     const nc = {
       ...DEFAULT_CHARACTER,
       name: lang === "en" ? "New Character" : "Nová Postava",
-      id: crypto.randomUUID(),
+      id: id,
       createdAt: serverTimestamp(),
     };
     try {
-      // Record history entry
-      const snapshot = { ...nc };
-      delete snapshot.imageUrl;
-      delete snapshot.history;
+      // Create initial snapshot (exclude large/circular/invalid fields)
+      const { imageUrl, history, createdAt, ...snapshot } = nc;
       nc.history = [snapshot];
 
       await setDoc(
@@ -1041,17 +1036,17 @@ function FalloutSheetApp() {
           "public",
           "data",
           "fallout_characters",
-          nc.id,
+          id,
         ),
-        nc,
+        nc
       );
 
-      setSelectedCharId(nc.id);
+      setSelectedCharId(id);
       setIsEditing(true);
-      setLocalChar(nc);
+      setLocalChar(normalizeCharacter(nc));
       setHistoryIndex(0);
     } catch (e) {
-      console.error(e);
+      console.error("Create error:", e);
       alert("Chyba při vytváření: " + e.message);
     }
   };
@@ -1063,7 +1058,7 @@ function FalloutSheetApp() {
       const img = localChar.imageUrl;
       const hist = localChar.history;
 
-      const restored = normalizeCharacter(entry);
+      const restored = normalizeCharacter({ ...entry, id: localChar.id });
       restored.imageUrl = img;
       restored.history = hist;
 
@@ -1081,7 +1076,7 @@ function FalloutSheetApp() {
       const img = localChar.imageUrl;
       const hist = localChar.history;
 
-      const restored = normalizeCharacter(entry);
+      const restored = normalizeCharacter({ ...entry, id: localChar.id });
       restored.imageUrl = img;
       restored.history = hist;
 
@@ -1094,13 +1089,10 @@ function FalloutSheetApp() {
   const handleSave = async () => {
     if (!user || !localChar) return;
     try {
-      // Record history snapshot
-      const snapshot = { ...localChar };
-      delete snapshot.imageUrl;
-      delete snapshot.history;
+      // Prepare snapshot - strip unnecessary/large fields
+      const { imageUrl, history, createdAt, ...snapshot } = localChar;
 
       const newHistory = [snapshot, ...(localChar.history || [])].slice(0, 50);
-      const updatedChar = { ...localChar, history: newHistory };
 
       await setDoc(
         doc(
@@ -1112,13 +1104,14 @@ function FalloutSheetApp() {
           "fallout_characters",
           localChar.id,
         ),
-        updatedChar,
+        { ...localChar, history: newHistory },
+        { merge: true }
       );
 
       setIsEditing(false);
       setHistoryIndex(0);
     } catch (e) {
-      console.error(e);
+      console.error("Save error:", e);
       alert("Chyba při ukládání: " + (e.message || "Nedostatečná oprávnění"));
     }
   };
