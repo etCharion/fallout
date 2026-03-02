@@ -1,0 +1,23 @@
+{
+  "name": "Fallout – RPG Sheet",
+  "short_name": "Fallout RPG",
+  "description": "Digitální osobní deník pro stolní hru Fallout: The Roleplaying Game.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fdfaf5",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
