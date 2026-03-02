@@ -551,14 +551,21 @@ function TemplatePicker({ isOpen, onClose, onSelect, templates, type, lang }) {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   if (!isOpen) return null;
-  const filtered = templates.filter((t) => {
-    const matchesSearch = (t.name || "")
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesType =
-      type !== "inventory" || filterType === "all" || t.type === filterType;
-    return matchesSearch && matchesType;
-  });
+  const filtered = templates
+    .filter((t) => {
+      const matchesSearch = (t.name || "")
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const matchesType =
+        type !== "inventory" || filterType === "all" || t.type === filterType;
+      return matchesSearch && matchesType;
+    })
+    .sort((a, b) =>
+      (a.name || "").localeCompare(b.name || "", lang, {
+        sensitivity: "accent",
+        numeric: true,
+      }),
+    );
   return React.createElement(
     "div",
     {
@@ -725,6 +732,29 @@ function FalloutSheetApp() {
     isOpen: false,
     type: "weapons",
   });
+
+  const sortedCharacters = useMemo(() => {
+    return [...characters].sort((a, b) =>
+      a.name.localeCompare(b.name, lang, {
+        sensitivity: "accent",
+        numeric: true,
+      }),
+    );
+  }, [characters, lang]);
+
+  const sortedTemplates = useMemo(() => {
+    const sortFn = (a, b) =>
+      (a.name || "").localeCompare(b.name || "", lang, {
+        sensitivity: "accent",
+        numeric: true,
+      });
+    return {
+      weapons: [...templates.weapons].sort(sortFn),
+      inventory: [...templates.inventory].sort(sortFn),
+      perks: [...templates.perks].sort(sortFn),
+    };
+  }, [templates, lang]);
+
   const t = TRANSLATIONS[lang];
   const fileInputRef = useRef(null);
   const dragRef = useRef({ draggedId: null });
@@ -1290,7 +1320,7 @@ function FalloutSheetApp() {
               },
             },
             React.createElement("option", { value: "" }, t.selectChar),
-            characters.map((c) =>
+            sortedCharacters.map((c) =>
               React.createElement("option", { key: c.id, value: c.id }, c.name),
             ),
           ),
@@ -2694,7 +2724,7 @@ function FalloutSheetApp() {
                       { className: "p-3 text-sm text-stone-500" },
                       "Zatím prázdné.",
                     )
-                  : (templates[tplTab] || []).map((row) =>
+                  : (sortedTemplates[tplTab] || []).map((row) =>
                       React.createElement(
                         "div",
                         {
