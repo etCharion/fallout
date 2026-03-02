@@ -721,11 +721,52 @@ function FalloutSheetApp() {
 
   useEffect(() => {
     localStorage.setItem("fallout_theme", theme);
+    const color = theme === "pipboy" ? "#20ff20" : "#d97706";
+
+    // Update Theme Class
     if (theme === "pipboy") {
       document.documentElement.classList.add("theme-pipboy");
     } else {
       document.documentElement.classList.remove("theme-pipboy");
     }
+
+    // Update Theme Color Meta Tag
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute(
+        "content",
+        theme === "pipboy" ? "#000000" : "#d97706",
+      );
+    }
+
+    // Dynamic Favicon Generation
+    const svgIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="${color}" stroke-width="4"/>
+        <circle cx="50" cy="50" r="10" fill="${color}"/>
+        <path d="M50 50 L50 4 A46 46 0 0 1 89.8 27 L50 50 Z" fill="${color}"/>
+        <path d="M50 50 L10.2 73 A46 46 0 0 1 10.2 27 L50 50 Z" fill="${color}"/>
+        <path d="M50 50 L89.8 73 A46 46 0 0 1 50 96 L50 50 Z" fill="${color}"/>
+      </svg>
+    `.trim();
+
+    const encodedSvg = window.btoa(svgIcon);
+    const dataUri = `data:image/svg+xml;base64,${encodedSvg}`;
+
+    const link =
+      document.querySelector("link[rel*='icon']") ||
+      document.createElement("link");
+    link.type = "image/svg+xml";
+    link.rel = "icon";
+    link.href = dataUri;
+    document.getElementsByTagName("head")[0].appendChild(link);
+
+    const appleLink =
+      document.querySelector("link[rel*='apple-touch-icon']") ||
+      document.createElement("link");
+    appleLink.rel = "apple-touch-icon";
+    appleLink.href = dataUri;
+    document.getElementsByTagName("head")[0].appendChild(appleLink);
   }, [theme]);
 
   const [pickerConfig, setPickerConfig] = useState({
@@ -881,7 +922,6 @@ function FalloutSheetApp() {
       unsubP();
     };
   }, [user]);
-
 
   useEffect(() => {
     if (selectedCharId) {
@@ -1059,16 +1099,8 @@ function FalloutSheetApp() {
       nc.history = [snapshot];
 
       await setDoc(
-        doc(
-          db,
-          "artifacts",
-          appId,
-          "public",
-          "data",
-          "fallout_characters",
-          id,
-        ),
-        nc
+        doc(db, "artifacts", appId, "public", "data", "fallout_characters", id),
+        nc,
       );
 
       setSelectedCharId(id);
@@ -1135,7 +1167,7 @@ function FalloutSheetApp() {
           localChar.id,
         ),
         { ...localChar, history: newHistory },
-        { merge: true }
+        { merge: true },
       );
 
       setIsEditing(false);
@@ -1351,7 +1383,8 @@ function FalloutSheetApp() {
                 "button",
                 {
                   onClick: handleUndo,
-                  disabled: historyIndex >= (localChar?.history?.length || 0) - 1,
+                  disabled:
+                    historyIndex >= (localChar?.history?.length || 0) - 1,
                   className: `btn-admin bg-stone-600 text-white ${historyIndex >= (localChar?.history?.length || 0) - 1 ? "opacity-50 cursor-not-allowed" : ""}`,
                   title: t.btnUndo,
                 },
