@@ -5,6 +5,11 @@ import React, {
   useState,
 } from "https://esm.sh/react@18.2.0";
 import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
+import {
+  buildCharacterSheetHTML,
+  buildBlankSheetHTML,
+  printSheet,
+} from "./print.js";
 
 // Firebase (modular)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -175,6 +180,11 @@ const TRANSLATIONS = {
     btnUndo: "Zpět",
     btnRedo: "Znovu",
     btnPrint: "TISK",
+    printTitle: "Co vytisknout?",
+    printChar: "KARTA POSTAVY",
+    printCharDesc: "Vytiskne aktuální postavu · A4 · 2 strany",
+    printBlank: "PRÁZDNÝ FORMULÁŘ",
+    printBlankDesc: "K ručnímu vyplnění · A4 · 2 strany",
     btnStyle: "STYL",
     diceTitle: "Virtuální kostky",
     diceCombat: "Bojové (CD)",
@@ -323,6 +333,11 @@ const TRANSLATIONS = {
     btnUndo: "Undo",
     btnRedo: "Redo",
     btnPrint: "PRINT",
+    printTitle: "What to print?",
+    printChar: "CHARACTER SHEET",
+    printCharDesc: "Prints the current character · A4 · 2 pages",
+    printBlank: "BLANK FORM",
+    printBlankDesc: "Print and fill in by hand · A4 · 2 pages",
     btnStyle: "STYLE",
     diceTitle: "Virtual dice",
     diceCombat: "Combat (CD)",
@@ -938,7 +953,7 @@ function FalloutSheetApp() {
     if (mode !== "edit") localStorage.setItem("fallout_mode", mode);
   }, [mode]);
 
-  const [modal, setModal] = useState(null); // 'chars' | 'notes' | 'admin' | 'log' | null
+  const [modal, setModal] = useState(null); // 'chars' | 'notes' | 'admin' | 'log' | 'print' | null
   const [templates, setTemplates] = useState({
     weapons: [],
     inventory: [],
@@ -1908,11 +1923,7 @@ function FalloutSheetApp() {
             {
               className: "pb-chip",
               title: t.btnPrint,
-              onClick: () => {
-                try {
-                  window.print();
-                } catch (e) {}
-              },
+              onClick: () => setModal("print"),
             },
             "⎙ " + t.btnPrint,
           ),
@@ -3067,6 +3078,67 @@ function FalloutSheetApp() {
       onClear: () => setRollLog([]),
       t: t,
     }),
+
+    // ---------- PRINT MODAL ----------
+    modal === "print" &&
+      h(
+        ModalShell,
+        { onClose: () => setModal(null) },
+        h(
+          "div",
+          { className: "pb-modal-head" },
+          h("span", { className: "pb-modal-title" }, "⎙ " + t.printTitle),
+          h(
+            "button",
+            {
+              className: "pb-chip dim pb-push-right",
+              onClick: () => setModal(null),
+            },
+            "✕",
+          ),
+        ),
+        h(
+          "div",
+          { className: "pb-modal-body" },
+          localChar &&
+            h(
+              "button",
+              {
+                className: "pb-pick-row",
+                onClick: () => {
+                  setModal(null);
+                  printSheet(
+                    buildCharacterSheetHTML(localChar, lang, (key) =>
+                      getTypeLabel(key, lang),
+                    ),
+                  );
+                },
+              },
+              h(
+                "div",
+                { className: "pb-pick-main" },
+                h("span", { className: "pb-pick-name" }, "▶ " + t.printChar),
+                h("span", { className: "pb-pick-sub" }, t.printCharDesc),
+              ),
+            ),
+          h(
+            "button",
+            {
+              className: "pb-pick-row",
+              onClick: () => {
+                setModal(null);
+                printSheet(buildBlankSheetHTML(lang));
+              },
+            },
+            h(
+              "div",
+              { className: "pb-pick-main" },
+              h("span", { className: "pb-pick-name" }, "▁ " + t.printBlank),
+              h("span", { className: "pb-pick-sub" }, t.printBlankDesc),
+            ),
+          ),
+        ),
+      ),
 
     // ---------- ADMIN MODAL ----------
     modal === "admin" &&
