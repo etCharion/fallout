@@ -40,79 +40,22 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- Minimal Lucide-like SVG icons ---
-const ICONS = {
-  Trash2: [
-    "M3 6h18",
-    "M8 6V4h8v2",
-    "M19 6l-1 14H6L5 6",
-    "M10 11v6",
-    "M14 11v6",
-  ],
-  Plus: ["M12 5v14", "M5 12h14"],
-  Save: [
-    "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z",
-    "M17 21v-8H7v8",
-    "M7 3v5h8",
-  ],
-  Edit3: ["M12 20h9", "M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"],
-  UserPlus: [
-    "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2",
-    "M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8",
-    "M19 8v6",
-    "M22 11h-6",
-  ],
-  X: ["M18 6 6 18", "M6 6l12 12"],
-  Zap: ["M13 2 3 14h9l-1 8 10-12h-9l1-8Z"],
-  Globe: [
-    "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z",
-    "M3 12h18",
-    "M12 3a15.3 15.3 0 0 1 4 9 15.3 15.3 0 0 1-4 9 15.3 15.3 0 0 1-4-9 15.3 15.3 0 0 1 4-9Z",
-  ],
-  Upload: [
-    "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
-    "M17 8l-5-5-5 5",
-    "M12 3v12",
-  ],
-  Eye: [
-    "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z",
-    "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
-  ],
-  EyeOff: [
-    "M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24",
-    "M1 1l22 22",
-  ],
-  Settings: [
-    "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
-    "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
-  ],
-  Search: ["M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"],
-  Undo: ["M3 7v6h6", "M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"],
-  Redo: ["M21 7v6h-6", "M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"],
-};
+const h = React.createElement;
 
-function Icon({ name, size = 16, className = "" }) {
-  const paths = ICONS[name] || [];
-  return React.createElement(
-    "svg",
-    {
-      width: size,
-      height: size,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-      className: className,
-    },
-    paths.map((d, i) => React.createElement("path", { key: i, d: d })),
-  );
-}
+// --- THEMES (Pip-Boy CRT palettes) ---
+const THEMES = ["green", "amber", "science", "radiation"];
+const THEME_COLORS = {
+  green: { fg: "#21ff85", bg: "#021008" },
+  amber: { fg: "#ffb84d", bg: "#0e0a05" },
+  science: { fg: "#7fd6ff", bg: "#050c14" },
+  radiation: { fg: "#d8ff3a", bg: "#0a0c04" },
+};
 
 const TRANSLATIONS = {
   cs: {
     headerTitle: "RPG HRA",
+    subtitle: "RPG Hra // Karta postavy",
+    survivor: "Záznam přeživšího",
     name: "JMÉNO POSTAVY",
     origin: "PŮVOD",
     level: "ÚROVEŇ",
@@ -127,8 +70,7 @@ const TRANSLATIONS = {
     luck: "ŠTĚSTÍ",
     luckPoints: "BODY ŠTĚSTÍ",
     skillsTitle: "DOVEDNOSTI",
-    skillName: "NÁZEV",
-    skillVal: "HODNOTA",
+    trained: "vycvičená",
     s_athletics: "Atletika [SIL]",
     s_unarmed: "Boj beze zbraně [SIL]",
     s_energyWeapons: "Energetické zbraně [VNI]",
@@ -151,10 +93,10 @@ const TRANSLATIONS = {
     defense: "OBRANA (DEF)",
     meleeDmg: "POŠKOZENÍ NA BLÍZKO",
     hitLocs: "ZÁSAHOVÉ ZÓNY",
-    dr_phys: "Fyz.",
-    dr_en: "En.",
-    dr_rad: "Rad.",
-    dr_hp: "BZ",
+    dr_phys: "Fyzická",
+    dr_en: "Energet.",
+    dr_rad: "Radiač.",
+    dr_hp: "Body zdraví",
     poisonRes: "JEDOVÉ OZ",
     loc_head: "HLAVA (1-2)",
     loc_torso: "TRUP (3-8)",
@@ -162,6 +104,10 @@ const TRANSLATIONS = {
     loc_rarm: "PRAVÁ RUKA (12-14)",
     loc_lleg: "LEVÁ NOHA (15-17)",
     loc_rleg: "PRAVÁ NOHA (18-20)",
+    locOk: "V pořádku",
+    locInjured: "ZRANĚNO",
+    hpStable: "Stabilní",
+    hpCritical: "Kritický",
     weaponsTitle: "ZBRANĚ",
     w_name: "NÁZEV",
     w_skill: "DOVED.",
@@ -174,11 +120,13 @@ const TRANSLATIONS = {
     w_qual: "ATRIBUTY",
     w_ammo: "MUNICE",
     w_weight: "VÁHA",
+    w_assigned: "PŘIŘ.",
     invTitle: "VYBAVENÍ",
     caps: "ZÁTKY",
     i_item: "PŘEDMĚT",
     i_weight: "VÁHA",
     i_qty: "KS",
+    i_type: "TYP",
     perksTitle: "PERKY A RYSY",
     p_name: "NÁZEV",
     p_rank: "ST.",
@@ -187,28 +135,76 @@ const TRANSLATIONS = {
     loading: "NAČÍTÁNÍ...",
     noData: "ŽÁDNÁ DATA",
     selectChar: "-- VYBER POSTAVU --",
-    btnNew: "Nová",
-    btnEdit: "Upravit",
-    btnSave: "Uložit",
-    btnDelete: "Smazat",
-    btnAdd: "PŘIDAT",
+    chooseChar: "Vyber postavu",
+    open: "Otevřít",
+    current: "Aktivní",
+    btnNew: "NOVÁ",
+    btnSave: "ULOŽIT",
+    btnDelete: "SMAZAT",
+    btnAdd: "Přidat",
+    fromTpl: "Ze šablony",
+    use: "Použít",
     confirmDelete: "Opravdu smazat tuto postavu?",
-    editMode: "EDIT MODE",
+    mEdit: "UPRAVIT",
+    mPlay: "HRÁT",
+    mLock: "ZAMČENO",
+    badgeEdit: "● ÚPRAVY",
+    badgePlay: "▶ HRA",
+    badgeLock: "○ NÁHLED",
     uploadImg: "Nahrát obrázek",
-    i_type: "TYP",
-    w_assigned: "PŘIŘ.",
     dragTip: "Chyť a přetáhni",
     btnNotes: "POZNÁMKY",
     notesTitle: "POZNÁMKY A HISTORIE",
-    btnAdmin: "Administrace",
-    adminTitle: "Administrace – databáze",
+    notesPh: "Zápisky, historie, questy…",
+    btnAdmin: "ADMIN",
+    adminTitle: "Administrace šablon",
+    adminHint:
+      "Šablony se ukládají do databáze. Uložené položky pak přidáš do postavy tlačítkem „Ze šablony“.",
+    adminEmpty: "Zatím žádné šablony — přidej první.",
+    adminPickHint: "Vyber položku vlevo, nebo vytvoř novou.",
+    adminEditing: "Editace",
+    newTpl: "Nová šablona",
+    pickerEmpty: "Žádné šablony. Přidej je v Administraci.",
+    pickWeapons: "Vyber zbraň",
+    pickInventory: "Vyber vybavení",
+    pickPerks: "Vyber perk",
+    searchPh: "Hledat…",
+    allTypes: "Všechny typy",
+    noName: "(beze jména)",
     btnClose: "Zavřít",
     btnUndo: "Zpět",
     btnRedo: "Znovu",
+    btnPrint: "TISK",
+    btnStyle: "STYL",
+    diceTitle: "Virtuální kostky",
+    diceCombat: "Bojové (CD)",
+    diceRoll: "HODIT",
+    diceLog: "LOG",
+    diceClear: "Vymazat",
+    diceHint: "Nastav počet a hoď kostkami",
+    diceSum: "Součet",
+    diceDmg: "Poškození",
+    diceEff: "ef.",
+    diceCrit: "krit.",
+    diceCompl: "kompl.",
+    diceLogTitle: "Historie hodů",
+    diceLogEmpty: "Zatím žádné hody.",
+    online: "ONLINE",
+    autosave: "AUTOSAVE",
+    active: "AKTIVNÍ",
+    manual: "RUČNÍ",
+    storage: "ÚLOŽIŠTĚ",
+    chars: "POSTAVY",
+    tplName_weapons: "Název zbraně",
+    tplName_inventory: "Název předmětu",
+    tplName_perks: "Název perku",
+    emptyList: "Zatím prázdné.",
   },
   en: {
     headerTitle: "THE ROLEPLAYING GAME",
-    name: "NAME",
+    subtitle: "RPG Game // Character sheet",
+    survivor: "Survivor record",
+    name: "CHARACTER NAME",
     origin: "ORIGIN",
     level: "LEVEL",
     xp: "XP EARNED",
@@ -222,8 +218,7 @@ const TRANSLATIONS = {
     luck: "LUCK",
     luckPoints: "LUCK POINTS",
     skillsTitle: "SKILLS",
-    skillName: "NAME",
-    skillVal: "RANK",
+    trained: "trained",
     s_athletics: "Athletics [STR]",
     s_unarmed: "Unarmed [STR]",
     s_energyWeapons: "Energy Weapons [PER]",
@@ -246,10 +241,10 @@ const TRANSLATIONS = {
     defense: "DEFENSE",
     meleeDmg: "MELEE DAMAGE",
     hitLocs: "HIT LOCATIONS",
-    dr_phys: "Phys.",
-    dr_en: "En.",
-    dr_rad: "Rad.",
-    dr_hp: "HP",
+    dr_phys: "Physical",
+    dr_en: "Energy",
+    dr_rad: "Radiation",
+    dr_hp: "Health pts",
     poisonRes: "POISON DR",
     loc_head: "HEAD (1-2)",
     loc_torso: "TORSO (3-8)",
@@ -257,23 +252,29 @@ const TRANSLATIONS = {
     loc_rarm: "RIGHT ARM (12-14)",
     loc_lleg: "LEFT LEG (15-17)",
     loc_rleg: "RIGHT LEG (18-20)",
+    locOk: "OK",
+    locInjured: "INJURED",
+    hpStable: "Stable",
+    hpCritical: "Critical",
     weaponsTitle: "WEAPONS",
     w_name: "NAME",
     w_skill: "SKILL",
     w_tn: "TN",
-    w_dmg: "DAMAGE",
+    w_dmg: "DMG",
     w_effects: "EFFECTS",
     w_type: "TYPE",
     w_rate: "RATE",
     w_range: "RANGE",
     w_qual: "QUALITIES",
     w_ammo: "AMMO",
-    w_weight: "WEIGHT",
+    w_weight: "WT",
+    w_assigned: "EQ.",
     invTitle: "EQUIPMENT",
     caps: "CAPS",
     i_item: "ITEM",
     i_weight: "LBS.",
     i_qty: "QTY",
+    i_type: "TYPE",
     perksTitle: "PERKS & TRAITS",
     p_name: "NAME",
     p_rank: "RANK",
@@ -282,24 +283,70 @@ const TRANSLATIONS = {
     loading: "LOADING...",
     noData: "NO DATA",
     selectChar: "-- SELECT CHARACTER --",
-    btnNew: "New",
-    btnEdit: "Edit",
-    btnSave: "Save",
-    btnDelete: "Delete",
-    btnAdd: "ADD",
+    chooseChar: "Choose character",
+    open: "Open",
+    current: "Active",
+    btnNew: "NEW",
+    btnSave: "SAVE",
+    btnDelete: "DELETE",
+    btnAdd: "Add",
+    fromTpl: "From template",
+    use: "Use",
     confirmDelete: "Are you sure you want to delete this character?",
-    editMode: "EDIT MODE",
+    mEdit: "EDIT",
+    mPlay: "PLAY",
+    mLock: "LOCK",
+    badgeEdit: "● EDITING",
+    badgePlay: "▶ PLAY",
+    badgeLock: "○ VIEW",
     uploadImg: "Upload Image",
-    i_type: "TYPE",
-    w_assigned: "ASSN.",
     dragTip: "Drag to reorder",
     btnNotes: "NOTES",
     notesTitle: "NOTES & HISTORY",
-    btnAdmin: "Admin",
-    adminTitle: "Administration – Database",
+    notesPh: "Notes, history, quests…",
+    btnAdmin: "ADMIN",
+    adminTitle: "Template admin",
+    adminHint:
+      "Templates are stored in the database. Add saved items to a character via “From template”.",
+    adminEmpty: "No templates yet — add the first.",
+    adminPickHint: "Pick an item on the left, or create a new one.",
+    adminEditing: "Editing",
+    newTpl: "New template",
+    pickerEmpty: "No templates. Add them in Admin.",
+    pickWeapons: "Pick a weapon",
+    pickInventory: "Pick equipment",
+    pickPerks: "Pick a perk",
+    searchPh: "Search…",
+    allTypes: "All types",
+    noName: "(unnamed)",
     btnClose: "Close",
     btnUndo: "Undo",
     btnRedo: "Redo",
+    btnPrint: "PRINT",
+    btnStyle: "STYLE",
+    diceTitle: "Virtual dice",
+    diceCombat: "Combat (CD)",
+    diceRoll: "ROLL",
+    diceLog: "LOG",
+    diceClear: "Clear",
+    diceHint: "Set the count and roll the dice",
+    diceSum: "Total",
+    diceDmg: "Damage",
+    diceEff: "eff.",
+    diceCrit: "crit",
+    diceCompl: "compl",
+    diceLogTitle: "Roll history",
+    diceLogEmpty: "No rolls yet.",
+    online: "ONLINE",
+    autosave: "AUTOSAVE",
+    active: "ACTIVE",
+    manual: "MANUAL",
+    storage: "STORAGE",
+    chars: "CHARS",
+    tplName_weapons: "Weapon name",
+    tplName_inventory: "Item name",
+    tplName_perks: "Perk name",
+    emptyList: "Empty so far.",
   },
 };
 
@@ -380,12 +427,12 @@ const DEFAULT_CHARACTER = {
   initiative: "0",
   defense: "0",
   meleeDamage: "0",
-  resHead: { phys: "0", en: "0", rad: "0", bz: "0" },
-  resTorso: { phys: "0", en: "0", rad: "0", bz: "0" },
-  resLArm: { phys: "0", en: "0", rad: "0", bz: "0" },
-  resRArm: { phys: "0", en: "0", rad: "0", bz: "0" },
-  resLLeg: { phys: "0", en: "0", rad: "0", bz: "0" },
-  resRLeg: { phys: "0", en: "0", rad: "0", bz: "0" },
+  resHead: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
+  resTorso: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
+  resLArm: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
+  resRArm: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
+  resLLeg: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
+  resRLeg: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
   poisonRes: "0",
   weapons: [],
   inventory: [],
@@ -419,7 +466,21 @@ function normalizeCharacter(raw) {
   return c;
 }
 
-function AutoResizeTextarea({ value, onChange, disabled, className, style }) {
+function computeInitials(name) {
+  const parts = (name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "??";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function AutoResizeTextarea({
+  value,
+  onChange,
+  disabled,
+  className,
+  style,
+  placeholder,
+}) {
   const textareaRef = useRef(null);
   const adjustHeight = () => {
     const el = textareaRef.current;
@@ -431,7 +492,7 @@ function AutoResizeTextarea({ value, onChange, disabled, className, style }) {
   useEffect(() => {
     adjustHeight();
   }, [value]);
-  return React.createElement("textarea", {
+  return h("textarea", {
     ref: textareaRef,
     value: value,
     onChange: (e) => {
@@ -440,28 +501,388 @@ function AutoResizeTextarea({ value, onChange, disabled, className, style }) {
     },
     disabled: disabled,
     rows: 1,
-    className: `resize-none overflow-hidden block ${className || ""}`,
+    placeholder: placeholder,
+    className: className,
     style: style,
   });
 }
 
-function InputGroup({ label, value, onChange, isEditing, className = "" }) {
-  return React.createElement(
+function PbField({ label, value, onChange, disabled, className, inputClass }) {
+  return h(
     "div",
-    { className: `flex flex-col ${className}` },
-    React.createElement(
-      "label",
-      { className: "text-[10px] uppercase font-bold text-stone-500 mb-1" },
-      label,
-    ),
-    React.createElement("input", {
+    { className: `pb-field ${className || ""}` },
+    h("span", { className: "pb-label" }, label),
+    h("input", {
       type: "text",
       value: value,
       onChange: (e) => onChange(e.target.value),
-      disabled: !isEditing,
-      className:
-        "border-b-2 border-stone-800 bg-transparent px-1 py-1 font-bold text-stone-800 focus:border-amber-600 focus:outline-none disabled:border-stone-200",
+      disabled: disabled,
+      className: inputClass || "pb-input",
     }),
+  );
+}
+
+function PanelHead({ title, note, children }) {
+  return h(
+    "div",
+    { className: "pb-panel-head" },
+    h("span", { className: "pb-head-arrow" }, "▸"),
+    h("span", { className: "pb-head-title" }, title),
+    note,
+    children,
+  );
+}
+
+function BodyPartCard({ name, data, field, update, canEdit, canPlay, t }) {
+  const injured = !!data.injured;
+  return h(
+    "div",
+    { className: `pb-loc-card ${injured ? "injured" : ""}` },
+    h("span", { className: "pb-loc-name" }, name),
+    h(
+      "label",
+      { className: "pb-loc-status" },
+      h("input", {
+        type: "checkbox",
+        checked: injured,
+        onChange: (e) => update(`${field}.injured`, e.target.checked),
+        disabled: !canPlay,
+      }),
+      injured ? t.locInjured : t.locOk,
+    ),
+    h(
+      "div",
+      { className: "pb-loc-vals" },
+      ["phys", "en", "rad", "bz"].map((k) =>
+        h("input", {
+          key: k,
+          type: "number",
+          className: `pb-num sm ${k === "bz" ? "hp" : ""}`,
+          value: data[k],
+          onChange: (e) => update(`${field}.${k}`, e.target.value),
+          disabled: !canPlay,
+          title:
+            k === "phys"
+              ? t.dr_phys
+              : k === "en"
+                ? t.dr_en
+                : k === "rad"
+                  ? t.dr_rad
+                  : t.dr_hp,
+        }),
+      ),
+    ),
+  );
+}
+
+function ModalShell({ onClose, className, children }) {
+  return h(
+    "div",
+    { className: "pb-modal-backdrop pb-noprint", onMouseDown: onClose },
+    h(
+      "div",
+      {
+        className: `pb-modal ${className || ""}`,
+        onMouseDown: (e) => e.stopPropagation(),
+      },
+      children,
+    ),
+  );
+}
+
+function TemplatePicker({
+  isOpen,
+  onClose,
+  onSelect,
+  onOpenAdmin,
+  templates,
+  type,
+  lang,
+  t,
+}) {
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  useEffect(() => {
+    if (isOpen) {
+      setSearch("");
+      setFilterType("all");
+    }
+  }, [isOpen, type]);
+  if (!isOpen) return null;
+  const filtered = templates
+    .filter((tp) => {
+      const matchesSearch = (tp.name || "")
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const matchesType =
+        type !== "inventory" || filterType === "all" || tp.type === filterType;
+      return matchesSearch && matchesType;
+    })
+    .sort((a, b) =>
+      (a.name || "").localeCompare(b.name || "", lang, {
+        sensitivity: "accent",
+        numeric: true,
+      }),
+    );
+  const title =
+    type === "weapons"
+      ? t.pickWeapons
+      : type === "inventory"
+        ? t.pickInventory
+        : t.pickPerks;
+  return h(
+    ModalShell,
+    { onClose, className: "mid" },
+    h(
+      "div",
+      { className: "pb-modal-head" },
+      h("span", { className: "pb-modal-title" }, "⌕ " + title),
+      h(
+        "button",
+        {
+          className: "pb-chip dim pb-push-right",
+          onClick: () => {
+            onClose();
+            onOpenAdmin();
+          },
+        },
+        "⚙ " + t.btnAdmin,
+      ),
+      h("button", { className: "pb-chip dim", onClick: onClose }, "✕"),
+    ),
+    h(
+      "div",
+      { className: "pb-modal-body" },
+      h(
+        "div",
+        { style: { display: "flex", gap: "8px" } },
+        h("input", {
+          type: "text",
+          placeholder: t.searchPh,
+          className: "pb-input",
+          style: { flex: 1 },
+          value: search,
+          onChange: (e) => setSearch(e.target.value),
+          autoFocus: true,
+        }),
+        type === "inventory" &&
+          h(
+            "select",
+            {
+              className: "pb-select",
+              style: { width: "auto" },
+              value: filterType,
+              onChange: (e) => setFilterType(e.target.value),
+            },
+            h("option", { value: "all" }, t.allTypes),
+            ITEM_TYPES.map((it) =>
+              h(
+                "option",
+                { key: it.key, value: it.key },
+                lang === "en" ? it.en : it.cs,
+              ),
+            ),
+          ),
+      ),
+      filtered.length === 0
+        ? h("div", { className: "pb-modal-empty" }, t.pickerEmpty)
+        : filtered.map((tpl) =>
+            h(
+              "button",
+              {
+                key: tpl.id,
+                className: "pb-pick-row",
+                onClick: () => {
+                  onSelect(tpl);
+                  onClose();
+                },
+              },
+              h(
+                "div",
+                { className: "pb-pick-main" },
+                h("span", { className: "pb-pick-name" }, tpl.name || t.noName),
+                h(
+                  "span",
+                  { className: "pb-pick-sub" },
+                  type === "inventory"
+                    ? getTypeLabel(tpl.type, lang)
+                    : type === "weapons"
+                      ? tpl.skill || ""
+                      : (tpl.effect || "").slice(0, 60),
+                ),
+              ),
+              h("span", { className: "pb-pick-use" }, "+ " + t.use),
+            ),
+          ),
+    ),
+  );
+}
+
+function CharacterModal({
+  isOpen,
+  onClose,
+  characters,
+  selectedCharId,
+  onSelect,
+  onCreate,
+  t,
+}) {
+  if (!isOpen) return null;
+  return h(
+    ModalShell,
+    { onClose },
+    h(
+      "div",
+      { className: "pb-modal-head" },
+      h("span", { className: "pb-modal-title" }, "◈ " + t.chooseChar),
+      h(
+        "button",
+        { className: "pb-chip accent pb-push-right", onClick: onCreate },
+        "+ " + t.btnNew,
+      ),
+      h("button", { className: "pb-chip dim", onClick: onClose }, "✕"),
+    ),
+    h(
+      "div",
+      { className: "pb-modal-body" },
+      characters.length === 0
+        ? h("div", { className: "pb-modal-empty" }, t.noData)
+        : characters.map((ch) =>
+            h(
+              "div",
+              {
+                key: ch.id,
+                className: `pb-char-row ${ch.id === selectedCharId ? "active" : ""}`,
+              },
+              h(
+                "span",
+                { className: "pb-char-initials" },
+                ch.imageUrl
+                  ? h("img", { src: ch.imageUrl, alt: "" })
+                  : computeInitials(ch.name),
+              ),
+              h(
+                "div",
+                { className: "pb-char-info" },
+                h("span", { className: "pb-char-name" }, ch.name),
+                h(
+                  "span",
+                  { className: "pb-char-sub" },
+                  `${ch.origin || "—"} · ${t.level} ${ch.level}`,
+                ),
+              ),
+              h(
+                "button",
+                { className: "pb-chip", onClick: () => onSelect(ch.id) },
+                ch.id === selectedCharId ? t.current : t.open,
+              ),
+            ),
+          ),
+    ),
+  );
+}
+
+function NotesModal({ isOpen, onClose, value, onChange, disabled, t }) {
+  if (!isOpen) return null;
+  return h(
+    ModalShell,
+    { onClose, className: "mid" },
+    h(
+      "div",
+      { className: "pb-modal-head" },
+      h("span", { className: "pb-modal-title" }, "✎ " + t.notesTitle),
+      h(
+        "button",
+        { className: "pb-chip dim pb-push-right", onClick: onClose },
+        "✕",
+      ),
+    ),
+    h(
+      "div",
+      { className: "pb-modal-body" },
+      h("textarea", {
+        className: "pb-textarea",
+        style: { minHeight: "240px" },
+        value: value || "",
+        placeholder: t.notesPh,
+        onChange: (e) => onChange(e.target.value),
+        disabled: disabled,
+      }),
+    ),
+  );
+}
+
+function RollLogModal({ isOpen, onClose, rollLog, onClear, t }) {
+  if (!isOpen) return null;
+  return h(
+    ModalShell,
+    { onClose },
+    h(
+      "div",
+      { className: "pb-modal-head" },
+      h("span", { className: "pb-modal-title" }, "▤ " + t.diceLogTitle),
+      rollLog.length > 0 &&
+        h(
+          "button",
+          { className: "pb-chip danger pb-push-right", onClick: onClear },
+          "✕ " + t.diceClear,
+        ),
+      h(
+        "button",
+        {
+          className: `pb-chip dim ${rollLog.length ? "" : "pb-push-right"}`,
+          onClick: onClose,
+        },
+        "✕",
+      ),
+    ),
+    h(
+      "div",
+      { className: "pb-modal-body" },
+      rollLog.length === 0
+        ? h("div", { className: "pb-modal-empty" }, t.diceLogEmpty)
+        : rollLog.map((r) => {
+            const d20 = r.type === "d20";
+            let sum;
+            if (d20) {
+              const bits = [t.diceSum + " " + r.summary.sum];
+              if (r.summary.crit)
+                bits.push(r.summary.crit + " " + t.diceCrit);
+              if (r.summary.compl)
+                bits.push(r.summary.compl + " " + t.diceCompl);
+              sum = bits.join(" · ");
+            } else {
+              sum =
+                t.diceDmg +
+                " " +
+                r.summary.dmg +
+                " · " +
+                r.summary.eff +
+                " " +
+                t.diceEff;
+            }
+            return h(
+              "div",
+              { key: r.id, className: "pb-log-row" },
+              h(
+                "span",
+                { className: `pb-log-label ${d20 ? "" : "cd"}` },
+                d20 ? r.values.length + "d20" : r.values.length + "×CD",
+              ),
+              h(
+                "div",
+                { className: "pb-log-main" },
+                h("span", { className: "pb-log-sum" }, sum),
+                h(
+                  "span",
+                  { className: "pb-log-faces" },
+                  "[ " + r.values.join(", ") + " ]",
+                ),
+              ),
+              h("span", { className: "pb-log-ts" }, r.ts),
+            );
+          }),
+    ),
   );
 }
 
@@ -489,208 +910,10 @@ function defaultTemplate(tab) {
   return { id, name: "" };
 }
 
-function BodyPartCard({ name, data, field, update, edit, t }) {
-  return React.createElement(
-    "div",
-    {
-      className:
-        "border-2 border-stone-800 p-2 bg-stone-100 print:border-black print:bg-white",
-    },
-    React.createElement(
-      "div",
-      {
-        className:
-          "text-[10px] font-bold uppercase mb-1 border-b-2 border-stone-800 pb-1",
-      },
-      name,
-    ),
-    React.createElement(
-      "div",
-      { className: "grid grid-cols-4 gap-1" },
-      ["phys", "en", "rad", "bz"].map((k) =>
-        React.createElement(
-          "div",
-          {
-            key: k,
-            className:
-              k === "bz"
-                ? "flex flex-col items-center border-l-2 border-stone-800 pl-1"
-                : "flex flex-col items-center",
-          },
-          React.createElement(
-            "span",
-            {
-              className:
-                k === "bz"
-                  ? "text-[9px] text-red-700 font-bold mb-0.5"
-                  : "text-[9px] text-stone-500 font-bold mb-0.5",
-            },
-            k === "phys"
-              ? t.dr_phys
-              : k === "en"
-                ? t.dr_en
-                : k === "rad"
-                  ? t.dr_rad
-                  : t.dr_hp,
-          ),
-          React.createElement("input", {
-            type: "number",
-            className:
-              "w-full text-center bg-white border-2 border-stone-800 text-sm font-bold p-1 print:border-black",
-            value: data[k],
-            onChange: (e) => update(`${field}.${k}`, e.target.value),
-            disabled: !edit,
-          }),
-        ),
-      ),
-    ),
-  );
-}
-
-function TemplatePicker({ isOpen, onClose, onSelect, templates, type, lang }) {
-  const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState("all");
-  if (!isOpen) return null;
-  const filtered = templates
-    .filter((t) => {
-      const matchesSearch = (t.name || "")
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      const matchesType =
-        type !== "inventory" || filterType === "all" || t.type === filterType;
-      return matchesSearch && matchesType;
-    })
-    .sort((a, b) =>
-      (a.name || "").localeCompare(b.name || "", lang, {
-        sensitivity: "accent",
-        numeric: true,
-      }),
-    );
-  return React.createElement(
-    "div",
-    {
-      className:
-        "fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm",
-      onMouseDown: onClose,
-    },
-    React.createElement(
-      "div",
-      {
-        className:
-          "bg-white border-4 border-stone-800 w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl",
-        onMouseDown: (e) => e.stopPropagation(),
-      },
-      React.createElement(
-        "div",
-        {
-          className:
-            "p-4 border-b-4 border-stone-800 flex justify-between items-center bg-stone-100",
-        },
-        React.createElement(
-          "h3",
-          { className: "font-bold text-lg uppercase tracking-wider" },
-          type === "weapons"
-            ? "Výběr zbraně"
-            : type === "inventory"
-              ? "Výběr vybavení"
-              : "Výběr perku",
-        ),
-        React.createElement(
-          "button",
-          { onClick: onClose, className: "p-1 hover:bg-stone-200" },
-          React.createElement(Icon, { name: "X", size: 24 }),
-        ),
-      ),
-      React.createElement(
-        "div",
-        { className: "p-4 space-y-4" },
-        React.createElement(
-          "div",
-          { className: "flex gap-2" },
-          React.createElement("input", {
-            type: "text",
-            placeholder: "Hledat...",
-            className:
-              "flex-1 border-2 border-stone-800 p-2 focus:outline-none focus:ring-2 focus:ring-amber-500",
-            value: search,
-            onChange: (e) => setSearch(e.target.value),
-            autoFocus: true,
-          }),
-          type === "inventory" &&
-            React.createElement(
-              "select",
-              {
-                className: "border-2 border-stone-800 p-2 focus:outline-none",
-                value: filterType,
-                onChange: (e) => setFilterType(e.target.value),
-              },
-              React.createElement("option", { value: "all" }, "Všechny typy"),
-              ITEM_TYPES.map((it) =>
-                React.createElement(
-                  "option",
-                  { key: it.key, value: it.key },
-                  lang === "en" ? it.en : it.cs,
-                ),
-              ),
-            ),
-        ),
-      ),
-      React.createElement(
-        "div",
-        { className: "flex-1 overflow-y-auto p-4 space-y-1" },
-        filtered.length === 0
-          ? React.createElement(
-              "div",
-              { className: "text-center py-8 text-stone-400 italic" },
-              "Nenalezeny žádné šablony",
-            )
-          : filtered.map((tpl) =>
-              React.createElement(
-                "button",
-                {
-                  key: tpl.id,
-                  onClick: () => {
-                    onSelect(tpl);
-                    onClose();
-                  },
-                  className:
-                    "w-full text-left p-3 border-2 border-transparent hover:border-stone-800 hover:bg-amber-50 group flex justify-between items-center transition-all",
-                },
-                React.createElement(
-                  "div",
-                  null,
-                  React.createElement(
-                    "div",
-                    { className: "font-bold group-hover:text-amber-800" },
-                    tpl.name,
-                  ),
-                  React.createElement(
-                    "div",
-                    { className: "text-xs text-stone-500" },
-                    type === "inventory"
-                      ? getTypeLabel(tpl.type, lang)
-                      : type === "weapons"
-                        ? tpl.skill
-                        : "",
-                  ),
-                ),
-                React.createElement(Icon, {
-                  name: "Plus",
-                  size: 18,
-                  className: "text-stone-300 group-hover:text-amber-600",
-                }),
-              ),
-            ),
-      ),
-    ),
-  );
-}
-
 function FalloutSheetApp() {
   const [user, setUser] = useState(null);
   const [characters, setCharacters] = useState([]);
   const [selectedCharId, setSelectedCharId] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [localChar, setLocalChar] = useState(null);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -698,11 +921,24 @@ function FalloutSheetApp() {
     () => localStorage.getItem("fallout_lang") || "cs",
   );
 
+  // mode: 'edit' | 'play' | 'locked' — persisted; 'edit' never restored
+  const [mode, setMode] = useState(() => {
+    const m = localStorage.getItem("fallout_mode");
+    return m === "play" ? "play" : "locked";
+  });
+  const isEditing = mode === "edit";
+  const canPlay = mode === "edit" || mode === "play";
+  const [playDirty, setPlayDirty] = useState(false);
+
   useEffect(() => {
     localStorage.setItem("fallout_lang", lang);
   }, [lang]);
 
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  useEffect(() => {
+    if (mode !== "edit") localStorage.setItem("fallout_mode", mode);
+  }, [mode]);
+
+  const [modal, setModal] = useState(null); // 'chars' | 'notes' | 'admin' | 'log' | null
   const [templates, setTemplates] = useState({
     weapons: [],
     inventory: [],
@@ -714,39 +950,43 @@ function FalloutSheetApp() {
     inventory: null,
     perks: null,
   });
-  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem("fallout_theme") || "paper",
+
+  // theme: green/amber/science/radiation (migrates legacy paper/pipboy)
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem("fallout_theme");
+    return THEMES.includes(stored) ? stored : "green";
+  });
+  const [scanlines, setScanlines] = useState(
+    () => localStorage.getItem("fallout_scanlines") !== "0",
   );
 
   useEffect(() => {
+    localStorage.setItem("fallout_scanlines", scanlines ? "1" : "0");
+  }, [scanlines]);
+
+  useEffect(() => {
     localStorage.setItem("fallout_theme", theme);
-    const color = theme === "pipboy" ? "#20ff20" : "#d97706";
+    const colors = THEME_COLORS[theme] || THEME_COLORS.green;
 
-    // Update Theme Class
-    if (theme === "pipboy") {
-      document.documentElement.classList.add("theme-pipboy");
-    } else {
-      document.documentElement.classList.remove("theme-pipboy");
-    }
+    // Theme class on <html> drives the CSS variable palette
+    document.documentElement.classList.remove(
+      ...THEMES.map((tn) => `theme-${tn}`),
+    );
+    if (theme !== "green")
+      document.documentElement.classList.add(`theme-${theme}`);
 
-    // Update Theme Color Meta Tag
+    // Theme color meta tag
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute(
-        "content",
-        theme === "pipboy" ? "#000000" : "#d97706",
-      );
-    }
+    if (metaThemeColor) metaThemeColor.setAttribute("content", colors.bg);
 
-    // Dynamic Favicon Generation
+    // Dynamic favicon generation (Pip-Boy dial in theme color)
     const svgIcon = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="46" fill="none" stroke="${color}" stroke-width="4"/>
-        <circle cx="50" cy="50" r="10" fill="${color}"/>
-        <path d="M50 50 L50 4 A46 46 0 0 1 89.8 27 L50 50 Z" fill="${color}"/>
-        <path d="M50 50 L10.2 73 A46 46 0 0 1 10.2 27 L50 50 Z" fill="${color}"/>
-        <path d="M50 50 L89.8 73 A46 46 0 0 1 50 96 L50 50 Z" fill="${color}"/>
+        <circle cx="50" cy="50" r="46" fill="none" stroke="${colors.fg}" stroke-width="4"/>
+        <circle cx="50" cy="50" r="10" fill="${colors.fg}"/>
+        <path d="M50 50 L50 4 A46 46 0 0 1 89.8 27 L50 50 Z" fill="${colors.fg}"/>
+        <path d="M50 50 L10.2 73 A46 46 0 0 1 10.2 27 L50 50 Z" fill="${colors.fg}"/>
+        <path d="M50 50 L89.8 73 A46 46 0 0 1 50 96 L50 50 Z" fill="${colors.fg}"/>
       </svg>
     `.trim();
 
@@ -773,6 +1013,24 @@ function FalloutSheetApp() {
     isOpen: false,
     type: "weapons",
   });
+  const [qtyPop, setQtyPop] = useState(null);
+
+  // dice state
+  const [diceType, setDiceType] = useState("d20");
+  const [diceCounts, setDiceCounts] = useState({ d20: 2, d6: 3 });
+  const [rolling, setRolling] = useState(false);
+  const [spinFaces, setSpinFaces] = useState(null);
+  const [lastRoll, setLastRoll] = useState(null);
+  const [rollLog, setRollLog] = useState([]);
+  const spinRef = useRef(null);
+  const settleRef = useRef(null);
+  useEffect(
+    () => () => {
+      clearInterval(spinRef.current);
+      clearTimeout(settleRef.current);
+    },
+    [],
+  );
 
   const sortedCharacters = useMemo(() => {
     return [...characters].sort((a, b) =>
@@ -811,6 +1069,17 @@ function FalloutSheetApp() {
     list.splice(to, 0, moved);
     setLocalChar({ ...localChar, [listName]: list });
   };
+  const moveItem = (listName, id, dir) => {
+    if (!localChar) return;
+    const list = [...(localChar[listName] || [])];
+    const from = list.findIndex((x) => x.id === id);
+    const to = from + dir;
+    if (from === -1 || to < 0 || to >= list.length) return;
+    const tmp = list[from];
+    list[from] = list[to];
+    list[to] = tmp;
+    setLocalChar({ ...localChar, [listName]: list });
+  };
   const onDragStartRow = (listName, id) => (e) => {
     if (!isEditing) return;
     dragRef.current.draggedId = id;
@@ -846,6 +1115,7 @@ function FalloutSheetApp() {
     const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
   }, []);
+
   useEffect(() => {
     if (!user) return;
     const q = collection(
@@ -872,45 +1142,24 @@ function FalloutSheetApp() {
     );
     return () => unsubscribe();
   }, [user]);
+
   useEffect(() => {
     if (!user) return;
-    const cW = collection(
-      db,
-      "artifacts",
-      appId,
-      "public",
-      "data",
-      "fallout_templates_weapons",
-    );
-    const cI = collection(
-      db,
-      "artifacts",
-      appId,
-      "public",
-      "data",
-      "fallout_templates_inventory",
-    );
-    const cP = collection(
-      db,
-      "artifacts",
-      appId,
-      "public",
-      "data",
-      "fallout_templates_perks",
-    );
-    const unsubW = onSnapshot(cW, (s) =>
+    const mk = (name) =>
+      collection(db, "artifacts", appId, "public", "data", name);
+    const unsubW = onSnapshot(mk("fallout_templates_weapons"), (s) =>
       setTemplates((p) => ({
         ...p,
         weapons: s.docs.map((d) => ({ id: d.id, ...d.data() })),
       })),
     );
-    const unsubI = onSnapshot(cI, (s) =>
+    const unsubI = onSnapshot(mk("fallout_templates_inventory"), (s) =>
       setTemplates((p) => ({
         ...p,
         inventory: s.docs.map((d) => ({ id: d.id, ...d.data() })),
       })),
     );
-    const unsubP = onSnapshot(cP, (s) =>
+    const unsubP = onSnapshot(mk("fallout_templates_perks"), (s) =>
       setTemplates((p) => ({
         ...p,
         perks: s.docs.map((d) => ({ id: d.id, ...d.data() })),
@@ -923,10 +1172,12 @@ function FalloutSheetApp() {
     };
   }, [user]);
 
+  // Sync local buffer from remote unless the user is editing (or has
+  // unsaved play-mode tweaks in flight).
   useEffect(() => {
     if (selectedCharId) {
       const found = characters.find((c) => c.id === selectedCharId);
-      if (found && !isEditing) {
+      if (found && mode !== "edit" && !playDirty) {
         setLocalChar(normalizeCharacter(found));
         setHistoryIndex(0);
       }
@@ -934,7 +1185,36 @@ function FalloutSheetApp() {
       setLocalChar(null);
       setHistoryIndex(0);
     }
-  }, [selectedCharId, characters, isEditing]);
+  }, [selectedCharId, characters, mode, playDirty]);
+
+  // Play-mode autosave: debounce writes of play-time tweaks (HP, luck,
+  // ammo counts, injuries) straight to the cloud — no history snapshot.
+  useEffect(() => {
+    if (mode !== "play" || !playDirty || !localChar || !user || !localChar.id)
+      return;
+    const timer = setTimeout(async () => {
+      try {
+        const { imageUrl, history, createdAt, ...data } = localChar;
+        await setDoc(
+          doc(
+            db,
+            "artifacts",
+            appId,
+            "public",
+            "data",
+            "fallout_characters",
+            localChar.id,
+          ),
+          data,
+          { merge: true },
+        );
+        setPlayDirty(false);
+      } catch (e) {
+        console.error("Play autosave error:", e);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [localChar, playDirty, mode, user]);
 
   const updateField = (path, value) => {
     if (!localChar) return;
@@ -944,13 +1224,21 @@ function FalloutSheetApp() {
       if (path.includes(".")) {
         const pts = path.split(".");
         let cur = copy;
-        for (let i = 0; i < pts.length - 1; i++) cur = cur[pts[i]];
+        for (let i = 0; i < pts.length - 1; i++) {
+          cur[pts[i]] = { ...cur[pts[i]] };
+          cur = cur[pts[i]];
+        }
         cur[pts[pts.length - 1]] = value;
       } else {
         copy[path] = value;
       }
       return copy;
     });
+  };
+  // Play-editable fields route through this so play mode autosaves.
+  const updatePlayField = (path, value) => {
+    updateField(path, value);
+    if (mode === "play") setPlayDirty(true);
   };
   const addItem = (listName) => {
     if (!localChar) return;
@@ -990,6 +1278,19 @@ function FalloutSheetApp() {
       i.id === id ? { ...i, [f]: v } : i,
     );
     setLocalChar({ ...localChar, [listName]: list });
+  };
+  const stepQty = (id, dir) => {
+    if (!localChar) return;
+    const list = localChar.inventory.map((i) =>
+      i.id === id
+        ? {
+            ...i,
+            quantity: String(Math.max(0, (parseInt(i.quantity, 10) || 0) + dir)),
+          }
+        : i,
+    );
+    setLocalChar({ ...localChar, inventory: list });
+    if (mode === "play") setPlayDirty(true);
   };
   const addFromTemplate = (tpl) => {
     if (!localChar) return;
@@ -1084,71 +1385,8 @@ function FalloutSheetApp() {
       console.error(e);
     }
   };
-  const handleCreate = async () => {
-    if (!user) return;
-    const id = crypto.randomUUID();
-    const nc = {
-      ...DEFAULT_CHARACTER,
-      name: lang === "en" ? "New Character" : "Nová Postava",
-      id: id,
-      createdAt: serverTimestamp(),
-    };
-    try {
-      // Create initial snapshot (exclude large/circular/invalid fields)
-      const { imageUrl, history, createdAt, ...snapshot } = nc;
-      nc.history = [snapshot];
 
-      await setDoc(
-        doc(db, "artifacts", appId, "public", "data", "fallout_characters", id),
-        nc,
-      );
-
-      setSelectedCharId(id);
-      setIsEditing(true);
-      setLocalChar(normalizeCharacter(nc));
-      setHistoryIndex(0);
-    } catch (e) {
-      console.error("Create error:", e);
-      alert("Chyba při vytváření: " + e.message);
-    }
-  };
-  const handleUndo = () => {
-    const h = localChar?.history || [];
-    if (h.length > 0 && historyIndex < h.length - 1) {
-      const nextIndex = historyIndex + 1;
-      const entry = h[nextIndex];
-      const img = localChar.imageUrl;
-      const hist = localChar.history;
-
-      const restored = normalizeCharacter({ ...entry, id: localChar.id });
-      restored.imageUrl = img;
-      restored.history = hist;
-
-      setHistoryIndex(nextIndex);
-      setLocalChar(restored);
-      setIsEditing(true);
-    }
-  };
-
-  const handleRedo = () => {
-    const h = localChar?.history || [];
-    if (h.length > 0 && historyIndex > 0) {
-      const nextIndex = historyIndex - 1;
-      const entry = h[nextIndex];
-      const img = localChar.imageUrl;
-      const hist = localChar.history;
-
-      const restored = normalizeCharacter({ ...entry, id: localChar.id });
-      restored.imageUrl = img;
-      restored.history = hist;
-
-      setHistoryIndex(nextIndex);
-      setLocalChar(restored);
-      setIsEditing(true);
-    }
-  };
-
-  const handleSave = async () => {
+  const handleSave = async (nextMode = "locked") => {
     if (!user || !localChar) return;
     try {
       // Prepare snapshot - strip unnecessary/large fields
@@ -1170,13 +1408,129 @@ function FalloutSheetApp() {
         { merge: true },
       );
 
-      setIsEditing(false);
+      setMode(nextMode);
       setHistoryIndex(0);
     } catch (e) {
       console.error("Save error:", e);
       alert("Chyba při ukládání: " + (e.message || "Nedostatečná oprávnění"));
     }
   };
+
+  // Immediately persist pending play-mode tweaks (skips the debounce).
+  const flushPlaySave = async () => {
+    if (!user || !localChar || !localChar.id) return;
+    try {
+      const { imageUrl, history, createdAt, ...data } = localChar;
+      await setDoc(
+        doc(
+          db,
+          "artifacts",
+          appId,
+          "public",
+          "data",
+          "fallout_characters",
+          localChar.id,
+        ),
+        data,
+        { merge: true },
+      );
+      setPlayDirty(false);
+    } catch (e) {
+      console.error("Play save error:", e);
+    }
+  };
+
+  // Leaving edit mode always saves first (no silent data loss).
+  const switchMode = (m) => {
+    if (m === mode) return;
+    setQtyPop(null);
+    if (mode === "edit" && localChar) {
+      handleSave(m);
+      return;
+    }
+    if (mode === "play" && playDirty) flushPlaySave();
+    setMode(m);
+  };
+
+  const handleCreate = async () => {
+    if (!user) return;
+    const id = crypto.randomUUID();
+    const nc = {
+      ...DEFAULT_CHARACTER,
+      name: lang === "en" ? "New Character" : "Nová Postava",
+      id: id,
+      createdAt: serverTimestamp(),
+    };
+    try {
+      // Create initial snapshot (exclude large/circular/invalid fields)
+      const { imageUrl, history, createdAt, ...snapshot } = nc;
+      nc.history = [snapshot];
+
+      await setDoc(
+        doc(db, "artifacts", appId, "public", "data", "fallout_characters", id),
+        nc,
+      );
+
+      setSelectedCharId(id);
+      setMode("edit");
+      setLocalChar(normalizeCharacter(nc));
+      setHistoryIndex(0);
+      setModal(null);
+    } catch (e) {
+      console.error("Create error:", e);
+      alert("Chyba při vytváření: " + e.message);
+    }
+  };
+
+  const handleSelectChar = (id) => {
+    if (mode === "edit" && localChar && localChar.id !== id) {
+      handleSave("locked");
+    }
+    if (mode === "play" && playDirty && localChar && localChar.id !== id) {
+      flushPlaySave();
+    }
+    setSelectedCharId(id || null);
+    setPlayDirty(false);
+    setQtyPop(null);
+    setModal(null);
+  };
+
+  const handleUndo = () => {
+    const hist = localChar?.history || [];
+    if (hist.length > 0 && historyIndex < hist.length - 1) {
+      const nextIndex = historyIndex + 1;
+      const entry = hist[nextIndex];
+      const img = localChar.imageUrl;
+      const fullHist = localChar.history;
+
+      const restored = normalizeCharacter({ ...entry, id: localChar.id });
+      restored.imageUrl = img;
+      restored.history = fullHist;
+
+      setHistoryIndex(nextIndex);
+      setLocalChar(restored);
+      setMode("edit");
+    }
+  };
+
+  const handleRedo = () => {
+    const hist = localChar?.history || [];
+    if (hist.length > 0 && historyIndex > 0) {
+      const nextIndex = historyIndex - 1;
+      const entry = hist[nextIndex];
+      const img = localChar.imageUrl;
+      const fullHist = localChar.history;
+
+      const restored = normalizeCharacter({ ...entry, id: localChar.id });
+      restored.imageUrl = img;
+      restored.history = fullHist;
+
+      setHistoryIndex(nextIndex);
+      setLocalChar(restored);
+      setMode("edit");
+    }
+  };
+
   const handleDelete = async () => {
     if (!user || !selectedCharId) return;
     if (window.confirm(t.confirmDelete)) {
@@ -1194,12 +1548,13 @@ function FalloutSheetApp() {
         );
         setSelectedCharId(null);
         setLocalChar(null);
-        setIsEditing(false);
+        setMode("locked");
       } catch (e) {
         console.error(e);
       }
     }
   };
+
   const handleImageUpload = (ev) => {
     const file = ev.target.files?.[0];
     if (!file || !localChar) return;
@@ -1210,21 +1565,21 @@ function FalloutSheetApp() {
         const cvs = document.createElement("canvas");
         const MAX = 200;
         let w = img.width,
-          h = img.height;
-        if (w > h) {
+          hh = img.height;
+        if (w > hh) {
           if (w > MAX) {
-            h *= MAX / w;
+            hh *= MAX / w;
             w = MAX;
           }
         } else {
-          if (h > MAX) {
-            w *= MAX / h;
-            h = MAX;
+          if (hh > MAX) {
+            w *= MAX / hh;
+            hh = MAX;
           }
         }
         cvs.width = w;
-        cvs.height = h;
-        cvs.getContext("2d")?.drawImage(img, 0, 0, w, h);
+        cvs.height = hh;
+        cvs.getContext("2d")?.drawImage(img, 0, 0, w, hh);
         const b64 = cvs.toDataURL("image/jpeg", 0.8);
         updateField("imageUrl", b64);
         try {
@@ -1250,6 +1605,94 @@ function FalloutSheetApp() {
     };
     rd.readAsDataURL(file);
   };
+
+  // --- dice ---
+  const buildRoll = (type, values) => {
+    let summary;
+    if (type === "d20") {
+      summary = {
+        sum: values.reduce((a, b) => a + b, 0),
+        crit: values.filter((v) => v === 1).length,
+        compl: values.filter((v) => v === 20).length,
+      };
+    } else {
+      let dmg = 0,
+        eff = 0;
+      values.forEach((v) => {
+        if (v === 1) dmg += 1;
+        else if (v === 2) dmg += 2;
+        else if (v >= 5) {
+          dmg += 1;
+          eff += 1;
+        }
+      });
+      summary = { dmg, eff };
+    }
+    let ts = "";
+    try {
+      ts = new Date().toLocaleTimeString(lang === "en" ? "en-US" : "cs-CZ", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    } catch (e) {}
+    return {
+      id: Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+      type,
+      values,
+      summary,
+      ts,
+    };
+  };
+  const rollDice = () => {
+    if (rolling) return;
+    const n = diceType === "d20" ? diceCounts.d20 : diceCounts.d6;
+    const sides = diceType === "d20" ? 20 : 6;
+    const rnd = () => 1 + Math.floor(Math.random() * sides);
+    setRolling(true);
+    setLastRoll(null);
+    setSpinFaces(Array.from({ length: n }, rnd));
+    clearInterval(spinRef.current);
+    spinRef.current = setInterval(
+      () => setSpinFaces(Array.from({ length: n }, rnd)),
+      70,
+    );
+    clearTimeout(settleRef.current);
+    settleRef.current = setTimeout(() => {
+      clearInterval(spinRef.current);
+      const rec = buildRoll(
+        diceType,
+        Array.from({ length: n }, rnd),
+      );
+      setRolling(false);
+      setSpinFaces(null);
+      setLastRoll(rec);
+      setRollLog((p) => [rec, ...p].slice(0, 60));
+    }, 850);
+  };
+  const stepDice = (dir) => {
+    if (rolling) return;
+    setDiceCounts((p) => {
+      if (diceType === "d20")
+        return { ...p, d20: Math.max(1, Math.min(5, p.d20 + dir)) };
+      return { ...p, d6: Math.max(1, Math.min(12, p.d6 + dir)) };
+    });
+  };
+  const dieFace = (type, v) => {
+    if (type === "d20") {
+      return {
+        big: String(v),
+        sub: "",
+        tag: "d20",
+        cls: v === 1 ? "crit" : v === 20 ? "compl" : "",
+      };
+    }
+    if (v === 1) return { big: "1", sub: "", tag: "CD", cls: "" };
+    if (v === 2) return { big: "2", sub: "", tag: "CD", cls: "" };
+    if (v === 3 || v === 4) return { big: "0", sub: "", tag: "CD", cls: "zero" };
+    return { big: "❋", sub: "+1", tag: "CD", cls: "compl" };
+  };
+
   const skillsList = useMemo(
     () =>
       [
@@ -1274,1202 +1717,1164 @@ function FalloutSheetApp() {
     [t],
   );
 
-  if (loading)
-    return React.createElement(
-      "div",
-      { className: "p-10 text-center font-mono text-green-700" },
-      t.loading,
-    );
+  if (loading) return h("div", { className: "pb-loading" }, t.loading);
 
-  return React.createElement(
-    "div",
+  // --- derived render values ---
+  const hpMax = Math.max(0, parseInt(localChar?.hpMax, 10) || 0);
+  const hpCur = Math.max(0, parseInt(localChar?.hpCurrent, 10) || 0);
+  const segCount = Math.min(hpMax, 40);
+  const hpSegs = Array.from({ length: segCount }, (_, i) => i < hpCur);
+  const hpRatio = hpMax ? hpCur / hpMax : 0;
+  const hpCritical = hpRatio < 0.34;
+
+  const modeBadge =
+    mode === "edit" ? t.badgeEdit : mode === "play" ? t.badgePlay : t.badgeLock;
+
+  const dCount = diceType === "d20" ? diceCounts.d20 : diceCounts.d6;
+  let diceView;
+  if (rolling && spinFaces) {
+    diceView = spinFaces.map((v, i) => ({
+      key: i,
+      ...dieFace(diceType, v),
+      anim: "spin",
+    }));
+  } else if (lastRoll) {
+    diceView = lastRoll.values.map((v, i) => ({
+      key: i,
+      ...dieFace(lastRoll.type, v),
+      anim: "pop",
+    }));
+  } else {
+    diceView = Array.from({ length: dCount }, (_, i) => ({
+      key: i,
+      big: "?",
+      sub: "",
+      tag: diceType === "d20" ? "d20" : "CD",
+      cls: "",
+      anim: "idle",
+    }));
+  }
+  let lastLine = "",
+    lastExtra = "";
+  if (lastRoll) {
+    const sm = lastRoll.summary;
+    if (lastRoll.type === "d20") {
+      lastLine = t.diceSum + " " + sm.sum;
+      const bits = [];
+      if (sm.crit) bits.push(sm.crit + " " + t.diceCrit);
+      if (sm.compl) bits.push(sm.compl + " " + t.diceCompl);
+      lastExtra = bits.length ? "· " + bits.join(" · ") : "";
+    } else {
+      lastLine = t.diceDmg + ": " + sm.dmg;
+      lastExtra = "· " + sm.eff + " " + t.diceEff;
+    }
+  }
+
+  const specialDefs = [
+    { key: "strength", code: "SIL", codeEn: "STR", label: t.strength },
+    { key: "perception", code: "VNI", codeEn: "PER", label: t.perception },
+    { key: "endurance", code: "ODO", codeEn: "END", label: t.endurance },
+    { key: "charisma", code: "CHA", codeEn: "CHA", label: t.charisma },
+    { key: "intelligence", code: "INT", codeEn: "INT", label: t.intelligence },
+    { key: "agility", code: "HBI", codeEn: "AGI", label: t.agility },
+    { key: "luck", code: "STE", codeEn: "LCK", label: t.luck },
+  ];
+
+  const locDefs = [
+    { field: "resHead", name: t.loc_head, area: { gridColumn: 2, gridRow: 1 } },
+    { field: "resLArm", name: t.loc_larm, area: { gridColumn: 1, gridRow: 2 } },
     {
-      className: `min-h-screen bg-stone-200 text-stone-900 font-mono pb-20 selection:bg-amber-300 ${theme === "pipboy" ? "theme-pipboy" : ""}`,
+      field: "resTorso",
+      name: t.loc_torso,
+      area: { gridColumn: 2, gridRow: 2 },
     },
-    theme === "pipboy" &&
-      React.createElement("div", { className: "pipboy-overlay" }),
-    React.createElement(
-      "header",
-      {
-        className:
-          "bg-stone-800 text-amber-500 p-4 sticky top-0 z-50 shadow-md border-b-4 border-amber-600 print:hidden overflow-x-auto",
-      },
-      React.createElement(
-        "div",
-        {
-          className:
-            "max-w-6xl mx-auto flex flex-nowrap gap-4 items-center justify-between min-w-max",
-        },
-        React.createElement(
-          "div",
-          { className: "flex items-center gap-2" },
-          React.createElement(Icon, {
-            name: "Zap",
-            size: 24,
-            className: "animate-pulse",
-          }),
-          React.createElement(
-            "span",
-            { className: "text-xl font-bold tracking-widest hidden sm:inline" },
-            "PIP-BOY 2000 MK VI",
+    { field: "resRArm", name: t.loc_rarm, area: { gridColumn: 3, gridRow: 2 } },
+    { field: "resLLeg", name: t.loc_lleg, area: { gridColumn: 1, gridRow: 3 } },
+    { field: "resRLeg", name: t.loc_rleg, area: { gridColumn: 3, gridRow: 3 } },
+  ];
+
+  const weaponCols = [
+    t.w_name,
+    t.w_skill,
+    t.w_assigned,
+    t.w_tn,
+    t.w_dmg,
+    t.w_effects,
+    t.w_type,
+    t.w_rate,
+    t.w_range,
+    t.w_qual,
+    t.w_ammo,
+    t.w_weight,
+  ];
+
+  const rowButtons = (listName, id) =>
+    h(
+      "div",
+      { className: "pb-rowbtns pb-noprint" },
+      isEditing &&
+        h(
+          React.Fragment,
+          null,
+          h(
+            "button",
+            {
+              className: "pb-rowbtn",
+              title: t.dragTip,
+              onClick: () => moveItem(listName, id, -1),
+            },
+            "▲",
+          ),
+          h(
+            "button",
+            {
+              className: "pb-rowbtn",
+              title: t.dragTip,
+              onClick: () => moveItem(listName, id, 1),
+            },
+            "▼",
+          ),
+          h(
+            "button",
+            {
+              className: "pb-rowbtn del",
+              onClick: () => removeItem(listName, id),
+            },
+            "✕",
           ),
         ),
-        React.createElement(
+    );
+
+  return h(
+    "div",
+    { className: "pb-root" },
+    scanlines && h("div", { className: "pb-scanlines pb-noprint" }),
+    h("div", { className: "pb-vignette pb-noprint" }),
+    h("div", { className: "pb-scanbeam pb-noprint" }),
+    h(
+      "div",
+      { className: "pb-wrap" },
+
+      // ---------- TOPBAR ----------
+      h(
+        "div",
+        { className: "pb-topbar" },
+        h(
           "div",
-          { className: "flex flex-nowrap gap-1 items-center" },
-          React.createElement(
-            "button",
-            {
-              onClick: () => setTheme(theme === "paper" ? "pipboy" : "paper"),
-              className:
-                "flex items-center gap-1 bg-stone-900 border-2 border-amber-600 px-3 py-1 text-sm hover:bg-stone-700 transition-colors",
-              title: "Změnit styl",
-            },
-            React.createElement(Icon, {
-              name: theme === "paper" ? "Eye" : "EyeOff",
-              size: 14,
-            }),
-          ),
-          React.createElement(
-            "button",
-            {
-              onClick: () => setLang(lang === "cs" ? "en" : "cs"),
-              className:
-                "flex items-center gap-1 bg-stone-900 border-2 border-amber-600 px-3 py-1 text-sm hover:bg-stone-700",
-            },
-            React.createElement(Icon, { name: "Globe", size: 14 }),
-            lang.toUpperCase(),
-          ),
-          React.createElement(
-            "select",
-            {
-              className:
-                "bg-stone-900 border-2 border-amber-600 text-amber-500 p-2 focus:outline-none",
-              value: selectedCharId || "",
-              onChange: (e) => {
-                setSelectedCharId(e.target.value || null);
-                setIsEditing(false);
-              },
-            },
-            React.createElement("option", { value: "" }, t.selectChar),
-            sortedCharacters.map((c) =>
-              React.createElement("option", { key: c.id, value: c.id }, c.name),
-            ),
-          ),
-          React.createElement(
-            "button",
-            {
-              onClick: () => setIsAdminOpen(true),
-              className:
-                "btn-admin bg-stone-700 text-amber-200 hover:bg-stone-600",
-            },
-            React.createElement(Icon, { name: "Settings", size: 16 }),
-            " " + t.btnAdmin,
-          ),
-          React.createElement(
-            "button",
-            {
-              onClick: handleCreate,
-              className: "btn-admin bg-amber-700 text-stone-900",
-            },
-            React.createElement(Icon, { name: "UserPlus", size: 16 }),
-            t.btnNew,
+          { className: "pb-topbar-row" },
+          h(
+            "div",
+            { className: "pb-topbar-brand" },
+            h("span", { className: "pb-status-dot" }),
+            h("span", { className: "pb-brand-title" }, "PIP-BOY 2000 MK VI"),
+            h("span", { className: "pb-brand-sub" }, "RobCo Industries"),
           ),
           selectedCharId &&
-            React.createElement(
+            h(
+              "button",
+              {
+                className: "pb-chip danger pb-push-right pb-noprint",
+                onClick: handleDelete,
+              },
+              "✕ " + t.btnDelete,
+            ),
+        ),
+        h(
+          "div",
+          { className: "pb-toolbar pb-noprint" },
+          h(
+            "button",
+            {
+              className: "pb-chip",
+              title: "Změnit styl / Change style",
+              onClick: () =>
+                setTheme(
+                  THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length],
+                ),
+            },
+            "◉ " + t.btnStyle,
+          ),
+          h(
+            "button",
+            {
+              className: `pb-chip ${scanlines ? "" : "dim"}`,
+              title: "Scanlines",
+              onClick: () => setScanlines((s) => !s),
+            },
+            "▤ CRT",
+          ),
+          h(
+            "button",
+            {
+              className: "pb-chip",
+              title: t.btnPrint,
+              onClick: () => {
+                try {
+                  window.print();
+                } catch (e) {}
+              },
+            },
+            "⎙ " + t.btnPrint,
+          ),
+          h(
+            "button",
+            {
+              className: "pb-chip",
+              onClick: () => setLang(lang === "cs" ? "en" : "cs"),
+            },
+            "⊕ " + lang.toUpperCase(),
+          ),
+          h(
+            "button",
+            {
+              className: "pb-chip inset",
+              onClick: () => setModal("chars"),
+            },
+            (localChar ? localChar.name : t.selectChar) + " ▾",
+          ),
+          h(
+            "button",
+            { className: "pb-chip dim", onClick: () => setModal("admin") },
+            "⚙ " + t.btnAdmin,
+          ),
+          h(
+            "button",
+            { className: "pb-chip accent", onClick: handleCreate },
+            "+ " + t.btnNew,
+          ),
+          selectedCharId &&
+            h(
               React.Fragment,
               null,
-              React.createElement(
+              h(
                 "button",
                 {
-                  onClick: handleUndo,
+                  className: "pb-chip dim",
+                  title: t.btnUndo,
                   disabled:
                     historyIndex >= (localChar?.history?.length || 0) - 1,
-                  className: `btn-admin bg-stone-600 text-white ${historyIndex >= (localChar?.history?.length || 0) - 1 ? "opacity-50 cursor-not-allowed" : ""}`,
-                  title: t.btnUndo,
+                  onClick: handleUndo,
                 },
-                React.createElement(Icon, { name: "Undo", size: 16 }),
+                "↶",
               ),
-              React.createElement(
+              h(
                 "button",
                 {
-                  onClick: handleRedo,
-                  disabled: historyIndex <= 0,
-                  className: `btn-admin bg-stone-600 text-white ${historyIndex <= 0 ? "opacity-50 cursor-not-allowed" : ""}`,
+                  className: "pb-chip dim",
                   title: t.btnRedo,
+                  disabled: historyIndex <= 0,
+                  onClick: handleRedo,
                 },
-                React.createElement(Icon, { name: "Redo", size: 16 }),
+                "↷",
               ),
-              !isEditing
-                ? React.createElement(
-                    "button",
-                    {
-                      onClick: () => setIsEditing(true),
-                      className: "btn-admin bg-blue-700 text-white",
-                    },
-                    React.createElement(Icon, { name: "Edit3", size: 16 }),
-                    t.btnEdit,
-                  )
-                : React.createElement(
-                    "button",
-                    {
-                      onClick: handleSave,
-                      className:
-                        "btn-admin bg-green-700 text-white animate-pulse",
-                    },
-                    React.createElement(Icon, { name: "Save", size: 16 }),
-                    t.btnSave,
-                  ),
-              React.createElement(
-                "button",
-                {
-                  onClick: handleDelete,
-                  className: "btn-admin bg-red-800 text-white",
-                  disabled: !isEditing && !selectedCharId,
-                },
-                React.createElement(Icon, { name: "Trash2", size: 16 }),
-                t.btnDelete,
+              h(
+                "div",
+                { className: "pb-mode-switch" },
+                h(
+                  "button",
+                  {
+                    className: `pb-mode-btn ${mode === "edit" ? "active" : ""}`,
+                    onClick: () => switchMode("edit"),
+                  },
+                  "✎ " + t.mEdit,
+                ),
+                h(
+                  "button",
+                  {
+                    className: `pb-mode-btn ${mode === "play" ? "active" : ""}`,
+                    onClick: () => switchMode("play"),
+                  },
+                  "▶ " + t.mPlay,
+                ),
+                h(
+                  "button",
+                  {
+                    className: `pb-mode-btn ${mode === "locked" ? "active" : ""}`,
+                    onClick: () => switchMode("locked"),
+                  },
+                  "⊘ " + t.mLock,
+                ),
               ),
+              isEditing &&
+                h(
+                  "button",
+                  {
+                    className: "pb-chip save",
+                    onClick: () => handleSave("locked"),
+                  },
+                  "▣ " + t.btnSave,
+                ),
             ),
         ),
       ),
-    ),
-    React.createElement(
-      "main",
-      { className: "max-w-7xl mx-auto p-2 sm:p-6 print:p-0" },
+
+      // ---------- SHEET ----------
       !localChar
-        ? React.createElement(
+        ? h(
             "div",
-            { className: "text-center mt-20 opacity-50" },
-            React.createElement(
-              "h2",
-              { className: "text-2xl font-bold text-stone-600" },
-              t.noData,
+            { className: "pb-panel" },
+            h(
+              "div",
+              { className: "pb-empty-state" },
+              h("div", null, t.noData),
+              h(
+                "button",
+                {
+                  className: "pb-chip accent pb-noprint",
+                  style: { marginTop: "18px" },
+                  onClick: () => setModal("chars"),
+                },
+                "◈ " + t.chooseChar,
+              ),
             ),
           )
-        : React.createElement(
-            "div",
-            {
-              className: `bg-[#fdfaf5] shadow-2xl border-4 border-stone-800 p-4 sm:p-8 relative print:shadow-none print:border-none print:p-0 character-sheet-container ${isEditing ? "ring-4 ring-amber-400/30" : ""}`,
-            },
-            React.createElement(
-              "section",
-              {
-                className:
-                  "grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 border-b-2 border-stone-800 pb-6 items-start header-info-section",
-              },
-              React.createElement(
+        : h(
+            React.Fragment,
+            null,
+
+            // ---------- IDENTITY ----------
+            h(
+              "div",
+              { className: "pb-panel" },
+              h(
+                PanelHead,
+                { title: t.survivor },
+                h("span", { className: `pb-badge ${mode === "locked" ? "dim" : ""}` }, modeBadge),
+                h(
+                  "button",
+                  {
+                    className: "pb-chip pb-push-right pb-noprint",
+                    onClick: () => setModal("notes"),
+                  },
+                  "+ " + t.btnNotes,
+                ),
+              ),
+              h(
                 "div",
-                {
-                  className:
-                    "md:col-span-1 flex flex-col items-center justify-center",
-                },
-                React.createElement(
+                { className: "pb-identity-grid" },
+                h(
                   "div",
                   {
-                    className: `relative group w-32 h-32 flex items-center justify-center border-2 ${isEditing ? "border-amber-400 border-dashed cursor-pointer bg-amber-50" : "border-transparent"}`,
+                    className: `pb-portrait ${isEditing ? "editable" : ""}`,
                     onClick: () => isEditing && fileInputRef.current?.click(),
                   },
+                  h("div", { className: "pb-portrait-scan" }),
                   localChar.imageUrl
-                    ? React.createElement("img", {
+                    ? h("img", {
                         key: `portrait-${localChar.id}`,
                         src: localChar.imageUrl,
                         alt: "Char",
-                        className:
-                          "w-full h-full object-cover character-portrait",
                       })
-                    : React.createElement("img", {
-                        key: `fallback-${localChar.id}`,
-                        src: "https://upload.wikimedia.org/wikipedia/en/5/52/Fallout_Vault_Boy.png",
-                        alt: "Vault Boy",
-                        className:
-                          "w-24 h-auto opacity-80 mix-blend-multiply character-portrait-fallback",
-                        onError: (e) =>
-                          (e.currentTarget.style.display = "none"),
-                      }),
-                  isEditing &&
-                    React.createElement(
-                      "div",
-                      {
-                        className:
-                          "absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity",
-                      },
-                      React.createElement(Icon, { name: "Upload", size: 24 }),
-                      React.createElement(
-                        "span",
-                        {
-                          className: "text-xs font-bold mt-1 text-center px-1",
-                        },
-                        t.uploadImg,
+                    : h(
+                        React.Fragment,
+                        null,
+                        h(
+                          "span",
+                          { className: "pb-portrait-initials" },
+                          computeInitials(localChar.name),
+                        ),
+                        h(
+                          "span",
+                          { className: "pb-portrait-origin" },
+                          localChar.origin,
+                        ),
                       ),
+                  isEditing &&
+                    h(
+                      "div",
+                      { className: "pb-portrait-upload pb-noprint" },
+                      h("span", null, "⇪"),
+                      h("span", null, t.uploadImg),
                     ),
                 ),
-                React.createElement("input", {
+                h("input", {
                   type: "file",
                   ref: fileInputRef,
                   onChange: handleImageUpload,
                   accept: "image/*",
-                  className: "hidden",
+                  style: { display: "none" },
                 }),
-              ),
-              React.createElement(
-                "div",
-                {
-                  className:
-                    "md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 char-info-grid",
-                },
-                React.createElement(
+                h(
                   "div",
-                  { className: "col-span-2 md:col-span-4 mb-2 print:hidden" },
-                  React.createElement(
-                    "h1",
-                    {
-                      className:
-                        "font-bold text-2xl tracking-tighter uppercase text-stone-800",
-                    },
-                    "Fallout ",
-                    React.createElement(
-                      "span",
-                      {
-                        className:
-                          "text-sm font-normal block sm:inline sm:ml-2 text-stone-500",
-                      },
-                      t.headerTitle,
-                    ),
-                  ),
-                ),
-                React.createElement(InputGroup, {
-                  label: t.name,
-                  value: localChar.name,
-                  onChange: (v) => updateField("name", v),
-                  isEditing: isEditing,
-                  className: "col-span-2 char-field-name",
-                }),
-                React.createElement(InputGroup, {
-                  label: t.origin,
-                  value: localChar.origin,
-                  onChange: (v) => updateField("origin", v),
-                  isEditing: isEditing,
-                  className: "col-span-2 char-field-origin",
-                }),
-                React.createElement(InputGroup, {
-                  label: t.level,
-                  value: localChar.level,
-                  onChange: (v) => updateField("level", v),
-                  isEditing: isEditing,
-                  className: "char-field-level",
-                }),
-                React.createElement(InputGroup, {
-                  label: t.xp,
-                  value: localChar.xp,
-                  onChange: (v) => updateField("xp", v),
-                  isEditing: isEditing,
-                  className: "char-field-xp",
-                }),
-                React.createElement(InputGroup, {
-                  label: t.xpNext,
-                  value: localChar.xpNext,
-                  onChange: (v) => updateField("xpNext", v),
-                  isEditing: isEditing,
-                  className: "char-field-xpnext",
-                }),
-                React.createElement(
-                  "div",
-                  { className: "flex items-end pb-1 print:hidden" },
-                  React.createElement(
-                    "button",
-                    {
-                      onClick: () => setIsNotesExpanded(!isNotesExpanded),
-                      className:
-                        "w-full border-2 border-stone-800 py-1 px-2 font-bold text-xs hover:bg-stone-800 hover:text-white transition-colors uppercase tracking-wider",
-                    },
-                    t.btnNotes,
-                  ),
-                ),
-              ),
-            ),
-            React.createElement(
-              "section",
-              {
-                className: `mb-6 p-4 border-2 border-stone-800 bg-white print-notes-section ${!isNotesExpanded ? "hidden print:block" : ""}`,
-              },
-              React.createElement(
-                "h3",
-                {
-                  className: "text-xs font-bold uppercase mb-2 text-stone-500",
-                },
-                t.notesTitle,
-              ),
-              React.createElement(AutoResizeTextarea, {
-                value: localChar.notes || "",
-                onChange: (e) => updateField("notes", e.target.value),
-                disabled: !isEditing,
-                className:
-                  "w-full min-h-[100px] bg-transparent border-none focus:outline-none font-bold text-stone-800",
-              }),
-            ),
-            React.createElement(
-              "section",
-              { className: "mb-6 special-section" },
-              React.createElement(
-                "div",
-                {
-                  className:
-                    "grid grid-cols-7 gap-1 sm:gap-4 text-center bg-white p-2 border-2 border-stone-800 print:bg-transparent print:border-none print:p-0",
-                },
-                [
-                  "strength",
-                  "perception",
-                  "endurance",
-                  "charisma",
-                  "intelligence",
-                  "agility",
-                  "luck",
-                ].map((key, idx) =>
-                  React.createElement(
+                  { className: "pb-id-fields" },
+                  h(
                     "div",
-                    { key, className: "flex flex-col items-center" },
-                    React.createElement(
-                      "span",
-                      {
-                        className:
-                          "text-[9px] sm:text-xs font-bold mb-1 w-full truncate",
-                      },
-                      [
-                        t.strength,
-                        t.perception,
-                        t.endurance,
-                        t.charisma,
-                        t.intelligence,
-                        t.agility,
-                        t.luck,
-                      ][idx],
-                    ),
-                    React.createElement("input", {
-                      type: "number",
-                      value: localChar[key],
-                      onChange: (e) => updateField(key, e.target.value),
-                      disabled: !isEditing,
-                      className:
-                        "w-full text-center text-xl sm:text-2xl font-bold bg-white border-2 border-stone-800 p-1 focus:border-amber-500 focus:outline-none print:border print:border-stone-800",
-                    }),
+                    { className: "pb-game-title" },
+                    h("span", { className: "main" }, "FALLOUT"),
+                    h("span", { className: "sub" }, t.subtitle),
                   ),
-                ),
-              ),
-            ),
-            React.createElement(
-              "div",
-              {
-                className:
-                  "grid grid-cols-1 lg:grid-cols-2 gap-8 print-maingrid",
-              },
-              React.createElement(
-                "section",
-                { className: "print-skills" },
-                React.createElement(
-                  "h3",
-                  { className: "section-title section-skills" },
-                  t.skillsTitle,
-                ),
-                React.createElement(
-                  "div",
-                  { className: "border-2 border-stone-800 bg-white" },
-                  React.createElement(
+                  h(PbField, {
+                    label: t.name,
+                    value: localChar.name,
+                    onChange: (v) => updateField("name", v),
+                    disabled: !isEditing,
+                    className: "full",
+                    inputClass: "pb-input big-name",
+                  }),
+                  h(PbField, {
+                    label: t.origin,
+                    value: localChar.origin,
+                    onChange: (v) => updateField("origin", v),
+                    disabled: !isEditing,
+                  }),
+                  h(
                     "div",
-                    {
-                      className:
-                        "grid grid-cols-12 bg-stone-800 text-stone-100 text-xs py-1 px-2 font-bold print:hidden",
-                    },
-                    React.createElement(
+                    { className: "pb-lvl-grid" },
+                    h(
                       "div",
-                      { className: "col-span-1" },
-                      "TAG",
-                    ),
-                    React.createElement(
-                      "div",
-                      { className: "col-span-8" },
-                      t.skillName,
-                    ),
-                    React.createElement(
-                      "div",
-                      { className: "col-span-3 text-center" },
-                      t.skillVal,
-                    ),
-                  ),
-                  React.createElement(
-                    "div",
-                    { className: "skills-grid-container" },
-                    skillsList.map((sk) =>
-                      React.createElement(
-                        "div",
-                        {
-                          key: sk.key,
-                          className:
-                            "grid grid-cols-12 items-center border-b-2 border-stone-800 py-1 px-2 skill-row",
-                        },
-                        React.createElement(
-                          "div",
-                          { className: "col-span-1 flex justify-center" },
-                          React.createElement("input", {
-                            type: "checkbox",
-                            checked: !!localChar.skills[sk.key],
-                            onChange: (e) =>
-                              updateField(`skills.${sk.key}`, e.target.checked),
-                            disabled: !isEditing,
-                            className: "accent-amber-600 w-4 h-4",
-                          }),
-                        ),
-                        React.createElement(
-                          "div",
-                          {
-                            className:
-                              "col-span-8 text-sm uppercase font-semibold print:text-[11px]",
-                          },
-                          sk.label,
-                        ),
-                        React.createElement(
-                          "div",
-                          { className: "col-span-3" },
-                          React.createElement("input", {
-                            type: "number",
-                            value: localChar.skills[`${sk.key}Val`],
-                            onChange: (e) =>
-                              updateField(
-                                `skills.${sk.key}Val`,
-                                e.target.value,
-                              ),
-                            disabled: !isEditing,
-                            className:
-                              "w-full text-center bg-transparent border-b-2 border-stone-800 focus:border-amber-500 focus:outline-none",
-                          }),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              React.createElement(
-                "div",
-                { className: "flex flex-col gap-6 print-right print:gap-2" },
-                React.createElement(
-                  "section",
-                  {
-                    className:
-                      "grid grid-cols-2 gap-4 print:grid-cols-4 print:gap-1",
-                  },
-                  React.createElement(
-                    "div",
-                    {
-                      className:
-                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
-                    },
-                    React.createElement(
-                      "div",
-                      {
-                        className: "text-xs font-bold text-stone-500 uppercase",
-                      },
-                      t.health,
-                    ),
-                    React.createElement(
-                      "div",
-                      {
-                        className:
-                          "flex gap-2 justify-center items-end stat-flex-print",
-                      },
-                      React.createElement("input", {
-                        type: "number",
-                        className: "stat-input-lg w-12",
-                        value: localChar.hpCurrent,
-                        onChange: (e) =>
-                          updateField("hpCurrent", e.target.value),
+                      { className: "pb-field" },
+                      h("span", { className: "pb-label" }, t.level),
+                      h("input", {
+                        className: "pb-num",
+                        value: localChar.level,
+                        onChange: (e) => updateField("level", e.target.value),
                         disabled: !isEditing,
                       }),
-                      React.createElement(
+                    ),
+                    h(
+                      "div",
+                      { className: "pb-field" },
+                      h("span", { className: "pb-label" }, t.xp),
+                      h("input", {
+                        className: "pb-num",
+                        value: localChar.xp,
+                        onChange: (e) => updateField("xp", e.target.value),
+                        disabled: !isEditing,
+                      }),
+                    ),
+                    h(
+                      "div",
+                      { className: "pb-field" },
+                      h(
                         "span",
-                        { className: "text-2xl" },
-                        "/",
+                        {
+                          className: "pb-label",
+                          style: { whiteSpace: "nowrap" },
+                        },
+                        t.xpNext,
                       ),
-                      React.createElement("input", {
-                        type: "number",
-                        className: "stat-input-lg w-12",
-                        value: localChar.hpMax,
-                        onChange: (e) => updateField("hpMax", e.target.value),
+                      h("input", {
+                        className: "pb-num",
+                        value: localChar.xpNext,
+                        onChange: (e) => updateField("xpNext", e.target.value),
                         disabled: !isEditing,
                       }),
                     ),
                   ),
-                  React.createElement(
+                ),
+                h(
+                  "div",
+                  { className: "pb-hpbox" },
+                  h("span", { className: "pb-label" }, t.health),
+                  h(
                     "div",
-                    {
-                      className:
-                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
-                    },
-                    React.createElement(
-                      "div",
-                      {
-                        className: "text-xs font-bold text-stone-500 uppercase",
-                      },
-                      t.initiative,
-                    ),
-                    React.createElement("input", {
-                      type: "number",
-                      className: "stat-input-lg w-full",
-                      value: localChar.initiative,
+                    { className: "pb-hp-row" },
+                    h("input", {
+                      className: "pb-num xl cur",
+                      value: localChar.hpCurrent,
                       onChange: (e) =>
-                        updateField("initiative", e.target.value),
+                        updatePlayField("hpCurrent", e.target.value),
+                      disabled: !canPlay,
+                    }),
+                    h("span", { className: "pb-hp-sep" }, "/"),
+                    h("input", {
+                      className: "pb-num max",
+                      value: localChar.hpMax,
+                      onChange: (e) => updateField("hpMax", e.target.value),
                       disabled: !isEditing,
                     }),
-                  ),
-                  React.createElement(
-                    "div",
-                    {
-                      className:
-                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
-                    },
-                    React.createElement(
-                      "div",
+                    h(
+                      "span",
                       {
-                        className: "text-xs font-bold text-stone-500 uppercase",
+                        className: `pb-badge pb-push-right ${hpCritical ? "warn" : ""}`,
                       },
-                      t.defense,
+                      hpCritical ? t.hpCritical : t.hpStable,
                     ),
-                    React.createElement("input", {
-                      type: "number",
-                      className: "stat-input-lg w-full",
-                      value: localChar.defense,
-                      onChange: (e) => updateField("defense", e.target.value),
-                      disabled: !isEditing,
-                    }),
                   ),
-                  React.createElement(
+                  h(
                     "div",
-                    {
-                      className:
-                        "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
-                    },
-                    React.createElement(
-                      "div",
-                      {
-                        className: "text-xs font-bold text-stone-500 uppercase",
-                      },
-                      t.meleeDmg,
+                    { className: "pb-hp-track" },
+                    hpSegs.map((on, i) =>
+                      h("span", {
+                        key: i,
+                        className: `pb-hp-seg ${on ? "on" : ""}`,
+                      }),
                     ),
-                    React.createElement("input", {
-                      type: "number",
-                      className: "stat-input-lg w-full",
-                      value: localChar.meleeDamage,
-                      onChange: (e) =>
-                        updateField("meleeDamage", e.target.value),
-                      disabled: !isEditing,
-                    }),
                   ),
                 ),
-                React.createElement(
-                  "section",
-                  {
-                    className:
-                      "border-2 border-stone-800 p-2 text-center bg-white stat-box-print",
-                  },
-                  React.createElement(
+              ),
+            ),
+
+            // ---------- SPECIAL ----------
+            h(
+              "div",
+              { className: "pb-panel" },
+              h(PanelHead, {
+                title: "S.P.E.C.I.A.L",
+                note: h(
+                  "span",
+                  { className: "pb-head-note" },
+                  t.luckPoints,
+                  " · ",
+                  h("b", null, localChar.luckPoints),
+                ),
+              }),
+              h(
+                "div",
+                { className: "pb-special-grid" },
+                specialDefs.map((s) =>
+                  h(
                     "div",
-                    { className: "text-xs font-bold text-stone-500 uppercase" },
-                    t.luckPoints,
+                    { key: s.key, className: "pb-special-card" },
+                    h("input", {
+                      className: "pb-num",
+                      value: localChar[s.key],
+                      onChange: (e) => updateField(s.key, e.target.value),
+                      disabled: !isEditing,
+                    }),
+                    h(
+                      "span",
+                      { className: "pb-special-code" },
+                      lang === "en" ? s.codeEn : s.code,
+                    ),
+                    h("span", { className: "pb-special-label" }, s.label),
                   ),
-                  React.createElement("input", {
-                    type: "number",
-                    className: "stat-input-lg w-full",
-                    value: localChar.luckPoints,
-                    onChange: (e) => updateField("luckPoints", e.target.value),
+                ),
+              ),
+            ),
+
+            // ---------- DERIVED ----------
+            h(
+              "div",
+              { className: "pb-derived-grid" },
+              [
+                {
+                  label: t.defense,
+                  value: localChar.defense,
+                  onChange: (v) => updateField("defense", v),
+                  disabled: !isEditing,
+                },
+                {
+                  label: t.initiative,
+                  value: localChar.initiative,
+                  onChange: (v) => updateField("initiative", v),
+                  disabled: !isEditing,
+                },
+                {
+                  label: t.meleeDmg,
+                  value: localChar.meleeDamage,
+                  onChange: (v) => updateField("meleeDamage", v),
+                  disabled: !isEditing,
+                },
+                {
+                  label: t.luckPoints,
+                  value: localChar.luckPoints,
+                  onChange: (v) => updatePlayField("luckPoints", v),
+                  disabled: !canPlay,
+                },
+                {
+                  label: t.poisonRes,
+                  value: localChar.poisonRes,
+                  onChange: (v) => updateField("poisonRes", v),
+                  disabled: !isEditing,
+                },
+                {
+                  label: t.caps,
+                  value: localChar.caps,
+                  onChange: (v) => updateField("caps", v),
+                  disabled: !isEditing,
+                },
+              ].map((d, i) =>
+                h(
+                  "div",
+                  { key: i, className: "pb-derived-card" },
+                  h("input", {
+                    className: "pb-num lg",
+                    value: d.value,
+                    onChange: (e) => d.onChange(e.target.value),
+                    disabled: d.disabled,
+                  }),
+                  h("span", { className: "pb-derived-label" }, d.label),
+                ),
+              ),
+            ),
+
+            // ---------- SKILLS + HIT LOCATIONS ----------
+            h(
+              "div",
+              { className: "pb-cols-2" },
+              h(
+                "div",
+                { className: "pb-panel" },
+                h(PanelHead, {
+                  title: t.skillsTitle,
+                  note: h(
+                    "span",
+                    { className: "pb-head-note" },
+                    "◼ = " + t.trained,
+                  ),
+                }),
+                h(
+                  "div",
+                  { className: "pb-skills-body" },
+                  skillsList.map((sk) =>
+                    h(
+                      "div",
+                      { key: sk.key, className: "pb-skill-row" },
+                      h("input", {
+                        type: "checkbox",
+                        className: "pb-check",
+                        checked: !!localChar.skills[sk.key],
+                        onChange: (e) =>
+                          updateField(`skills.${sk.key}`, e.target.checked),
+                        disabled: !isEditing,
+                      }),
+                      h("span", { className: "pb-skill-name" }, sk.label),
+                      h("input", {
+                        className: "pb-num md",
+                        value: localChar.skills[`${sk.key}Val`],
+                        onChange: (e) =>
+                          updateField(`skills.${sk.key}Val`, e.target.value),
+                        disabled: !isEditing,
+                      }),
+                    ),
+                  ),
+                ),
+              ),
+              h(
+                "div",
+                { className: "pb-panel" },
+                h(PanelHead, { title: t.hitLocs }),
+                h(
+                  "div",
+                  { className: "pb-loc-legend" },
+                  h("span", null, "FYZ · " + t.dr_phys),
+                  h("span", null, "EN · " + t.dr_en),
+                  h("span", null, "RAD · " + t.dr_rad),
+                  h("span", null, "BZ · " + t.dr_hp),
+                ),
+                h(
+                  "div",
+                  { className: "pb-loc-grid" },
+                  locDefs.map((ld) =>
+                    h(
+                      "div",
+                      { key: ld.field, style: ld.area },
+                      h(BodyPartCard, {
+                        name: ld.name,
+                        data: localChar[ld.field],
+                        field: ld.field,
+                        update: updatePlayField,
+                        canEdit: isEditing,
+                        canPlay: canPlay,
+                        t: t,
+                      }),
+                    ),
+                  ),
+                  h(
+                    "div",
+                    {
+                      className: "pb-loc-center",
+                      style: { gridColumn: 2, gridRow: 3 },
+                    },
+                    "⌖",
+                  ),
+                ),
+                h(
+                  "div",
+                  { className: "pb-poison-row" },
+                  h("span", { className: "pb-label" }, t.poisonRes),
+                  h("input", {
+                    className: "pb-num sm",
+                    value: localChar.poisonRes,
+                    onChange: (e) => updateField("poisonRes", e.target.value),
                     disabled: !isEditing,
                   }),
                 ),
-                React.createElement(
-                  "section",
-                  null,
-                  React.createElement(
-                    "h3",
-                    {
-                      className:
-                        "section-title section-hitlocs flex justify-between",
-                    },
-                    React.createElement("span", null, t.hitLocs),
-                  ),
-                  React.createElement(
+
+                // ---------- DICE ROLLER ----------
+                h(
+                  "div",
+                  { className: "pb-dice pb-noprint" },
+                  h(
                     "div",
-                    {
-                      className:
-                        "grid grid-cols-2 gap-2 text-sm print:grid-cols-3 print:gap-1",
-                    },
-                    React.createElement(BodyPartCard, {
-                      name: t.loc_head,
-                      data: localChar.resHead,
-                      field: "resHead",
-                      update: updateField,
-                      edit: isEditing,
-                      t: t,
-                    }),
-                    React.createElement(BodyPartCard, {
-                      name: t.loc_torso,
-                      data: localChar.resTorso,
-                      field: "resTorso",
-                      update: updateField,
-                      edit: isEditing,
-                      t: t,
-                    }),
-                    React.createElement(BodyPartCard, {
-                      name: t.loc_larm,
-                      data: localChar.resLArm,
-                      field: "resLArm",
-                      update: updateField,
-                      edit: isEditing,
-                      t: t,
-                    }),
-                    React.createElement(BodyPartCard, {
-                      name: t.loc_rarm,
-                      data: localChar.resRArm,
-                      field: "resRArm",
-                      update: updateField,
-                      edit: isEditing,
-                      t: t,
-                    }),
-                    React.createElement(BodyPartCard, {
-                      name: t.loc_lleg,
-                      data: localChar.resLLeg,
-                      field: "resLLeg",
-                      update: updateField,
-                      edit: isEditing,
-                      t: t,
-                    }),
-                    React.createElement(BodyPartCard, {
-                      name: t.loc_rleg,
-                      data: localChar.resRLeg,
-                      field: "resRLeg",
-                      update: updateField,
-                      edit: isEditing,
-                      t: t,
-                    }),
-                  ),
-                  React.createElement(
-                    "div",
-                    {
-                      className:
-                        "mt-2 border-2 border-green-800/20 p-2 bg-green-50 print:bg-white print:border-black",
-                    },
-                    React.createElement(
+                    { className: "pb-dice-head" },
+                    h("span", { className: "pb-head-arrow" }, "◈"),
+                    h("span", { className: "pb-dice-title" }, t.diceTitle),
+                    h(
                       "div",
-                      { className: "flex justify-between items-center" },
-                      React.createElement(
-                        "span",
-                        { className: "font-bold text-stone-700" },
-                        t.poisonRes,
-                        ":",
+                      { className: "pb-dice-type" },
+                      h(
+                        "button",
+                        {
+                          className: `pb-mode-btn ${diceType === "d20" ? "active" : ""}`,
+                          onClick: () => {
+                            if (!rolling) {
+                              setDiceType("d20");
+                              setLastRoll(null);
+                            }
+                          },
+                        },
+                        "d20",
                       ),
-                      React.createElement("input", {
-                        type: "number",
-                        className:
-                          "w-16 text-center border-b border-stone-500 bg-transparent font-bold text-lg",
-                        value: localChar.poisonRes,
-                        onChange: (e) =>
-                          updateField("poisonRes", e.target.value),
-                        disabled: !isEditing,
-                      }),
+                      h(
+                        "button",
+                        {
+                          className: `pb-mode-btn ${diceType === "d6" ? "active" : ""}`,
+                          onClick: () => {
+                            if (!rolling) {
+                              setDiceType("d6");
+                              setLastRoll(null);
+                            }
+                          },
+                        },
+                        t.diceCombat,
+                      ),
+                    ),
+                    h(
+                      "button",
+                      {
+                        className: "pb-chip dim pb-push-right",
+                        onClick: () => setModal("log"),
+                      },
+                      "▤ " + t.diceLog + " · " + rollLog.length,
                     ),
                   ),
+                  h(
+                    "div",
+                    { className: "pb-dice-controls" },
+                    h(
+                      "div",
+                      { className: "pb-dice-count" },
+                      h(
+                        "button",
+                        {
+                          className: "pb-dice-step",
+                          onClick: () => stepDice(-1),
+                        },
+                        "−",
+                      ),
+                      h(
+                        "span",
+                        { className: "pb-dice-count-label" },
+                        diceType === "d20" ? dCount + "d20" : dCount + "×CD",
+                      ),
+                      h(
+                        "button",
+                        {
+                          className: "pb-dice-step",
+                          onClick: () => stepDice(1),
+                        },
+                        "+",
+                      ),
+                    ),
+                    h(
+                      "span",
+                      { className: "pb-dice-range" },
+                      diceType === "d20" ? "1–5 d20" : "1–12 CD",
+                    ),
+                    h(
+                      "button",
+                      {
+                        className: `pb-roll-btn ${rolling ? "rolling" : ""}`,
+                        onClick: rollDice,
+                      },
+                      rolling ? "· · ·" : "⚁ " + t.diceRoll,
+                    ),
+                  ),
+                  h(
+                    "div",
+                    { className: "pb-dice-tray" },
+                    diceView.map((d) =>
+                      h(
+                        "div",
+                        {
+                          key: d.key,
+                          className: `pb-die ${d.cls} ${d.anim}`,
+                        },
+                        h("span", { className: "pb-die-big" }, d.big),
+                        d.sub &&
+                          h("span", { className: "pb-die-sub" }, d.sub),
+                        h("span", { className: "pb-die-tag" }, d.tag),
+                      ),
+                    ),
+                  ),
+                  lastRoll
+                    ? h(
+                        "div",
+                        { className: "pb-last-roll" },
+                        h("span", { className: "main" }, lastLine),
+                        h("span", { className: "extra" }, lastExtra),
+                      )
+                    : !rolling &&
+                        h(
+                          "span",
+                          { className: "pb-dice-hint" },
+                          t.diceHint,
+                        ),
                 ),
               ),
             ),
-            React.createElement(
-              "section",
-              { className: "mt-8" },
-              React.createElement(
-                "h3",
-                {
-                  className: "section-title section-weapons mb-3",
-                },
-                React.createElement("span", null, t.weaponsTitle),
+
+            // ---------- WEAPONS ----------
+            h(
+              "div",
+              { className: "pb-panel" },
+              h(
+                PanelHead,
+                { title: t.weaponsTitle },
+                h("span", { className: "pb-push-right" }),
                 isEditing &&
-                  React.createElement(
-                    "span",
-                    { className: "flex gap-2 items-center" },
-                    React.createElement(
+                  h(
+                    React.Fragment,
+                    null,
+                    h(
                       "button",
                       {
+                        className: "pb-chip dim pb-noprint",
                         onClick: () =>
                           setPickerConfig({ isOpen: true, type: "weapons" }),
-                        className: "btn-add-header",
-                        title: "Vybrat šablonu",
                       },
-                      React.createElement(Icon, { name: "Search", size: 14 }),
+                      "⌕ " + t.fromTpl,
                     ),
-                    React.createElement(
+                    h(
                       "button",
                       {
+                        className: "pb-chip pb-noprint",
                         onClick: () => addItem("weapons"),
-                        className: "btn-add-header",
-                        title: t.btnAdd,
                       },
-                      React.createElement(Icon, { name: "Plus", size: 14 }),
+                      "+ " + t.btnAdd,
                     ),
                   ),
               ),
-              React.createElement(
+              h(
                 "div",
-                { className: "overflow-x-auto mt-2 weapons-table-container" },
-                React.createElement(
-                  "table",
-                  {
-                    className:
-                      "w-full text-left text-sm border-collapse weapons-table",
-                  },
-                  React.createElement(
-                    "thead",
-                    null,
-                    React.createElement(
-                      "tr",
-                      {
-                        className:
-                          "bg-stone-800 text-stone-100 text-xs print:bg-stone-300 print:text-black",
-                      },
-                      [
-                        t.w_name,
-                        t.w_skill,
-                        t.w_assigned,
-                        t.w_tn,
-                        t.w_dmg,
-                        t.w_effects,
-                        t.w_type,
-                        t.w_rate,
-                        t.w_range,
-                        t.w_qual,
-                        t.w_ammo,
-                        t.w_weight,
-                      ].map((h, i) =>
-                        React.createElement(
-                          "th",
-                          {
-                            key: i,
-                            className: `p-1 ${i === 0 ? "w-[14%]" : i === 1 ? "w-[8%]" : i === 2 ? "w-[4%]" : i === 3 ? "w-[4%]" : i === 4 ? "w-[6%]" : i === 5 ? "w-[15%]" : i === 6 ? "w-[8%]" : i === 7 ? "w-[4%]" : i === 8 ? "w-[4%]" : i === 9 ? "w-[15%]" : i === 10 ? "w-[8%]" : "w-[4%]"}`,
-                          },
-                          h,
-                        ),
-                      ),
-                      React.createElement("th", { className: "p-1 w-[6%]" }),
-                    ),
-                  ),
-                  React.createElement(
-                    "tbody",
-                    null,
-                    localChar.weapons.map((w) =>
-                      React.createElement(
-                        "tr",
+                { className: "pb-tablewrap" },
+                h(
+                  "div",
+                  { className: "pb-wtable" },
+                  h(
+                    "div",
+                    { className: "pb-wgrid head" },
+                    weaponCols.map((c, i) =>
+                      h(
+                        "span",
                         {
-                          key: w.id,
-                          className: `border-b-2 border-stone-800 hover:bg-stone-100 align-top ${isEditing ? "cursor-move" : ""}`,
-                          draggable: isEditing,
-                          onDragStart: onDragStartRow("weapons", w.id),
-                          onDragOver: onDragOverRow(),
-                          onDrop: onDropRow("weapons", w.id),
+                          key: i,
+                          style:
+                            i === 2 || i === 3 || i === 4 || i === 7 || i === 8 || i === 11
+                              ? { textAlign: "center" }
+                              : null,
                         },
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement(AutoResizeTextarea, {
-                            className: "tbl-inp",
-                            value: w.name,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "name",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement(AutoResizeTextarea, {
-                            className: "tbl-inp",
-                            value: w.skill,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "skill",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1 text-center" },
-                          React.createElement("input", {
-                            type: "checkbox",
-                            checked: !!w.assigned,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "assigned",
-                                e.target.checked,
-                              ),
-                            disabled: !isEditing,
-                            className: "accent-amber-600 w-4 h-4",
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
-                            value: w.targetNum,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "targetNum",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
-                            value: w.damage,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "damage",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement(AutoResizeTextarea, {
-                            className: "tbl-inp",
-                            value: w.effects,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "effects",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp",
-                            value: w.type,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "type",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
-                            value: w.rateOfFire,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "rateOfFire",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
-                            value: w.range,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "range",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement(AutoResizeTextarea, {
-                            className: "tbl-inp",
-                            value: w.attributes,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "attributes",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp",
-                            value: w.ammo,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "ammo",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
-                            value: w.weight,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "weapons",
-                                w.id,
-                                "weight",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1 text-center" },
-                          isEditing &&
-                            React.createElement(
-                              "button",
-                              {
-                                onClick: () => removeItem("weapons", w.id),
-                                className: "text-red-600",
-                              },
-                              React.createElement(Icon, {
-                                name: "X",
-                                size: 16,
-                              }),
-                            ),
-                        ),
+                        c,
                       ),
+                    ),
+                    h("span", null),
+                  ),
+                  localChar.weapons.map((w) =>
+                    h(
+                      "div",
+                      {
+                        key: w.id,
+                        className: `pb-wgrid row ${isEditing ? "draggable" : ""}`,
+                        draggable: isEditing,
+                        onDragStart: onDragStartRow("weapons", w.id),
+                        onDragOver: onDragOverRow(),
+                        onDrop: onDropRow("weapons", w.id),
+                      },
+                      h(AutoResizeTextarea, {
+                        className: "pb-cell",
+                        value: w.name,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem("weapons", w.id, "name", e.target.value),
+                      }),
+                      h(AutoResizeTextarea, {
+                        className: "pb-cell dim",
+                        value: w.skill,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "skill",
+                            e.target.value,
+                          ),
+                      }),
+                      h("input", {
+                        type: "checkbox",
+                        className: "pb-check",
+                        style: { justifySelf: "center" },
+                        checked: !!w.assigned,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "assigned",
+                            e.target.checked,
+                          ),
+                        disabled: !isEditing,
+                      }),
+                      h("input", {
+                        className: "pb-num sm",
+                        value: w.targetNum,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "targetNum",
+                            e.target.value,
+                          ),
+                      }),
+                      h("input", {
+                        className: "pb-num sm",
+                        value: w.damage,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "damage",
+                            e.target.value,
+                          ),
+                      }),
+                      h(AutoResizeTextarea, {
+                        className: "pb-cell",
+                        value: w.effects,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "effects",
+                            e.target.value,
+                          ),
+                      }),
+                      h("input", {
+                        className: "pb-cell dim",
+                        value: w.type,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem("weapons", w.id, "type", e.target.value),
+                      }),
+                      h("input", {
+                        className: "pb-cell center",
+                        value: w.rateOfFire,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "rateOfFire",
+                            e.target.value,
+                          ),
+                      }),
+                      h("input", {
+                        className: "pb-cell center",
+                        value: w.range,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "range",
+                            e.target.value,
+                          ),
+                      }),
+                      h(AutoResizeTextarea, {
+                        className: "pb-cell dim",
+                        value: w.attributes,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "attributes",
+                            e.target.value,
+                          ),
+                      }),
+                      h("input", {
+                        className: "pb-cell",
+                        value: w.ammo,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem("weapons", w.id, "ammo", e.target.value),
+                      }),
+                      h("input", {
+                        className: "pb-cell center",
+                        value: w.weight,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "weapons",
+                            w.id,
+                            "weight",
+                            e.target.value,
+                          ),
+                      }),
+                      rowButtons("weapons", w.id),
                     ),
                   ),
                 ),
               ),
             ),
-            React.createElement(
+
+            // ---------- INVENTORY + PERKS ----------
+            h(
               "div",
-              {
-                className:
-                  "grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 print-maingrid",
-              },
-              React.createElement(
-                "section",
-                null,
-                React.createElement(
-                  "h3",
-                  {
-                    className: "section-title section-inventory mb-3",
-                  },
-                  React.createElement("span", null, t.invTitle),
-                  React.createElement(
+              { className: "pb-cols-2" },
+              h(
+                "div",
+                { className: "pb-panel" },
+                h(
+                  PanelHead,
+                  { title: t.invTitle },
+                  h(
                     "span",
-                    {
-                      className:
-                        "flex gap-2 items-center overflow-hidden font-bold",
-                    },
-                    React.createElement(
-                      "span",
-                      {
-                        className: "text-xs whitespace-nowrap",
-                      },
-                      t.caps,
-                      ":",
-                    ),
-                    React.createElement("input", {
-                      className:
-                        "w-12 border-b-2 border-current bg-transparent text-right font-mono",
-                      value: localChar.caps,
-                      onChange: (e) => updateField("caps", e.target.value),
-                      disabled: !isEditing,
-                    }),
-                    isEditing &&
-                      React.createElement(
-                        React.Fragment,
-                        null,
-                        React.createElement(
-                          "button",
-                          {
-                            onClick: () =>
-                              setPickerConfig({
-                                isOpen: true,
-                                type: "inventory",
-                              }),
-                            className: "btn-add-header",
-                          },
-                          React.createElement(Icon, {
-                            name: "Search",
-                            size: 14,
-                          }),
-                        ),
-                        React.createElement(
-                          "button",
-                          {
-                            onClick: () => addItem("inventory"),
-                            className: "btn-add-header",
-                          },
-                          React.createElement(Icon, { name: "Plus", size: 14 }),
-                        ),
-                      ),
+                    { className: "pb-head-note" },
+                    t.caps,
+                    " · ",
+                    h("b", null, localChar.caps),
                   ),
-                ),
-                React.createElement(
-                  "table",
-                  {
-                    className: "w-full text-left text-sm inventory-table mt-2",
-                  },
-                  React.createElement(
-                    "thead",
-                    null,
-                    React.createElement(
-                      "tr",
-                      { className: "bg-stone-300 text-stone-800 text-xs" },
-                      React.createElement(
-                        "th",
-                        { className: "p-1 w-[40%]" },
-                        t.i_item,
-                      ),
-                      React.createElement(
-                        "th",
-                        { className: "p-1 w-[20%]" },
-                        t.i_type,
-                      ),
-                      React.createElement(
-                        "th",
-                        { className: "p-1 w-[20%] text-center" },
-                        t.i_weight,
-                      ),
-                      React.createElement(
-                        "th",
-                        { className: "p-1 w-[15%] text-center" },
-                        t.i_qty,
-                      ),
-                      React.createElement("th", { className: "w-[5%]" }),
-                    ),
-                  ),
-                  React.createElement(
-                    "tbody",
-                    null,
-                    localChar.inventory.map((it) =>
-                      React.createElement(
-                        "tr",
+                  isEditing &&
+                    h(
+                      React.Fragment,
+                      null,
+                      h(
+                        "button",
                         {
-                          key: it.id,
-                          className: `border-b-2 border-stone-800 align-top ${isEditing ? "cursor-move" : ""}`,
-                          draggable: isEditing,
-                          onDragStart: onDragStartRow("inventory", it.id),
-                          onDragOver: onDragOverRow(),
-                          onDrop: onDropRow("inventory", it.id),
+                          className: "pb-chip dim pb-noprint",
+                          onClick: () =>
+                            setPickerConfig({
+                              isOpen: true,
+                              type: "inventory",
+                            }),
                         },
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement(AutoResizeTextarea, {
-                            className: "tbl-inp",
-                            value: it.name,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "inventory",
-                                it.id,
-                                "name",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          isEditing
-                            ? React.createElement(
-                                "select",
-                                {
-                                  className:
-                                    "tbl-inp border-2 border-stone-800 bg-transparent text-xs",
-                                  value: it.type || "other",
-                                  onChange: (e) =>
-                                    updateListItem(
-                                      "inventory",
-                                      it.id,
-                                      "type",
-                                      e.target.value,
-                                    ),
-                                },
-                                ITEM_TYPES.map((o) =>
-                                  React.createElement(
-                                    "option",
-                                    { key: o.key, value: o.key },
-                                    lang === "en" ? o.en : o.cs,
-                                  ),
+                        "⌕",
+                      ),
+                      h(
+                        "button",
+                        {
+                          className: "pb-chip pb-noprint",
+                          onClick: () => addItem("inventory"),
+                        },
+                        "+",
+                      ),
+                    ),
+                ),
+                h(
+                  "div",
+                  { className: "pb-ibody" },
+                  h(
+                    "div",
+                    { className: "pb-igrid head" },
+                    h("span", null, t.i_item),
+                    h("span", null, t.i_type),
+                    h("span", { style: { textAlign: "center" } }, t.i_weight),
+                    h("span", { style: { textAlign: "center" } }, t.i_qty),
+                    h("span", null),
+                  ),
+                  localChar.inventory.map((it) =>
+                    h(
+                      "div",
+                      {
+                        key: it.id,
+                        className: `pb-igrid row ${isEditing ? "draggable" : ""}`,
+                        draggable: isEditing,
+                        onDragStart: onDragStartRow("inventory", it.id),
+                        onDragOver: onDragOverRow(),
+                        onDrop: onDropRow("inventory", it.id),
+                      },
+                      h(AutoResizeTextarea, {
+                        className: "pb-cell",
+                        value: it.name,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "inventory",
+                            it.id,
+                            "name",
+                            e.target.value,
+                          ),
+                      }),
+                      isEditing
+                        ? h(
+                            "select",
+                            {
+                              className: "pb-type-pill",
+                              value: it.type || "other",
+                              onChange: (e) =>
+                                updateListItem(
+                                  "inventory",
+                                  it.id,
+                                  "type",
+                                  e.target.value,
                                 ),
-                              )
-                            : React.createElement(
+                            },
+                            ITEM_TYPES.map((o) =>
+                              h(
+                                "option",
+                                { key: o.key, value: o.key },
+                                lang === "en" ? o.en : o.cs,
+                              ),
+                            ),
+                          )
+                        : h(
+                            "span",
+                            { className: "pb-type-pill" },
+                            getTypeLabel(it.type || "other", lang),
+                          ),
+                      h("input", {
+                        className: "pb-cell center",
+                        value: it.weight,
+                        disabled: !isEditing,
+                        onChange: (e) =>
+                          updateListItem(
+                            "inventory",
+                            it.id,
+                            "weight",
+                            e.target.value,
+                          ),
+                      }),
+                      mode === "play"
+                        ? h(
+                            "div",
+                            { className: "pb-qty-wrap" },
+                            h(
+                              "button",
+                              {
+                                className: "pb-qty-view",
+                                onClick: () =>
+                                  setQtyPop(
+                                    qtyPop === it.id ? null : it.id,
+                                  ),
+                              },
+                              it.quantity,
+                            ),
+                            qtyPop === it.id &&
+                              h(
                                 "div",
-                                {
-                                  className: "text-xs uppercase text-stone-700",
-                                },
-                                getTypeLabel(it.type || "other", lang),
+                                { className: "pb-qty-pop" },
+                                h(
+                                  "button",
+                                  { onClick: () => stepQty(it.id, -1) },
+                                  "−",
+                                ),
+                                h(
+                                  "span",
+                                  { className: "val" },
+                                  it.quantity,
+                                ),
+                                h(
+                                  "button",
+                                  { onClick: () => stepQty(it.id, 1) },
+                                  "+",
+                                ),
                               ),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
-                            value: it.weight,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "inventory",
-                                it.id,
-                                "weight",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
+                          )
+                        : h("input", {
+                            className: "pb-num sm",
                             value: it.quantity,
                             disabled: !isEditing,
                             onChange: (e) =>
@@ -2480,596 +2885,466 @@ function FalloutSheetApp() {
                                 e.target.value,
                               ),
                           }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1 text-center" },
-                          isEditing &&
-                            React.createElement(
-                              "button",
-                              {
-                                onClick: () => removeItem("inventory", it.id),
-                                className: "text-red-500",
-                              },
-                              React.createElement(Icon, {
-                                name: "X",
-                                size: 14,
-                              }),
-                            ),
-                        ),
-                      ),
+                      rowButtons("inventory", it.id),
                     ),
                   ),
                 ),
               ),
-              React.createElement(
-                "section",
-                null,
-                React.createElement(
-                  "h3",
-                  {
-                    className: "section-title section-perks mb-3",
-                  },
-                  React.createElement("span", null, t.perksTitle),
+              h(
+                "div",
+                { className: "pb-panel" },
+                h(
+                  PanelHead,
+                  { title: t.perksTitle },
+                  h("span", { className: "pb-push-right" }),
                   isEditing &&
-                    React.createElement(
-                      "span",
-                      { className: "flex gap-2 items-center" },
-                      React.createElement(
+                    h(
+                      React.Fragment,
+                      null,
+                      h(
                         "button",
                         {
+                          className: "pb-chip dim pb-noprint",
                           onClick: () =>
                             setPickerConfig({ isOpen: true, type: "perks" }),
-                          className: "btn-add-header",
                         },
-                        React.createElement(Icon, { name: "Search", size: 14 }),
+                        "⌕",
                       ),
-                      React.createElement(
+                      h(
                         "button",
                         {
+                          className: "pb-chip pb-noprint",
                           onClick: () => addItem("perks"),
-                          className: "btn-add-header",
                         },
-                        React.createElement(Icon, { name: "Plus", size: 14 }),
+                        "+",
                       ),
                     ),
                 ),
-                React.createElement(
-                  "table",
-                  { className: "w-full text-left text-sm perks-table mt-2" },
-                  React.createElement(
-                    "thead",
-                    null,
-                    React.createElement(
-                      "tr",
-                      { className: "bg-stone-300 text-stone-800 text-xs" },
-                      React.createElement(
-                        "th",
-                        { className: "p-1 w-[35%]" },
-                        t.p_name,
-                      ),
-                      React.createElement(
-                        "th",
-                        { className: "p-1 w-[10%] text-center" },
-                        t.p_rank,
-                      ),
-                      React.createElement(
-                        "th",
-                        { className: "p-1 w-[50%]" },
-                        t.p_effect,
-                      ),
-                      React.createElement("th", { className: "w-[5%]" }),
-                    ),
-                  ),
-                  React.createElement(
-                    "tbody",
-                    null,
-                    localChar.perks.map((pk) =>
-                      React.createElement(
-                        "tr",
-                        {
-                          key: pk.id,
-                          className: `border-b-2 border-stone-800 align-top ${isEditing ? "cursor-move" : ""}`,
-                          draggable: isEditing,
-                          onDragStart: onDragStartRow("perks", pk.id),
-                          onDragOver: onDragOverRow(),
-                          onDrop: onDropRow("perks", pk.id),
-                        },
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement(AutoResizeTextarea, {
-                            className: "tbl-inp",
-                            value: pk.name,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "perks",
-                                pk.id,
-                                "name",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement("input", {
-                            className: "tbl-inp text-center",
-                            value: pk.rank,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "perks",
-                                pk.id,
-                                "rank",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1" },
-                          React.createElement(AutoResizeTextarea, {
-                            className: "tbl-inp",
-                            value: pk.effect,
-                            disabled: !isEditing,
-                            onChange: (e) =>
-                              updateListItem(
-                                "perks",
-                                pk.id,
-                                "effect",
-                                e.target.value,
-                              ),
-                          }),
-                        ),
-                        React.createElement(
-                          "td",
-                          { className: "p-1 text-center" },
-                          isEditing &&
-                            React.createElement(
-                              "button",
-                              {
-                                onClick: () => removeItem("perks", pk.id),
-                                className: "text-red-500",
-                              },
-                              React.createElement(Icon, {
-                                name: "X",
-                                size: 14,
-                              }),
+                h(
+                  "div",
+                  { className: "pb-perks-body" },
+                  localChar.perks.map((pk) =>
+                    h(
+                      "div",
+                      {
+                        key: pk.id,
+                        className: "pb-perk-row",
+                        draggable: isEditing,
+                        onDragStart: onDragStartRow("perks", pk.id),
+                        onDragOver: onDragOverRow(),
+                        onDrop: onDropRow("perks", pk.id),
+                      },
+                      h("input", {
+                        className: "pb-perk-rank",
+                        value: pk.rank,
+                        disabled: !isEditing,
+                        title: t.p_rank,
+                        onChange: (e) =>
+                          updateListItem("perks", pk.id, "rank", e.target.value),
+                      }),
+                      h(
+                        "div",
+                        { className: "pb-perk-main" },
+                        h(AutoResizeTextarea, {
+                          className: "pb-cell",
+                          value: pk.name,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "perks",
+                              pk.id,
+                              "name",
+                              e.target.value,
                             ),
-                        ),
+                        }),
+                        h(AutoResizeTextarea, {
+                          className: "pb-cell dim",
+                          value: pk.effect,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "perks",
+                              pk.id,
+                              "effect",
+                              e.target.value,
+                            ),
+                        }),
                       ),
+                      rowButtons("perks", pk.id),
                     ),
                   ),
                 ),
               ),
             ),
+
+            // ---------- NOTES ----------
+            h(
+              "div",
+              { className: "pb-panel" },
+              h(PanelHead, {
+                title: t.notesTitle,
+                note: h("span", { className: "pb-head-note" }, t.autosave),
+              }),
+              h(
+                "div",
+                { className: "pb-notes-body" },
+                h("textarea", {
+                  className: "pb-textarea",
+                  value: localChar.notes || "",
+                  placeholder: t.notesPh,
+                  onChange: (e) => updateField("notes", e.target.value),
+                  disabled: !isEditing,
+                }),
+              ),
+            ),
+
+            // ---------- STATUS BAR ----------
+            h(
+              "div",
+              { className: "pb-statusbar" },
+              h("span", null, "◉ " + t.online),
+              h("span", { className: "sep" }, "//"),
+              h(
+                "span",
+                null,
+                t.autosave + ": ",
+                h("b", null, mode === "play" ? t.active : t.manual),
+              ),
+              h("span", { className: "sep" }, "//"),
+              h("span", null, t.storage + ": CLOUD"),
+              h("span", { className: "sep" }, "//"),
+              h(
+                "span",
+                null,
+                t.chars + ": ",
+                h("b", null, String(characters.length)),
+              ),
+              h("span", { className: "sep" }, "//"),
+              h(
+                "span",
+                { className: "pb-push-right" },
+                t.caps + ": ",
+                h("b", null, localChar.caps),
+              ),
+              h("span", { className: "sep" }, "//"),
+              h("span", { className: "pb-cursor" }, "▋"),
+            ),
           ),
     ),
-    React.createElement(TemplatePicker, {
+
+    // ---------- MODALS ----------
+    h(TemplatePicker, {
       isOpen: pickerConfig.isOpen,
       type: pickerConfig.type,
       templates: templates[pickerConfig.type] || [],
       onSelect: addFromTemplate,
       onClose: () => setPickerConfig({ ...pickerConfig, isOpen: false }),
+      onOpenAdmin: () => setModal("admin"),
       lang: lang,
+      t: t,
     }),
-    isAdminOpen &&
-      React.createElement(
-        "div",
-        {
-          className:
-            "fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 print:hidden",
-          onMouseDown: () => setIsAdminOpen(false),
-        },
-        React.createElement(
+    h(CharacterModal, {
+      isOpen: modal === "chars",
+      onClose: () => setModal(null),
+      characters: sortedCharacters,
+      selectedCharId: selectedCharId,
+      onSelect: handleSelectChar,
+      onCreate: handleCreate,
+      t: t,
+    }),
+    h(NotesModal, {
+      isOpen: modal === "notes",
+      onClose: () => setModal(null),
+      value: localChar?.notes,
+      onChange: (v) => updateField("notes", v),
+      disabled: !isEditing,
+      t: t,
+    }),
+    h(RollLogModal, {
+      isOpen: modal === "log",
+      onClose: () => setModal(null),
+      rollLog: rollLog,
+      onClear: () => setRollLog([]),
+      t: t,
+    }),
+
+    // ---------- ADMIN MODAL ----------
+    modal === "admin" &&
+      h(
+        ModalShell,
+        { onClose: () => setModal(null), className: "wide" },
+        h(
           "div",
-          {
-            className:
-              "w-full max-w-5xl bg-[#fdfaf5] border-2 border-stone-800 shadow-2xl p-4 sm:p-6",
-            onMouseDown: (e) => e.stopPropagation(),
-          },
-          React.createElement(
+          { className: "pb-modal-head" },
+          h("span", { className: "pb-modal-title" }, "⚙ " + t.adminTitle),
+          h(
             "div",
-            {
-              className:
-                "flex items-center justify-between mb-4 border-b-2 border-stone-800 pb-2",
-            },
-            React.createElement(
-              "h2",
-              { className: "text-lg font-bold uppercase tracking-wide" },
-              t.adminTitle,
-            ),
-            React.createElement(
-              "button",
-              {
-                className: "btn-admin bg-red-800 text-white",
-                onClick: () => setIsAdminOpen(false),
-              },
-              React.createElement(Icon, { name: "X", size: 16 }),
-              " " + t.btnClose,
-            ),
-          ),
-          React.createElement(
-            "div",
-            { className: "admin-tabs-container flex gap-2 mb-4" },
+            { className: "pb-mode-switch" },
             ["weapons", "inventory", "perks"].map((tab) =>
-              React.createElement(
+              h(
                 "button",
                 {
                   key: tab,
-                  className: `btn-admin ${tplTab === tab ? "bg-amber-700 text-stone-900" : "bg-stone-700 text-amber-200 hover:bg-stone-600"}`,
+                  className: `pb-mode-btn ${tplTab === tab ? "active" : ""}`,
                   onClick: () => {
                     setTplTab(tab);
                     setTplDraft((p) => ({ ...p, [tab]: null }));
                   },
                 },
                 tab === "weapons"
-                  ? "Zbraně"
+                  ? t.weaponsTitle
                   : tab === "inventory"
-                    ? "Vybavení"
-                    : "Perky",
+                    ? t.invTitle
+                    : t.perksTitle,
               ),
             ),
           ),
-          React.createElement(
+          h(
+            "button",
+            {
+              className: "pb-chip accent pb-push-right",
+              onClick: () =>
+                setTplDraft((p) => ({
+                  ...p,
+                  [tplTab]: defaultTemplate(tplTab),
+                })),
+            },
+            "+ " + t.newTpl,
+          ),
+          h(
+            "button",
+            { className: "pb-chip dim", onClick: () => setModal(null) },
+            "✕",
+          ),
+        ),
+        h("p", { className: "pb-admin-hint" }, t.adminHint),
+        h(
+          "div",
+          { className: "pb-admin-grid" },
+          h(
             "div",
-            { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" },
-            React.createElement(
-              "div",
-              { className: "border-2 border-stone-800 bg-white" },
-              React.createElement(
-                "div",
-                {
-                  className:
-                    "flex justify-between items-center p-2 bg-stone-800 text-stone-100",
-                },
-                React.createElement(
-                  "div",
-                  { className: "font-bold text-sm" },
-                  tplTab === "weapons"
-                    ? "Zbraně"
-                    : tplTab === "inventory"
-                      ? "Vybavení"
-                      : "Perky",
-                ),
-                React.createElement(
-                  "button",
-                  {
-                    className: "btn-add",
-                    onClick: () =>
-                      setTplDraft((p) => ({
-                        ...p,
-                        [tplTab]: defaultTemplate(tplTab),
-                      })),
-                  },
-                  React.createElement(Icon, { name: "Plus", size: 14 }),
-                  " Nový",
-                ),
-              ),
-              React.createElement(
-                "div",
-                { className: "max-h-[60vh] overflow-auto" },
-                (templates[tplTab] || []).length === 0
-                  ? React.createElement(
-                      "div",
-                      { className: "p-3 text-sm text-stone-500" },
-                      "Zatím prázdné.",
-                    )
-                  : (sortedTemplates[tplTab] || []).map((row) =>
-                      React.createElement(
-                        "div",
-                        {
-                          key: row.id,
-                          className:
-                            "p-2 border-b-2 border-stone-800 flex items-start justify-between gap-2 hover:bg-amber-50",
-                        },
-                        React.createElement(
-                          "button",
-                          {
-                            className: "text-left flex-1",
-                            onClick: () =>
-                              setTplDraft((p) => ({ ...p, [tplTab]: row })),
-                          },
-                          React.createElement(
-                            "div",
-                            { className: "font-bold text-sm" },
-                            row.name || "(beze jména)",
-                          ),
-                          tplTab === "inventory" &&
-                            React.createElement(
-                              "div",
-                              { className: "text-xs text-stone-600" },
-                              getTypeLabel(row.type || "other", lang),
-                            ),
-                          tplTab === "weapons" &&
-                            React.createElement(
-                              "div",
-                              { className: "text-xs text-stone-600" },
-                              row.skill || "",
-                            ),
-                        ),
-                        React.createElement(
-                          "button",
-                          {
-                            className: "text-red-700",
-                            onClick: () => deleteTemplate(tplTab, row.id),
-                          },
-                          React.createElement(Icon, {
-                            name: "Trash2",
-                            size: 16,
-                          }),
-                        ),
-                      ),
-                    ),
-              ),
-            ),
-            React.createElement(
-              "div",
-              { className: "border-2 border-stone-800 bg-white p-3" },
-              !tplDraft[tplTab]
-                ? React.createElement(
+            { className: "pb-admin-list" },
+            (templates[tplTab] || []).length === 0
+              ? h("div", { className: "pb-modal-empty" }, t.adminEmpty)
+              : (sortedTemplates[tplTab] || []).map((row) =>
+                  h(
                     "div",
-                    { className: "text-sm text-stone-500" },
-                    "Vyber položku vlevo, nebo vytvoř novou.",
-                  )
-                : React.createElement(
-                    "div",
-                    { className: "flex flex-col gap-3" },
-                    React.createElement(
-                      "div",
+                    {
+                      key: row.id,
+                      className: `pb-admin-item ${tplDraft[tplTab]?.id === row.id ? "selected" : ""}`,
+                    },
+                    h(
+                      "button",
                       {
-                        className: "text-xs uppercase font-bold text-stone-600",
+                        className: "pb-admin-item-btn",
+                        onClick: () =>
+                          setTplDraft((p) => ({ ...p, [tplTab]: row })),
                       },
-                      "Editace",
+                      h(
+                        "div",
+                        { className: "pb-admin-item-name" },
+                        row.name || t.noName,
+                      ),
+                      tplTab === "inventory" &&
+                        h(
+                          "div",
+                          { className: "pb-admin-item-sub" },
+                          getTypeLabel(row.type || "other", lang),
+                        ),
+                      tplTab === "weapons" &&
+                        h(
+                          "div",
+                          { className: "pb-admin-item-sub" },
+                          row.skill || "",
+                        ),
+                      tplTab === "perks" &&
+                        h(
+                          "div",
+                          { className: "pb-admin-item-sub" },
+                          (row.effect || "").slice(0, 60),
+                        ),
                     ),
-                    React.createElement(InputGroup, {
-                      label:
-                        tplTab === "perks"
-                          ? "Název perku"
-                          : tplTab === "inventory"
-                            ? "Název předmětu"
-                            : "Název zbraně",
-                      value: tplDraft[tplTab].name || "",
-                      onChange: (v) =>
-                        setTplDraft((p) => ({
-                          ...p,
-                          [tplTab]: { ...p[tplTab], name: v },
-                        })),
-                      isEditing: true,
-                    }),
-                    tplTab === "inventory" &&
-                      React.createElement(
-                        "div",
-                        { className: "grid grid-cols-2 gap-3" },
-                        React.createElement(
-                          "div",
-                          { className: "flex flex-col" },
-                          React.createElement(
-                            "label",
-                            {
-                              className:
-                                "text-[10px] uppercase font-bold text-stone-500 mb-1",
-                            },
-                            "Typ",
-                          ),
-                          React.createElement(
-                            "select",
-                            {
-                              className:
-                                "border-b-2 border-stone-800 bg-transparent px-1 py-1 font-bold text-stone-800 focus:border-amber-600 focus:outline-none",
-                              value: tplDraft[tplTab].type || "other",
-                              onChange: (e) =>
-                                setTplDraft((p) => ({
-                                  ...p,
-                                  inventory: {
-                                    ...p.inventory,
-                                    type: e.target.value,
-                                  },
-                                })),
-                            },
-                            ITEM_TYPES.map((o) =>
-                              React.createElement(
-                                "option",
-                                { key: o.key, value: o.key },
-                                lang === "en" ? o.en : o.cs,
-                              ),
-                            ),
-                          ),
-                        ),
-                        React.createElement(InputGroup, {
-                          label: "Váha",
-                          value: tplDraft[tplTab].weight || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              inventory: { ...p.inventory, weight: v },
-                            })),
-                          isEditing: true,
-                        }),
-                      ),
-                    tplTab === "perks" &&
-                      React.createElement(
-                        "div",
-                        { className: "grid grid-cols-2 gap-3" },
-                        React.createElement(InputGroup, {
-                          label: "Stupeň",
-                          value: tplDraft[tplTab].rank || "1",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              perks: { ...p.perks, rank: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(
-                          "div",
-                          { className: "flex flex-col" },
-                          React.createElement(
-                            "label",
-                            {
-                              className:
-                                "text-[10px] uppercase font-bold text-stone-500 mb-1",
-                            },
-                            "Účinek",
-                          ),
-                          React.createElement(AutoResizeTextarea, {
-                            className: "border-2 border-stone-800 p-2 text-sm",
-                            value: tplDraft[tplTab].effect || "",
-                            onChange: (e) =>
-                              setTplDraft((p) => ({
-                                ...p,
-                                perks: { ...p.perks, effect: e.target.value },
-                              })),
-                            disabled: false,
-                          }),
-                        ),
-                      ),
-                    tplTab === "weapons" &&
-                      React.createElement(
-                        "div",
-                        { className: "grid grid-cols-2 gap-3" },
-                        React.createElement(InputGroup, {
-                          label: "Dovednost",
-                          value: tplDraft[tplTab].skill || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, skill: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(
-                          "div",
-                          { className: "flex items-center gap-2 mt-5" },
-                          React.createElement("input", {
-                            type: "checkbox",
-                            checked: !!tplDraft[tplTab].assigned,
-                            onChange: (e) =>
-                              setTplDraft((p) => ({
-                                ...p,
-                                weapons: {
-                                  ...p.weapons,
-                                  assigned: e.target.checked,
-                                },
-                              })),
-                          }),
-                          React.createElement(
-                            "span",
-                            { className: "text-sm font-bold" },
-                            "PŘIŘ.",
-                          ),
-                        ),
-                        React.createElement(InputGroup, {
-                          label: "CČ",
-                          value: tplDraft[tplTab].targetNum || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, targetNum: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Pošk.",
-                          value: tplDraft[tplTab].damage || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, damage: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Účinky",
-                          value: tplDraft[tplTab].effects || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, effects: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Druh",
-                          value: tplDraft[tplTab].type || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, type: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Rych.",
-                          value: tplDraft[tplTab].rateOfFire || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, rateOfFire: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Dostř.",
-                          value: tplDraft[tplTab].range || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, range: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Atributy",
-                          value: tplDraft[tplTab].attributes || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, attributes: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Munice",
-                          value: tplDraft[tplTab].ammo || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, ammo: v },
-                            })),
-                          isEditing: true,
-                        }),
-                        React.createElement(InputGroup, {
-                          label: "Váha",
-                          value: tplDraft[tplTab].weight || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, weight: v },
-                            })),
-                          isEditing: true,
-                        }),
-                      ),
-                    React.createElement(
-                      "div",
+                    h(
+                      "button",
                       {
-                        className:
-                          "flex justify-end gap-2 pt-2 border-t-2 border-stone-800",
+                        className: "pb-rowbtn del",
+                        onClick: () => deleteTemplate(tplTab, row.id),
                       },
-                      React.createElement(
-                        "button",
-                        {
-                          className: "btn-admin bg-green-700 text-white",
-                          onClick: () => saveTemplate(tplTab, tplDraft[tplTab]),
-                        },
-                        React.createElement(Icon, { name: "Save", size: 16 }),
-                        " Uložit",
-                      ),
+                      "✕",
                     ),
                   ),
-            ),
+                ),
+          ),
+          h(
+            "div",
+            { className: "pb-admin-form" },
+            !tplDraft[tplTab]
+              ? h("div", { className: "pb-modal-empty" }, t.adminPickHint)
+              : h(
+                  React.Fragment,
+                  null,
+                  h("span", { className: "pb-label" }, t.adminEditing),
+                  h(PbField, {
+                    label: t[`tplName_${tplTab}`],
+                    value: tplDraft[tplTab].name || "",
+                    onChange: (v) =>
+                      setTplDraft((p) => ({
+                        ...p,
+                        [tplTab]: { ...p[tplTab], name: v },
+                      })),
+                    disabled: false,
+                  }),
+                  tplTab === "inventory" &&
+                    h(
+                      "div",
+                      { className: "pb-admin-form-grid" },
+                      h(
+                        "div",
+                        { className: "pb-field" },
+                        h("span", { className: "pb-label" }, t.i_type),
+                        h(
+                          "select",
+                          {
+                            className: "pb-select",
+                            value: tplDraft.inventory.type || "other",
+                            onChange: (e) =>
+                              setTplDraft((p) => ({
+                                ...p,
+                                inventory: {
+                                  ...p.inventory,
+                                  type: e.target.value,
+                                },
+                              })),
+                          },
+                          ITEM_TYPES.map((o) =>
+                            h(
+                              "option",
+                              { key: o.key, value: o.key },
+                              lang === "en" ? o.en : o.cs,
+                            ),
+                          ),
+                        ),
+                      ),
+                      h(PbField, {
+                        label: t.w_weight,
+                        value: tplDraft.inventory.weight || "",
+                        onChange: (v) =>
+                          setTplDraft((p) => ({
+                            ...p,
+                            inventory: { ...p.inventory, weight: v },
+                          })),
+                        disabled: false,
+                      }),
+                    ),
+                  tplTab === "perks" &&
+                    h(
+                      "div",
+                      { className: "pb-admin-form-grid" },
+                      h(PbField, {
+                        label: t.p_rank,
+                        value: tplDraft.perks.rank || "1",
+                        onChange: (v) =>
+                          setTplDraft((p) => ({
+                            ...p,
+                            perks: { ...p.perks, rank: v },
+                          })),
+                        disabled: false,
+                      }),
+                      h(
+                        "div",
+                        { className: "pb-field" },
+                        h("span", { className: "pb-label" }, t.p_effect),
+                        h(AutoResizeTextarea, {
+                          className: "pb-cell",
+                          value: tplDraft.perks.effect || "",
+                          onChange: (e) =>
+                            setTplDraft((p) => ({
+                              ...p,
+                              perks: { ...p.perks, effect: e.target.value },
+                            })),
+                          disabled: false,
+                        }),
+                      ),
+                    ),
+                  tplTab === "weapons" &&
+                    h(
+                      "div",
+                      { className: "pb-admin-form-grid" },
+                      h(PbField, {
+                        label: t.w_skill,
+                        value: tplDraft.weapons.skill || "",
+                        onChange: (v) =>
+                          setTplDraft((p) => ({
+                            ...p,
+                            weapons: { ...p.weapons, skill: v },
+                          })),
+                        disabled: false,
+                      }),
+                      h(
+                        "label",
+                        {
+                          className: "pb-loc-status",
+                          style: { alignSelf: "end", paddingBottom: "8px" },
+                        },
+                        h("input", {
+                          type: "checkbox",
+                          checked: !!tplDraft.weapons.assigned,
+                          onChange: (e) =>
+                            setTplDraft((p) => ({
+                              ...p,
+                              weapons: {
+                                ...p.weapons,
+                                assigned: e.target.checked,
+                              },
+                            })),
+                        }),
+                        t.w_assigned,
+                      ),
+                      [
+                        ["targetNum", t.w_tn],
+                        ["damage", t.w_dmg],
+                        ["effects", t.w_effects],
+                        ["type", t.w_type],
+                        ["rateOfFire", t.w_rate],
+                        ["range", t.w_range],
+                        ["attributes", t.w_qual],
+                        ["ammo", t.w_ammo],
+                        ["weight", t.w_weight],
+                      ].map(([f, label]) =>
+                        h(PbField, {
+                          key: f,
+                          label: label,
+                          value: tplDraft.weapons[f] || "",
+                          onChange: (v) =>
+                            setTplDraft((p) => ({
+                              ...p,
+                              weapons: { ...p.weapons, [f]: v },
+                            })),
+                          disabled: false,
+                        }),
+                      ),
+                    ),
+                  h(
+                    "div",
+                    {
+                      style: {
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: "8px",
+                        paddingTop: "6px",
+                        borderTop: "1px dashed var(--pb-border)",
+                      },
+                    },
+                    h(
+                      "button",
+                      {
+                        className: "pb-chip save",
+                        onClick: () => saveTemplate(tplTab, tplDraft[tplTab]),
+                      },
+                      "▣ " + t.btnSave,
+                    ),
+                  ),
+                ),
           ),
         ),
       ),
@@ -3077,4 +3352,4 @@ function FalloutSheetApp() {
 }
 
 const root = createRoot(document.getElementById("root"));
-root.render(React.createElement(FalloutSheetApp));
+root.render(h(FalloutSheetApp));
