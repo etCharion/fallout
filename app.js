@@ -1547,7 +1547,8 @@ function FalloutSheetApp() {
   };
 
   const handleDelete = async () => {
-    if (!user || !selectedCharId) return;
+    // Mazání postavy je možné jen v editačním režimu.
+    if (!user || !selectedCharId || mode !== "edit") return;
     if (window.confirm(t.confirmDelete)) {
       try {
         await deleteDoc(
@@ -1884,7 +1885,8 @@ function FalloutSheetApp() {
             h("span", { className: "pb-brand-title" }, "PIP-BOY 2000 MK VI"),
             h("span", { className: "pb-brand-sub" }, "RobCo Industries"),
           ),
-          selectedCharId &&
+          isEditing &&
+            selectedCharId &&
             h(
               "button",
               {
