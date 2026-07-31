@@ -7,6 +7,8 @@ Frontend-only aplikace bez build kroku — otevírá se přímo `index.html`, ho
 
 - `index.html` — shell, načítá `app.js` jako ES modul
 - `app.js` — celá aplikace: React (bez JSX, přes `React.createElement` aliasovaný na `h`), Firebase auth + Firestore, dvojjazyčné texty v `TRANSLATIONS`, roller kostek
+- `perks.js` — katalog 94 perků z příručky (název cs/en, limit stupňů, požadavky, zkrácený popis)
+  a pomocníci na dohledání perku podle názvu; z Administrace se sype do Firestore jako šablony
 - `print.js` — generování A4 archů (karta postavy / prázdný formulář), tiskne se přes skrytý iframe
 - `styles.css` — Pip-Boy CRT vzhled, čtyři barevné motivy přes třídy na `<html>`
 - `manifest.json`, `favicon.svg` — PWA metadata
