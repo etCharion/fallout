@@ -281,10 +281,12 @@ ${body}
 
 // ---------- vyplněná karta postavy ----------
 
-export function buildCharacterSheetHTML(c, lang, typeLabel, ammoTypeLabel) {
+export function buildCharacterSheetHTML(c, lang, labels) {
   const t = T[lang === "en" ? "en" : "cs"];
-  const label = typeLabel || ((key) => key || "");
-  const ammoLabel = ammoTypeLabel || ((key) => key || "");
+  const id = (key) => key || "";
+  const label = (labels && labels.type) || id;
+  const ammoLabel = (labels && labels.ammo) || id;
+  const skillLabel = (labels && labels.weaponSkill) || id;
 
   // Radiace ukrajuje z maxima HP — na archu se šrafuje odečtená část pruhu.
   const hpMax = Math.max(0, parseInt(c.hpMax, 10) || 0);
@@ -388,7 +390,7 @@ export function buildCharacterSheetHTML(c, lang, typeLabel, ammoTypeLabel) {
 <div style="display:contents;">
   <span style="padding:4px 2px;text-align:center;color:var(--ink2);border-bottom:1px solid var(--line);">${w.assigned ? "●" : "○"}</span>
   <span style="padding:4px 6px;color:var(--ink);border-bottom:1px solid var(--line);">${esc(w.name)}</span>
-  <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.skill)}</span>
+  <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(skillLabel(w.skill))}</span>
   <span style="padding:4px 2px;text-align:center;color:var(--ink);border-bottom:1px solid var(--line);font-family:'VT323',monospace;font-size:14px;">${esc(w.targetNum)}</span>
   <span style="padding:4px 2px;text-align:center;color:var(--ink);border-bottom:1px solid var(--line);font-family:'VT323',monospace;font-size:14px;">${esc(w.damage)}</span>
   <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.effects)}</span>

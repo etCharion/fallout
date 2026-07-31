@@ -801,7 +801,6 @@ input[type="number"] {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 .pb-hp-row .cur {
@@ -1252,16 +1251,34 @@ input[type="number"] {
   text-transform: uppercase;
 }
 
+/* kritický úspěch žlutě, kritický neúspěch (20) červeně */
 .pb-die.crit {
-  border-color: var(--pb-fg-bright);
+  border-color: var(--pb-warn);
+  background: color-mix(in srgb, var(--pb-warn) 14%, var(--pb-bg-inset));
+}
+
+.pb-die.crit .pb-die-big,
+.pb-die.crit .pb-die-sub {
+  color: var(--pb-warn);
 }
 
 .pb-die.compl {
-  border-color: var(--pb-warn);
+  border-color: var(--pb-injury);
+  background: color-mix(in srgb, var(--pb-injury) 14%, var(--pb-bg-inset));
 }
 
 .pb-die.compl .pb-die-big,
 .pb-die.compl .pb-die-sub {
+  color: var(--pb-injury);
+}
+
+/* bojová kostka 5–6: poškození + efekt */
+.pb-die.eff {
+  border-color: var(--pb-warn);
+}
+
+.pb-die.eff .pb-die-big,
+.pb-die.eff .pb-die-sub {
   color: var(--pb-warn);
 }
 
@@ -2125,48 +2142,38 @@ input[type="number"] {
   visibility: visible;
 }
 
-/* radiace u HP */
-.pb-hp-eff {
-  font-family: "VT323", monospace;
-  font-size: 22px;
-  line-height: 1;
-  color: var(--pb-rad);
-  text-shadow: 0 0 8px currentColor;
-  white-space: nowrap;
-}
-
+/* Radiace sedí na stejném řádku jako zdraví a nese jeho měřítko. */
 .pb-rad-box {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   margin-left: auto;
   min-width: 0;
-  border: 1px solid var(--pb-border);
-  border-radius: 999px;
-  padding: 2px 6px 2px 9px;
 }
 
-.pb-rad-box.on {
-  border-color: var(--pb-rad);
-}
-
-.pb-rad-box .pb-label {
+.pb-rad-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
   color: var(--pb-fg-dim);
-  margin: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.pb-rad-box.on .pb-label {
+.pb-rad-box.on .pb-rad-label {
   color: var(--pb-rad);
 }
 
-.pb-rad-box .pb-num {
-  width: 46px;
-  font-size: 20px;
+.pb-num.rad {
+  width: 52px;
+  font-size: 30px;
+  color: var(--pb-fg-dim);
+  text-shadow: none;
 }
 
-.pb-rad-box.on .pb-num {
+.pb-rad-box.on .pb-num.rad {
   border-color: var(--pb-rad);
   color: var(--pb-rad);
+  text-shadow: 0 0 8px currentColor;
 }
 
 .pb-hp-seg.rad {
@@ -2183,6 +2190,75 @@ input[type="number"] {
 .pb-hp-seg.low.on {
   background: var(--pb-injury);
   box-shadow: 0 0 6px var(--pb-injury);
+}
+
+/* stepper zranění kolem nápisu ZRANĚNO */
+.pb-loc-statusrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pb-inj-step {
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 1px solid var(--pb-injury);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--pb-injury) 12%, transparent);
+  color: var(--pb-injury);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pb-inj-step:hover {
+  background: var(--pb-injury);
+  color: var(--pb-bg);
+}
+
+/* dovednost u zbraně — zkratka, která umí vybrat hod */
+.pb-wskill {
+  width: 100%;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--pb-fg-dim);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.pb-wskill.pickable {
+  cursor: pointer;
+  border-color: var(--pb-border);
+  color: var(--pb-fg);
+}
+
+.pb-wskill.pickable:hover {
+  border-color: var(--pb-warn);
+  color: var(--pb-warn);
+}
+
+.pb-wskill.picked {
+  border-color: var(--pb-warn);
+  background: color-mix(in srgb, var(--pb-warn) 14%, transparent);
+  color: var(--pb-warn);
+  text-shadow: 0 0 6px currentColor;
+}
+
+/* kostky mimo režim HRA */
+.pb-dice.locked .pb-dice-tray,
+.pb-dice.locked .pb-dice-controls {
+  opacity: 0.45;
+}
+
+.pb-dice.locked .pb-roll-btn,
+.pb-dice.locked .pb-dice-step {
+  cursor: not-allowed;
 }
 
 /* ============================================================
