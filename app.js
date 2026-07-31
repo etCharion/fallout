@@ -614,24 +614,45 @@ function d20SummaryBits(lang, sm) {
   return bits;
 }
 
+// Typy, které jde u vybavení vybrat. Zbraně mají vlastní sekci, takže sem
+// nepatří — „Jiné" musí zůstat poslední, slouží jako záložní hodnota.
 const ITEM_TYPES = [
   { key: "food", cs: "Jídlo", en: "Food" },
   { key: "drink", cs: "Pití", en: "Drink" },
   { key: "chems", cs: "Chemikálie", en: "Chems" },
   { key: "clothing", cs: "Oblečení", en: "Clothing" },
   { key: "armor", cs: "Zbroj", en: "Armor" },
-  { key: "melee", cs: "Zbraň na blízko", en: "Melee weapon" },
-  { key: "light", cs: "Lehká zbraň", en: "Light weapon" },
-  { key: "heavy", cs: "Těžká zbraň", en: "Heavy weapon" },
-  { key: "energy", cs: "Energetická zbraň", en: "Energy weapon" },
   { key: "ammo", cs: "Munice", en: "Ammunition" },
   { key: "other", cs: "Jiné", en: "Other" },
 ];
 
+// Zbraňové typy z dřívějška: nenabízejí se, ale staré položky si díky nim
+// udrží popisek, dokud je někdo nepřepne.
+const LEGACY_ITEM_TYPES = [
+  { key: "melee", cs: "Zbraň na blízko", en: "Melee weapon" },
+  { key: "light", cs: "Lehká zbraň", en: "Light weapon" },
+  { key: "heavy", cs: "Těžká zbraň", en: "Heavy weapon" },
+  { key: "energy", cs: "Energetická zbraň", en: "Energy weapon" },
+];
+
 function getTypeLabel(key, lang) {
   const t =
-    ITEM_TYPES.find((x) => x.key === key) || ITEM_TYPES[ITEM_TYPES.length - 1];
+    ITEM_TYPES.find((x) => x.key === key) ||
+    LEGACY_ITEM_TYPES.find((x) => x.key === key) ||
+    ITEM_TYPES[ITEM_TYPES.length - 1];
   return lang === "en" ? t.en : t.cs;
+}
+
+// Do výběru přidej starý typ, jen když ho položka opravdu má.
+function itemTypeOptions(current) {
+  const legacy = LEGACY_ITEM_TYPES.find((x) => x.key === current);
+  return legacy ? [...ITEM_TYPES, legacy] : ITEM_TYPES;
+}
+
+// Do filtru přidej starý typ, jen když se v datech ještě vyskytuje.
+function itemTypeFilterOptions(rows) {
+  const used = new Set((rows || []).map((r) => r.type));
+  return [...ITEM_TYPES, ...LEGACY_ITEM_TYPES.filter((x) => used.has(x.key))];
 }
 
 const DEFAULT_CHARACTER = {
@@ -999,7 +1020,7 @@ function TemplatePicker({
               onChange: (e) => setFilterType(e.target.value),
             },
             h("option", { value: "all" }, t.allTypes),
-            ITEM_TYPES.map((it) =>
+            itemTypeFilterOptions(templates).map((it) =>
               h(
                 "option",
                 { key: it.key, value: it.key },
@@ -3572,7 +3593,7 @@ function FalloutSheetApp() {
                                   e.target.value,
                                 ),
                             },
-                            ITEM_TYPES.map((o) =>
+                            itemTypeOptions(it.type).map((o) =>
                               h(
                                 "option",
                                 { key: o.key, value: o.key },
@@ -3987,7 +4008,7 @@ function FalloutSheetApp() {
                     onChange: (e) => setTplFilterType(e.target.value),
                   },
                   h("option", { value: "all" }, t.allTypes),
-                  ITEM_TYPES.map((it) =>
+                  itemTypeFilterOptions(templates.inventory).map((it) =>
                     h(
                       "option",
                       { key: it.key, value: it.key },
@@ -4111,7 +4132,7 @@ function FalloutSheetApp() {
                                 },
                               })),
                           },
-                          ITEM_TYPES.map((o) =>
+                          itemTypeOptions(tplDraft.inventory.type).map((o) =>
                             h(
                               "option",
                               { key: o.key, value: o.key },
