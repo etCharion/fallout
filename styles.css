@@ -1767,12 +1767,38 @@ input[type="number"] {
   padding: 12px 16px;
 }
 
+.pb-admin-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pb-admin-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.pb-admin-filters .pb-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.pb-admin-filters .pb-select {
+  width: auto;
+  max-width: 48%;
+}
+
 .pb-admin-list {
   border: 1px solid var(--pb-border);
   border-radius: 10px;
   background: var(--pb-bg-inset);
   max-height: 56vh;
   overflow: auto;
+}
+
+.pb-admin-col .pb-admin-list {
+  flex: 1;
 }
 
 .pb-admin-item {

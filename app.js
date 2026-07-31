@@ -176,6 +176,8 @@ const TRANSLATIONS = {
     pickPerks: "Vyber perk",
     searchPh: "Hledat…",
     allTypes: "Všechny typy",
+    allSkills: "Všechny dovednosti",
+    adminNoMatch: "Filtru nic neodpovídá.",
     noName: "(beze jména)",
     btnClose: "Zavřít",
     btnUndo: "Zpět",
@@ -372,6 +374,8 @@ const TRANSLATIONS = {
     pickPerks: "Pick a perk",
     searchPh: "Search…",
     allTypes: "All types",
+    allSkills: "All skills",
+    adminNoMatch: "Nothing matches the filter.",
     noName: "(unnamed)",
     btnClose: "Close",
     btnUndo: "Undo",
@@ -1276,6 +1280,8 @@ function FalloutSheetApp() {
     perks: [],
   });
   const [tplTab, setTplTab] = useState("weapons");
+  const [tplSearch, setTplSearch] = useState("");
+  const [tplFilterType, setTplFilterType] = useState("all");
   const [tplDraft, setTplDraft] = useState({
     weapons: null,
     inventory: null,
@@ -1386,6 +1392,19 @@ function FalloutSheetApp() {
       perks: [...templates.perks].sort(sortFn),
     };
   }, [templates, lang]);
+
+  // Administrace filtruje podle názvu a podle typu (vybavení) či
+  // dovednosti (zbraně).
+  const filteredTemplates = useMemo(() => {
+    const q = tplSearch.trim().toLowerCase();
+    return (sortedTemplates[tplTab] || []).filter((row) => {
+      if (q && !(row.name || "").toLowerCase().includes(q)) return false;
+      if (tplFilterType === "all") return true;
+      if (tplTab === "inventory") return (row.type || "other") === tplFilterType;
+      if (tplTab === "weapons") return row.skill === tplFilterType;
+      return true;
+    });
+  }, [sortedTemplates, tplTab, tplSearch, tplFilterType]);
 
   const t = TRANSLATIONS[lang];
   const fileInputRef = useRef(null);
@@ -3894,6 +3913,8 @@ function FalloutSheetApp() {
                   onClick: () => {
                     setTplTab(tab);
                     setTplDraft((p) => ({ ...p, [tab]: null }));
+                    setTplSearch("");
+                    setTplFilterType("all");
                   },
                 },
                 tab === "weapons"
@@ -3904,11 +3925,10 @@ function FalloutSheetApp() {
               ),
             ),
           ),
-          h("span", { className: "pb-push-right" }),
           h(
             "button",
             {
-              className: "pb-chip accent",
+              className: "pb-chip accent pb-push-right",
               onClick: () =>
                 setTplDraft((p) => ({
                   ...p,
@@ -3947,10 +3967,60 @@ function FalloutSheetApp() {
           { className: "pb-admin-grid" },
           h(
             "div",
+            { className: "pb-admin-col" },
+            h(
+              "div",
+              { className: "pb-admin-filters" },
+              h("input", {
+                type: "text",
+                className: "pb-input",
+                placeholder: t.searchPh,
+                value: tplSearch,
+                onChange: (e) => setTplSearch(e.target.value),
+              }),
+              tplTab === "inventory" &&
+                h(
+                  "select",
+                  {
+                    className: "pb-select",
+                    value: tplFilterType,
+                    onChange: (e) => setTplFilterType(e.target.value),
+                  },
+                  h("option", { value: "all" }, t.allTypes),
+                  ITEM_TYPES.map((it) =>
+                    h(
+                      "option",
+                      { key: it.key, value: it.key },
+                      lang === "en" ? it.en : it.cs,
+                    ),
+                  ),
+                ),
+              tplTab === "weapons" &&
+                h(
+                  "select",
+                  {
+                    className: "pb-select",
+                    value: tplFilterType,
+                    onChange: (e) => setTplFilterType(e.target.value),
+                  },
+                  h("option", { value: "all" }, t.allSkills),
+                  WEAPON_SKILLS.map((ws) =>
+                    h(
+                      "option",
+                      { key: ws.key, value: ws.key },
+                      `${getWeaponSkillLabel(ws.key, lang)} · ${skillName(t, ws.key)}`,
+                    ),
+                  ),
+                ),
+            ),
+          h(
+            "div",
             { className: "pb-admin-list" },
             (templates[tplTab] || []).length === 0
               ? h("div", { className: "pb-modal-empty" }, t.adminEmpty)
-              : (sortedTemplates[tplTab] || []).map((row) =>
+              : filteredTemplates.length === 0
+              ? h("div", { className: "pb-modal-empty" }, t.adminNoMatch)
+              : filteredTemplates.map((row) =>
                   h(
                     "div",
                     {
@@ -3998,6 +4068,7 @@ function FalloutSheetApp() {
                     ),
                   ),
                 ),
+          ),
           ),
           h(
             "div",
@@ -4195,17 +4266,57 @@ function FalloutSheetApp() {
                         ["ammo", t.w_ammo],
                         ["weight", t.w_weight],
                       ].map(([f, label]) =>
-                        h(PbField, {
-                          key: f,
-                          label: label,
-                          value: tplDraft.weapons[f] || "",
-                          onChange: (v) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: { ...p.weapons, [f]: v },
-                            })),
-                          disabled: false,
-                        }),
+                        // Munice se vybírá ze stejného seznamu jako u zbraně
+                        // na listu, ať se typy nerozejdou.
+                        f === "ammo"
+                          ? h(
+                              "div",
+                              { key: f, className: "pb-field" },
+                              h("span", { className: "pb-label" }, label),
+                              h(
+                                "select",
+                                {
+                                  className: "pb-select",
+                                  value: tplDraft.weapons.ammo || "",
+                                  onChange: (e) =>
+                                    setTplDraft((p) => ({
+                                      ...p,
+                                      weapons: {
+                                        ...p.weapons,
+                                        ammo: e.target.value,
+                                      },
+                                    })),
+                                },
+                                h("option", { value: "" }, t.ammoPick),
+                                AMMO_TYPES.map((a) =>
+                                  h(
+                                    "option",
+                                    { key: a.key, value: a.key },
+                                    lang === "en" ? a.en : a.cs,
+                                  ),
+                                ),
+                                tplDraft.weapons.ammo &&
+                                  !AMMO_TYPES.some(
+                                    (a) => a.key === tplDraft.weapons.ammo,
+                                  ) &&
+                                  h(
+                                    "option",
+                                    { value: tplDraft.weapons.ammo },
+                                    tplDraft.weapons.ammo,
+                                  ),
+                              ),
+                            )
+                          : h(PbField, {
+                              key: f,
+                              label: label,
+                              value: tplDraft.weapons[f] || "",
+                              onChange: (v) =>
+                                setTplDraft((p) => ({
+                                  ...p,
+                                  weapons: { ...p.weapons, [f]: v },
+                                })),
+                              disabled: false,
+                            }),
                       ),
                     ),
                   h(
