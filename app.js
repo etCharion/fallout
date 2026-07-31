@@ -10,6 +10,15 @@ import {
   buildBlankSheetHTML,
   printSheet,
 } from "./print.js";
+import {
+  PERK_CATALOG,
+  PERK_REQ_ATTRS,
+  perkByKey,
+  perkIdOf,
+  perkRules,
+  perkTemplateDoc,
+  resolvePerk,
+} from "./perks.js";
 
 // Firebase (modular)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -254,6 +263,38 @@ const TRANSLATIONS = {
     ammoTip: "Počet v inventáři — mění se i v seznamu vybavení",
     seedAmmo: "Doplnit typy munice",
     seedAmmoHint: "Chybí {n} typů munice z příručky.",
+    // perky
+    seedPerks: "Doplnit perky",
+    seedPerksHint: "Chybí {n} perků z příručky.",
+    tplRanks: "Limit stupňů",
+    tplReqLevel: "Min. úroveň",
+    tplLevelStep: "Úroveň +/stupeň",
+    tplReqAttrs: "Požadované atributy (0 = bez požadavku)",
+    tplNoRobot: "Nelze pro robota",
+    perkOwnedAll: "Vlastněné i nové",
+    perkOwnedHide: "Skrýt vlastněné",
+    perkOwnedOnly: "Jen vlastněné",
+    perkReqAll: "Všechny požadavky",
+    perkReqNone: "Bez požadavku na atribut",
+    perkAttrMax: "ATRIB ≤",
+    perkAttrMaxTip: "Nejvyšší hodnota, kterou perk u zvoleného atributu žádá",
+    perkLevelMax: "ÚROVEŇ ≤",
+    perkLevelMaxTip: "Nejvyšší požadovaná úroveň perku",
+    perkFits: "Postava splňuje",
+    perkFitsTip:
+      "Nechá jen perky, na které má vybraná postava atributy, úroveň i volný stupeň.",
+    perkRobot: "Postava je robot",
+    perkRobotTip: "Skryje perky, které robot mít nemůže.",
+    perkFiltersReset: "Zrušit filtry",
+    perkNoReq: "Bez požadavků",
+    perkLevelReq: "úroveň {n}+",
+    perkOwnedBadge: "MÁŠ",
+    perkExcl: "nelze s {x}",
+    perkUnmet: "Postava nesplňuje: {x}",
+    perkNeedLevel: "úroveň {n}",
+    perkNeedRanks: "všechny stupně vyčerpány",
+    perkNeedRobot: "nelze pro robota",
+    perkNeedExcl: "konflikt s perkem {x}",
   },
   en: {
     headerTitle: "THE ROLEPLAYING GAME",
@@ -452,6 +493,38 @@ const TRANSLATIONS = {
     ammoTip: "Amount in inventory — also updates the equipment list",
     seedAmmo: "Add ammo types",
     seedAmmoHint: "{n} ammo types from the rulebook are missing.",
+    // perks
+    seedPerks: "Add perks",
+    seedPerksHint: "{n} perks from the rulebook are missing.",
+    tplRanks: "Rank limit",
+    tplReqLevel: "Min. level",
+    tplLevelStep: "Level +/rank",
+    tplReqAttrs: "Required attributes (0 = no requirement)",
+    tplNoRobot: "Not available to robots",
+    perkOwnedAll: "Owned and new",
+    perkOwnedHide: "Hide owned",
+    perkOwnedOnly: "Owned only",
+    perkReqAll: "All requirements",
+    perkReqNone: "No attribute requirement",
+    perkAttrMax: "ATTR ≤",
+    perkAttrMaxTip: "Highest value the perk asks for in the chosen attribute",
+    perkLevelMax: "LEVEL ≤",
+    perkLevelMaxTip: "Highest level the perk requires",
+    perkFits: "Character qualifies",
+    perkFitsTip:
+      "Keeps only perks the selected character has the attributes, level and a free rank for.",
+    perkRobot: "Character is a robot",
+    perkRobotTip: "Hides perks a robot cannot take.",
+    perkFiltersReset: "Clear filters",
+    perkNoReq: "No requirements",
+    perkLevelReq: "level {n}+",
+    perkOwnedBadge: "OWNED",
+    perkExcl: "not with {x}",
+    perkUnmet: "Character does not meet: {x}",
+    perkNeedLevel: "level {n}",
+    perkNeedRanks: "all ranks already taken",
+    perkNeedRobot: "not available to robots",
+    perkNeedExcl: "conflicts with {x}",
   },
 };
 
@@ -562,6 +635,210 @@ const SKILL_ATTR = {
   sneak: "agility",
   throwing: "agility",
 };
+
+// ---------- PERKY ----------
+// Filtr perků pracuje s podmínkami z tabulky perků: co už postava má,
+// požadovaný atribut a jeho hodnota, minimální úroveň, zákaz pro roboty
+// a dvojice perků, které se navzájem vylučují.
+const DEFAULT_PERK_FILTER = {
+  owned: "all", // all | hide | only
+  attr: "all", // all | none | klíč atributu
+  attrMax: "",
+  levelMax: "",
+  fits: false,
+  robot: false,
+};
+
+const isPerkFilterActive = (f) =>
+  f.owned !== "all" ||
+  f.attr !== "all" ||
+  f.attrMax !== "" ||
+  f.levelMax !== "" ||
+  f.fits ||
+  f.robot;
+
+const attrCode = (key, lang) =>
+  (SPECIAL_CODES[key] || {})[lang === "en" ? "en" : "cs"] || key;
+
+// V závorce u perku je druhý jazyk; do popisků podmínek se hodí jen ten
+// odpovídající tomu, co je zrovna nastavené.
+const perkShortName = (p, lang) => (lang === "en" ? p.en || p.cs : p.cs);
+
+// Zkrácené popisy perků jsou i tak na jednu dvě řádky — useknutí přiznej
+// výpustkou, ať to nevypadá jako chybějící text.
+const clipText = (v, n) => {
+  const s = String(v ?? "").trim();
+  return s.length > n ? s.slice(0, n).trimEnd() + "…" : s;
+};
+
+const rankWord = (lang, n) =>
+  plural(lang, n, ["stupeň", "stupně", "stupňů"], ["rank", "ranks"]);
+
+// Kolik stupňů kterého perku už postava má. Klíče drží `perkIdOf`, takže se
+// potkají i řádky zapsané ručně, bez odkazu do katalogu.
+function ownedPerkMap(char) {
+  const map = new Map();
+  for (const row of char?.perks || []) {
+    const id = perkIdOf(row);
+    if (!id) continue;
+    map.set(id, (map.get(id) || 0) + Math.max(1, parseInt(row.rank, 10) || 1));
+  }
+  return map;
+}
+
+// Podmínky pod názvem perku: „ODO 7 · úroveň 1+ · 3 stupně".
+function perkReqLabel(row, lang, t) {
+  const r = perkRules(row);
+  const bits = PERK_REQ_ATTRS.filter((k) => r.attrs[k]).map(
+    (k) => `${attrCode(k, lang)} ${r.attrs[k]}`,
+  );
+  if (r.level) bits.push(t.perkLevelReq.replace("{n}", r.level));
+  if (r.noRobot) bits.push(t.tplNoRobot.toLowerCase());
+  for (const key of r.excludes) {
+    const other = perkByKey(key);
+    bits.push(
+      t.perkExcl.replace("{x}", other ? perkShortName(other, lang) : key),
+    );
+  }
+  if (r.ranks > 1) bits.push(`${r.ranks} ${rankWord(lang, r.ranks)}`);
+  return bits.length ? bits.join(" · ") : t.perkNoReq;
+}
+
+// Co postavě chybí, aby si perk mohla vzít. Prázdné pole = může hned.
+function perkProblems(row, char, owned, isRobot, lang, t) {
+  if (!char) return [];
+  const r = perkRules(row);
+  const out = [];
+  for (const k of PERK_REQ_ATTRS) {
+    const need = r.attrs[k];
+    if (need && (parseInt(char[k], 10) || 0) < need)
+      out.push(`${attrCode(k, lang)} ${need}`);
+  }
+  const have = owned.get(perkIdOf(row)) || 0;
+  if (have >= r.ranks) out.push(t.perkNeedRanks);
+  // Každý další stupeň posouvá požadovanou úroveň o `levelStep`.
+  const needLevel = r.level ? r.level + have * r.levelStep : 0;
+  if (needLevel && (parseInt(char.level, 10) || 0) < needLevel)
+    out.push(t.perkNeedLevel.replace("{n}", needLevel));
+  if (r.noRobot && isRobot) out.push(t.perkNeedRobot);
+  for (const key of r.excludes) {
+    if (!owned.has(key)) continue;
+    const other = perkByKey(key);
+    out.push(
+      t.perkNeedExcl.replace("{x}", other ? perkShortName(other, lang) : key),
+    );
+  }
+  return out;
+}
+
+function perkMatchesFilter(row, f, ctx) {
+  const r = perkRules(row);
+  const have = ctx.owned.get(perkIdOf(row)) || 0;
+  if (ctx.char && f.owned === "hide" && have > 0) return false;
+  if (ctx.char && f.owned === "only" && have === 0) return false;
+  const hasAnyAttr = PERK_REQ_ATTRS.some((k) => r.attrs[k]);
+  if (f.attr === "none" && hasAnyAttr) return false;
+  if (f.attr !== "all" && f.attr !== "none" && !r.attrs[f.attr]) return false;
+  const attrMax = parseInt(f.attrMax, 10);
+  if (Number.isFinite(attrMax)) {
+    // Bez vybraného atributu platí strop na ten nejnáročnější požadavek.
+    const vals =
+      f.attr === "all" || f.attr === "none"
+        ? PERK_REQ_ATTRS.map((k) => r.attrs[k] || 0)
+        : [r.attrs[f.attr] || 0];
+    if (Math.max(0, ...vals) > attrMax) return false;
+  }
+  const levelMax = parseInt(f.levelMax, 10);
+  if (Number.isFinite(levelMax) && r.level > levelMax) return false;
+  if (f.robot && r.noRobot) return false;
+  if (f.fits && ctx.char) {
+    const lack = perkProblems(row, ctx.char, ctx.owned, f.robot, ctx.lang, ctx.t);
+    if (lack.length) return false;
+  }
+  return true;
+}
+
+// Filtrační lišta perků — sdílí ji Administrace i výběr perku na kartu.
+function PerkFilters({ value, onChange, lang, t, hasChar }) {
+  const set = (patch) => onChange({ ...value, ...patch });
+  const numFilter = (key, label, title) =>
+    h(
+      "label",
+      { className: "pb-perk-check", title },
+      label,
+      h("input", {
+        type: "number",
+        className: "pb-num pb-perk-num",
+        min: "0",
+        value: value[key],
+        onChange: (e) => set({ [key]: e.target.value }),
+      }),
+    );
+  return h(
+    "div",
+    { className: "pb-perk-filters" },
+    h(
+      "select",
+      {
+        className: "pb-select",
+        value: value.owned,
+        onChange: (e) => set({ owned: e.target.value }),
+        disabled: !hasChar,
+        title: hasChar ? undefined : t.chooseChar,
+      },
+      h("option", { value: "all" }, t.perkOwnedAll),
+      h("option", { value: "hide" }, t.perkOwnedHide),
+      h("option", { value: "only" }, t.perkOwnedOnly),
+    ),
+    h(
+      "select",
+      {
+        className: "pb-select",
+        value: value.attr,
+        onChange: (e) => set({ attr: e.target.value }),
+      },
+      h("option", { value: "all" }, t.perkReqAll),
+      h("option", { value: "none" }, t.perkReqNone),
+      PERK_REQ_ATTRS.map((k) =>
+        h("option", { key: k, value: k }, `${attrCode(k, lang)} · ${t[k]}`),
+      ),
+    ),
+    numFilter("attrMax", t.perkAttrMax, t.perkAttrMaxTip),
+    numFilter("levelMax", t.perkLevelMax, t.perkLevelMaxTip),
+    h(
+      "label",
+      { className: "pb-perk-check", title: t.perkFitsTip },
+      h("input", {
+        type: "checkbox",
+        className: "pb-check",
+        checked: value.fits,
+        disabled: !hasChar,
+        onChange: (e) => set({ fits: e.target.checked }),
+      }),
+      t.perkFits,
+    ),
+    h(
+      "label",
+      { className: "pb-perk-check", title: t.perkRobotTip },
+      h("input", {
+        type: "checkbox",
+        className: "pb-check",
+        checked: value.robot,
+        onChange: (e) => set({ robot: e.target.checked }),
+      }),
+      t.perkRobot,
+    ),
+    isPerkFilterActive(value) &&
+      h(
+        "button",
+        {
+          className: "pb-chip dim",
+          onClick: () => onChange({ ...DEFAULT_PERK_FILTER }),
+        },
+        "✕ " + t.perkFiltersReset,
+      ),
+  );
+}
 
 // Porovnávání názvů munice: zajímají nás jen písmena a číslice, aby
 // „10. mm náboje", „10 mm" i „10mm" byly totéž.
@@ -935,6 +1212,43 @@ function ModalShell({ onClose, className, children }) {
   );
 }
 
+// Řádek perku ve výběru: nad účinkem jsou podmínky, vpravo poznámka, jestli
+// už ho postava má a jestli na něj vůbec dosáhne. Vzít ho jde tak jako tak —
+// pravidla si hlídá stůl, aplikace jen napovídá.
+function PerkPickRow({ row, ctx, isRobot, lang, t, onPick }) {
+  const have = ctx.owned.get(perkIdOf(row)) || 0;
+  const rules = perkRules(row);
+  const lack = perkProblems(row, ctx.char, ctx.owned, isRobot, lang, t);
+  const note = lack.length ? t.perkUnmet.replace("{x}", lack.join(", ")) : "";
+  return h(
+    "button",
+    {
+      className: `pb-pick-row ${have ? "owned" : ""} ${lack.length ? "unmet" : ""}`,
+      onClick: onPick,
+      title: note || undefined,
+    },
+    h(
+      "div",
+      { className: "pb-pick-main" },
+      h(
+        "span",
+        { className: "pb-pick-name" },
+        row.name || t.noName,
+        have > 0 &&
+          h(
+            "span",
+            { className: "pb-perk-badge" },
+            `${t.perkOwnedBadge} ${have}/${rules.ranks}`,
+          ),
+      ),
+      h("span", { className: "pb-pick-sub" }, perkReqLabel(row, lang, t)),
+      h("span", { className: "pb-pick-sub" }, clipText(row.effect, 120)),
+      note && h("span", { className: "pb-pick-warn" }, "⚠ " + note),
+    ),
+    h("span", { className: "pb-pick-use" }, "+ " + t.use),
+  );
+}
+
 function TemplatePicker({
   isOpen,
   onClose,
@@ -942,17 +1256,24 @@ function TemplatePicker({
   onOpenAdmin,
   templates,
   type,
+  character,
   lang,
   t,
 }) {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [perkFilter, setPerkFilter] = useState({ ...DEFAULT_PERK_FILTER });
   useEffect(() => {
     if (isOpen) {
       setSearch("");
       setFilterType("all");
+      setPerkFilter({ ...DEFAULT_PERK_FILTER });
     }
   }, [isOpen, type]);
+  const perkCtx = useMemo(
+    () => ({ char: character, owned: ownedPerkMap(character), lang, t }),
+    [character, lang, t],
+  );
   if (!isOpen) return null;
   const filtered = templates
     .filter((tp) => {
@@ -961,7 +1282,9 @@ function TemplatePicker({
         .includes(search.toLowerCase());
       const matchesType =
         type !== "inventory" || filterType === "all" || tp.type === filterType;
-      return matchesSearch && matchesType;
+      const matchesPerk =
+        type !== "perks" || perkMatchesFilter(tp, perkFilter, perkCtx);
+      return matchesSearch && matchesType && matchesPerk;
     })
     .sort((a, b) =>
       (a.name || "").localeCompare(b.name || "", lang, {
@@ -1029,35 +1352,62 @@ function TemplatePicker({
             ),
           ),
       ),
+      type === "perks" &&
+        h(PerkFilters, {
+          value: perkFilter,
+          onChange: setPerkFilter,
+          lang,
+          t,
+          hasChar: !!character,
+        }),
       filtered.length === 0
-        ? h("div", { className: "pb-modal-empty" }, t.pickerEmpty)
+        ? h(
+            "div",
+            { className: "pb-modal-empty" },
+            templates.length === 0 ? t.pickerEmpty : t.adminNoMatch,
+          )
         : filtered.map((tpl) =>
-            h(
-              "button",
-              {
-                key: tpl.id,
-                className: "pb-pick-row",
-                onClick: () => {
-                  onSelect(tpl);
-                  onClose();
-                },
-              },
-              h(
-                "div",
-                { className: "pb-pick-main" },
-                h("span", { className: "pb-pick-name" }, tpl.name || t.noName),
-                h(
-                  "span",
-                  { className: "pb-pick-sub" },
-                  type === "inventory"
-                    ? getTypeLabel(tpl.type, lang)
-                    : type === "weapons"
-                      ? skillFullName(t, tpl.skill)
-                      : (tpl.effect || "").slice(0, 60),
+            type === "perks"
+              ? h(PerkPickRow, {
+                  key: tpl.id,
+                  row: tpl,
+                  ctx: perkCtx,
+                  isRobot: perkFilter.robot,
+                  lang,
+                  t,
+                  onPick: () => {
+                    onSelect(tpl);
+                    onClose();
+                  },
+                })
+              : h(
+                  "button",
+                  {
+                    key: tpl.id,
+                    className: "pb-pick-row",
+                    onClick: () => {
+                      onSelect(tpl);
+                      onClose();
+                    },
+                  },
+                  h(
+                    "div",
+                    { className: "pb-pick-main" },
+                    h(
+                      "span",
+                      { className: "pb-pick-name" },
+                      tpl.name || t.noName,
+                    ),
+                    h(
+                      "span",
+                      { className: "pb-pick-sub" },
+                      type === "inventory"
+                        ? getTypeLabel(tpl.type, lang)
+                        : skillFullName(t, tpl.skill),
+                    ),
+                  ),
+                  h("span", { className: "pb-pick-use" }, "+ " + t.use),
                 ),
-              ),
-              h("span", { className: "pb-pick-use" }, "+ " + t.use),
-            ),
           ),
     ),
   );
@@ -1262,7 +1612,19 @@ function defaultTemplate(tab) {
       quantity: "1",
       ammoKey: "",
     };
-  if (tab === "perks") return { id, name: "", rank: "1", effect: "" };
+  if (tab === "perks")
+    return {
+      id,
+      name: "",
+      rank: "1",
+      effect: "",
+      ranks: 1,
+      reqLevel: 0,
+      levelStep: 0,
+      reqAttrs: {},
+      noRobot: false,
+      excludes: [],
+    };
   return { id, name: "" };
 }
 
@@ -1303,6 +1665,9 @@ function FalloutSheetApp() {
   const [tplTab, setTplTab] = useState("weapons");
   const [tplSearch, setTplSearch] = useState("");
   const [tplFilterType, setTplFilterType] = useState("all");
+  const [tplPerkFilter, setTplPerkFilter] = useState({
+    ...DEFAULT_PERK_FILTER,
+  });
   const [tplDraft, setTplDraft] = useState({
     weapons: null,
     inventory: null,
@@ -1414,18 +1779,39 @@ function FalloutSheetApp() {
     };
   }, [templates, lang]);
 
-  // Administrace filtruje podle názvu a podle typu (vybavení) či
-  // dovednosti (zbraně).
+  // Podmínky perků se počítají proti otevřené postavě — bez ní zůstanou
+  // filtry na vlastnictví a splnění vypnuté.
+  const perkCtx = useMemo(
+    () => ({
+      char: localChar,
+      owned: ownedPerkMap(localChar),
+      lang,
+      t: TRANSLATIONS[lang],
+    }),
+    [localChar, lang],
+  );
+
+  // Administrace filtruje podle názvu a podle typu (vybavení),
+  // dovednosti (zbraně) či podmínek z tabulky perků.
   const filteredTemplates = useMemo(() => {
     const q = tplSearch.trim().toLowerCase();
     return (sortedTemplates[tplTab] || []).filter((row) => {
       if (q && !(row.name || "").toLowerCase().includes(q)) return false;
+      if (tplTab === "perks")
+        return perkMatchesFilter(row, tplPerkFilter, perkCtx);
       if (tplFilterType === "all") return true;
       if (tplTab === "inventory") return (row.type || "other") === tplFilterType;
       if (tplTab === "weapons") return row.skill === tplFilterType;
       return true;
     });
-  }, [sortedTemplates, tplTab, tplSearch, tplFilterType]);
+  }, [
+    sortedTemplates,
+    tplTab,
+    tplSearch,
+    tplFilterType,
+    tplPerkFilter,
+    perkCtx,
+  ]);
 
   const t = TRANSLATIONS[lang];
   const fileInputRef = useRef(null);
@@ -1743,6 +2129,37 @@ function FalloutSheetApp() {
     }
   };
 
+  // Perky z katalogu: chybí ten, na který v šablonách nesedí ani `perkKey`,
+  // ani název — ať se opakovaným doplněním nezaloží duplikát.
+  const missingPerks = () => {
+    const taken = new Set(
+      (templates.perks || []).map((tp) => perkIdOf(tp)).filter(Boolean),
+    );
+    return PERK_CATALOG.filter((p) => !taken.has(p.key));
+  };
+  const missingPerkCount = missingPerks().length;
+
+  const seedPerkTemplates = async () => {
+    for (const p of missingPerks()) {
+      try {
+        await setDoc(
+          doc(
+            db,
+            "artifacts",
+            appId,
+            "public",
+            "data",
+            "fallout_templates_perks",
+            crypto.randomUUID(),
+          ),
+          perkTemplateDoc(p),
+        );
+      } catch (e) {
+        console.error("Perk seed error:", e);
+      }
+    }
+  };
+
   const addFromTemplate = (tpl) => {
     if (!localChar) return;
     const ln = pickerConfig.type;
@@ -1798,6 +2215,8 @@ function FalloutSheetApp() {
             name: tpl.name || "",
             rank: tpl.rank || "1",
             effect: tpl.effect || "",
+            // Odkaz do katalogu drží vazbu i po přejmenování řádku.
+            perkKey: tpl.perkKey || resolvePerk(tpl)?.key || "",
           },
         ],
       });
@@ -3686,6 +4105,7 @@ function FalloutSheetApp() {
                         "button",
                         {
                           className: "pb-chip dim pb-noprint",
+                          title: t.fromTpl,
                           onClick: () =>
                             setPickerConfig({ isOpen: true, type: "perks" }),
                         },
@@ -3818,6 +4238,7 @@ function FalloutSheetApp() {
       isOpen: pickerConfig.isOpen,
       type: pickerConfig.type,
       templates: templates[pickerConfig.type] || [],
+      character: localChar,
       onSelect: addFromTemplate,
       onClose: () => setPickerConfig({ ...pickerConfig, isOpen: false }),
       onOpenAdmin: () => setModal("admin"),
@@ -3936,6 +4357,7 @@ function FalloutSheetApp() {
                     setTplDraft((p) => ({ ...p, [tab]: null }));
                     setTplSearch("");
                     setTplFilterType("all");
+                    setTplPerkFilter({ ...DEFAULT_PERK_FILTER });
                   },
                 },
                 tab === "weapons"
@@ -3980,6 +4402,20 @@ function FalloutSheetApp() {
                 "button",
                 { className: "pb-chip dim", onClick: seedAmmoTemplates },
                 "⁙ " + t.seedAmmo,
+              ),
+            ),
+          tplTab === "perks" &&
+            missingPerkCount > 0 &&
+            h(
+              React.Fragment,
+              null,
+              " ",
+              h("b", null, t.seedPerksHint.replace("{n}", missingPerkCount)),
+              " ",
+              h(
+                "button",
+                { className: "pb-chip dim", onClick: seedPerkTemplates },
+                "⁙ " + t.seedPerks,
               ),
             ),
         ),
@@ -4034,6 +4470,14 @@ function FalloutSheetApp() {
                   ),
                 ),
             ),
+          tplTab === "perks" &&
+            h(PerkFilters, {
+              value: tplPerkFilter,
+              onChange: setTplPerkFilter,
+              lang,
+              t,
+              hasChar: !!localChar,
+            }),
           h(
             "div",
             { className: "pb-admin-list" },
@@ -4074,9 +4518,24 @@ function FalloutSheetApp() {
                         ),
                       tplTab === "perks" &&
                         h(
-                          "div",
-                          { className: "pb-admin-item-sub" },
-                          (row.effect || "").slice(0, 60),
+                          React.Fragment,
+                          null,
+                          h(
+                            "div",
+                            { className: "pb-admin-item-sub" },
+                            perkReqLabel(row, lang, t),
+                            (perkCtx.owned.get(perkIdOf(row)) || 0) > 0 &&
+                              h(
+                                "span",
+                                { className: "pb-perk-badge" },
+                                `${t.perkOwnedBadge} ${perkCtx.owned.get(perkIdOf(row))}/${perkRules(row).ranks}`,
+                              ),
+                          ),
+                          h(
+                            "div",
+                            { className: "pb-admin-item-sub" },
+                            clipText(row.effect, 90),
+                          ),
                         ),
                     ),
                     h(
@@ -4204,9 +4663,87 @@ function FalloutSheetApp() {
                           })),
                         disabled: false,
                       }),
+                      // Podmínky se ukládají k šabloně, aby podle nich šlo
+                      // filtrovat i ručně zapsané perky.
+                      ...[
+                        ["ranks", t.tplRanks],
+                        ["reqLevel", t.tplReqLevel],
+                        ["levelStep", t.tplLevelStep],
+                      ].map(([field, label]) =>
+                        h(
+                          "div",
+                          { key: field, className: "pb-field" },
+                          h("span", { className: "pb-label" }, label),
+                          h("input", {
+                            type: "number",
+                            min: field === "ranks" ? "1" : "0",
+                            className: "pb-input",
+                            value: perkRules(tplDraft.perks)[
+                              field === "reqLevel" ? "level" : field
+                            ],
+                            onChange: (e) =>
+                              setTplDraft((p) => ({
+                                ...p,
+                                perks: {
+                                  ...p.perks,
+                                  [field]: parseInt(e.target.value, 10) || 0,
+                                },
+                              })),
+                          }),
+                        ),
+                      ),
                       h(
                         "div",
-                        { className: "pb-field" },
+                        { className: "pb-field full" },
+                        h("span", { className: "pb-label" }, t.tplReqAttrs),
+                        h(
+                          "div",
+                          { className: "pb-perk-attr-grid" },
+                          PERK_REQ_ATTRS.map((k) =>
+                            h(
+                              "label",
+                              { key: k, className: "pb-perk-attr", title: t[k] },
+                              attrCode(k, lang),
+                              h("input", {
+                                type: "number",
+                                min: "0",
+                                max: "10",
+                                className: "pb-num",
+                                value: perkRules(tplDraft.perks).attrs[k] || 0,
+                                onChange: (e) =>
+                                  setTplDraft((p) => ({
+                                    ...p,
+                                    perks: {
+                                      ...p.perks,
+                                      reqAttrs: {
+                                        ...perkRules(p.perks).attrs,
+                                        [k]: parseInt(e.target.value, 10) || 0,
+                                      },
+                                    },
+                                  })),
+                              }),
+                            ),
+                          ),
+                        ),
+                      ),
+                      h(
+                        "label",
+                        { className: "pb-perk-check" },
+                        h("input", {
+                          type: "checkbox",
+                          className: "pb-check",
+                          checked: perkRules(tplDraft.perks).noRobot,
+                          onChange: (e) =>
+                            setTplDraft((p) => ({
+                              ...p,
+                              perks: { ...p.perks, noRobot: e.target.checked },
+                            })),
+                        }),
+                        t.tplNoRobot,
+                      ),
+                      h(
+                        "div",
+                        { className: "pb-field full" },
                         h("span", { className: "pb-label" }, t.p_effect),
                         h(AutoResizeTextarea, {
                           className: "pb-cell",

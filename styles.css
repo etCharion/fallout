@@ -1866,6 +1866,92 @@ input[type="number"] {
   letter-spacing: 0.04em;
 }
 
+/* perky — filtr podmínek a značky u řádků */
+.pb-perk-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pb-perk-filters .pb-select {
+  width: auto;
+  max-width: 100%;
+}
+
+.pb-perk-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pb-fg-dim);
+  cursor: pointer;
+}
+
+.pb-perk-check:has(input:disabled) {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pb-perk-num {
+  width: 52px;
+  font-size: 18px;
+  padding: 2px 4px;
+}
+
+.pb-perk-attr-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.pb-perk-attr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--pb-fg-dim);
+}
+
+.pb-perk-attr .pb-num {
+  font-size: 18px;
+  padding: 2px;
+}
+
+.pb-perk-badge {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border: 1px solid var(--pb-fg-dim);
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pb-fg-dim);
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.pb-pick-warn {
+  font-size: 11px;
+  color: var(--pb-warn);
+}
+
+.pb-pick-row.owned {
+  border-style: dashed;
+}
+
+.pb-pick-row.unmet {
+  opacity: 0.62;
+}
+
+.pb-pick-row.unmet:hover {
+  opacity: 1;
+}
+
 /* log */
 .pb-log-row {
   display: flex;

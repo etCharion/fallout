@@ -63,7 +63,8 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 - [x] **HOTOVO — Rady a efektivní max HP.** Zbývá případně tlačítko na RadAway.
 - [x] **HOTOVO — Zranění jako počitadlo na lokaci** včetně textu efektu a pravidla o 5+ poškození.
 - [ ] **P2 — Rychlé akce v režimu HRA:** HP −/+, zátky −/+, „přidat kořist" jedním klikem. (Munice už −/+ má.)
-- [ ] **P2 — Přednačtené šablony z příručky** (zbraně, chemie, perky) místo prázdné administrace. *(Munice už doplnit jde.)*
+- [ ] **ČÁSTEČNĚ — Přednačtené šablony z příručky** místo prázdné administrace. Perky jsou hotové: katalog 94 perků (`perks.js`) se v Administraci doplní jedním tlačítkem, včetně podmínek. Munice už doplnit jde. **Zbývá:** zbraně a chemie.
+- [x] **HOTOVO — Filtrování perků podle podmínek.** V Administraci i ve výběru perku jde filtrovat podle vlastnictví, požadovaného atributu a jeho hodnoty, minimální úrovně, zákazu pro roboty a podle toho, jestli na perk otevřená postava vůbec dosáhne. U řádku se ukazují podmínky, kolikátý stupeň už postava má a co jí chybí.
 - [x] **HOTOVO — Filtrování v administraci** podle názvu a podle typu vybavení či dovednosti zbraně.
 - [ ] **P3 — Export/import postavy do JSON** + offline režim (service worker, lokální kopie).
 - [ ] **P3 — Průvodce tvorbou postavy** (rozdělení SPECIAL, 3 tagy, INT×2 bodů dovedností, hlídání limitů) a průvodce postupem na úroveň.
