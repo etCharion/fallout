@@ -33,8 +33,14 @@ import {
   doc,
   setDoc,
   deleteDoc,
+  deleteField,
   onSnapshot,
   serverTimestamp,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 // --- FIREBASE SETUP ---
@@ -215,6 +221,25 @@ const TRANSLATIONS = {
     autosave: "AUTOSAVE",
     active: "AKTIVNÍ",
     manual: "RUČNÍ",
+    saveLabel: "ULOŽENÍ",
+    saving: "UKLÁDÁM…",
+    savedAt: "ULOŽENO",
+    saveError: "CHYBA ULOŽENÍ",
+    unsaved: "NEULOŽENO",
+    readonly: "JEN ČTENÍ",
+    undoSteps: "vráceno o",
+    btnVersions: "VERZE",
+    versionsTitle: "Uložené verze",
+    versionsHint:
+      "Verze vzniká při ručním uložení, když se data liší od té poslední. Držíme posledních 30.",
+    versionsEmpty: "Zatím žádná uložená verze.",
+    versionsLoading: "Načítám verze…",
+    versionRestore: "Obnovit",
+    versionNewest: "nejnovější",
+    versionUnknown: "starší verze",
+    draftFound: "Máš neuloženou změnu z",
+    draftRestore: "Obnovit",
+    draftDiscard: "Zahodit",
     storage: "ÚLOŽIŠTĚ",
     chars: "POSTAVY",
     tplName_weapons: "Název zbraně",
@@ -445,6 +470,25 @@ const TRANSLATIONS = {
     autosave: "AUTOSAVE",
     active: "ACTIVE",
     manual: "MANUAL",
+    saveLabel: "SAVE",
+    saving: "SAVING…",
+    savedAt: "SAVED",
+    saveError: "SAVE FAILED",
+    unsaved: "UNSAVED",
+    readonly: "READ ONLY",
+    undoSteps: "undone by",
+    btnVersions: "VERSIONS",
+    versionsTitle: "Saved versions",
+    versionsHint:
+      "A version is created on manual save when the data differs from the last one. The latest 30 are kept.",
+    versionsEmpty: "No saved version yet.",
+    versionsLoading: "Loading versions…",
+    versionRestore: "Restore",
+    versionNewest: "newest",
+    versionUnknown: "older version",
+    draftFound: "You have an unsaved change from",
+    draftRestore: "Restore",
+    draftDiscard: "Discard",
     storage: "STORAGE",
     chars: "CHARS",
     tplName_weapons: "Weapon name",
@@ -1035,6 +1079,168 @@ function normalizeCharacter(raw) {
   return c;
 }
 
+// --- UKLÁDÁNÍ, VERZE A KROKY ZPĚT ---------------------------------------
+// Historie postavy nežije v dokumentu postavy (naráželo by to na limit 1 MiB),
+// ale v podkolekci `history`. Ukládání má tři vrstvy:
+//   1. kroky Zpět/Znovu — lokálně v localStorage, zachytí každou změnu
+//   2. průběžné uložení — debouncovaný zápis dokumentu postavy do Firestore
+//   3. verze — záchytný bod v podkolekci, vzniká při ručním uložení
+
+const HISTORY_LIMIT = 30; // kolik verzí držíme v cloudu
+const UNDO_LIMIT = 100; // kolik kroků Zpět držíme lokálně
+const STEP_MERGE_MS = 700; // psaní do jednoho pole se slučuje do jednoho kroku
+const SAVE_DEBOUNCE = { play: 800, edit: 2000 };
+const LOCAL_MAX = 1200000; // ~1,2 MB strop pro zásobník kroků v localStorage
+const undoKey = (id) => "fallout_undo_" + id;
+const draftKey = (id) => "fallout_draft_" + id;
+
+// Pole, která nepatří do snapshotu verze ani do porovnání změn: portrét je
+// velký a zapisuje se zvlášť hned při nahrání, zbytek jsou služební údaje.
+const SNAPSHOT_OMIT = [
+  "imageUrl",
+  "history",
+  "createdAt",
+  "historySeq",
+  "historyCount",
+  "historyHash",
+];
+
+function stripSnapshot(char) {
+  const out = {};
+  Object.keys(char || {}).forEach((k) => {
+    if (!SNAPSHOT_OMIT.includes(k)) out[k] = char[k];
+  });
+  return out;
+}
+
+// Kanonický zápis se seřazenými klíči — stejná data dají stejný řetězec
+// bez ohledu na pořadí klíčů.
+function stableStringify(value) {
+  if (value === null || value === undefined) return "null";
+  if (typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(stableStringify).join(",") + "]";
+  return (
+    "{" +
+    Object.keys(value)
+      .sort()
+      .map((k) => JSON.stringify(k) + ":" + stableStringify(value[k]))
+      .join(",") +
+    "}"
+  );
+}
+
+// cyrb53 — krátký otisk řetězce. Nejde o kryptografii, jen o odpověď na
+// otázku „změnilo se něco?"; otisk se vejde do dokumentu postavy.
+function hashString(str) {
+  let h1 = 0xdeadbeef,
+    h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 =
+    Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
+    Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 =
+    Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
+    Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+const fingerprint = (char) => hashString(stableStringify(stripSnapshot(char)));
+
+const charDocRef = (id) =>
+  doc(db, "artifacts", appId, "public", "data", "fallout_characters", id);
+const historyColRef = (id) => collection(charDocRef(id), "history");
+// ID verze nese pořadí, takže řazení podle ID = řazení podle stáří a opakovaný
+// zápis téže verze nic nezduplikuje.
+const versionDocId = (seq) => "v" + String(seq).padStart(6, "0");
+
+function readLocal(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+// Když je localStorage plný, radši zahodíme data ostatních postav, než aby
+// se ztratil rozpracovaný stav té otevřené.
+function writeLocal(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (_) {
+    try {
+      Object.keys(localStorage)
+        .filter(
+          (k) =>
+            (k.startsWith("fallout_undo_") || k.startsWith("fallout_draft_")) &&
+            k !== key,
+        )
+        .forEach((k) => localStorage.removeItem(k));
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+}
+
+function dropDraft(id) {
+  try {
+    localStorage.removeItem(draftKey(id));
+  } catch (_) {}
+}
+
+function dropLocal(id) {
+  try {
+    localStorage.removeItem(undoKey(id));
+  } catch (_) {}
+  dropDraft(id);
+}
+
+// Krok Zpět nese jen změněné klíče. Klíč, který v původním stavu neexistoval,
+// se musí odebrat — Firestore by na `undefined` spadl.
+function applyStep(base, patch) {
+  const next = { ...base };
+  Object.keys(patch).forEach((k) => {
+    if (patch[k] === undefined) delete next[k];
+    else next[k] = patch[k];
+  });
+  return next;
+}
+
+// Krok se seznamem (zbraně, inventář) nese celé pole, takže zásobník se
+// ořezává i podle velikosti, ne jen podle počtu kroků.
+function trimSteps(steps) {
+  let out = steps.slice(0, UNDO_LIMIT);
+  while (out.length > 1 && JSON.stringify(out).length > LOCAL_MAX)
+    out = out.slice(0, out.length - 1);
+  return out;
+}
+
+function formatClock(ts, lang) {
+  if (!ts) return "";
+  return new Date(ts).toLocaleTimeString(lang === "en" ? "en-GB" : "cs-CZ", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatStamp(value, lang) {
+  const d = value?.toDate ? value.toDate() : value ? new Date(value) : null;
+  if (!d || isNaN(d.getTime())) return null;
+  return d.toLocaleString(lang === "en" ? "en-GB" : "cs-CZ", {
+    day: "numeric",
+    month: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function computeInitials(name) {
   const parts = (name || "").trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "??";
@@ -1507,6 +1713,70 @@ function NotesModal({ isOpen, onClose, value, onChange, disabled, t }) {
   );
 }
 
+// Seznam uložených verzí z podkolekce `history`. Načítá se až při otevření,
+// aby se snapshoty netahaly zbytečně při každém spuštění aplikace.
+function VersionsModal({ isOpen, onClose, state, onRestore, canRestore, lang, t }) {
+  if (!isOpen) return null;
+  const entries = state.entries || [];
+  return h(
+    ModalShell,
+    { onClose },
+    h(
+      "div",
+      { className: "pb-modal-head" },
+      h("span", { className: "pb-modal-title" }, "⟲ " + t.versionsTitle),
+      h(
+        "button",
+        { className: "pb-chip dim pb-push-right", onClick: onClose },
+        "✕",
+      ),
+    ),
+    h(
+      "div",
+      { className: "pb-modal-body" },
+      h("div", { className: "pb-modal-hint" }, t.versionsHint),
+      state.loading
+        ? h("div", { className: "pb-modal-empty" }, t.versionsLoading)
+        : state.error
+          ? h("div", { className: "pb-modal-empty" }, t.saveError + ": " + state.error)
+          : entries.length === 0
+            ? h("div", { className: "pb-modal-empty" }, t.versionsEmpty)
+            : entries.map((entry, i) => {
+                const d = entry.data || {};
+                const stamp = formatStamp(entry.savedAt, lang);
+                return h(
+                  "div",
+                  {
+                    key: entry.id,
+                    className: `pb-char-row ${i === 0 ? "active" : ""}`,
+                  },
+                  h(
+                    "div",
+                    { className: "pb-char-info" },
+                    h(
+                      "span",
+                      { className: "pb-char-name" },
+                      (stamp || t.versionUnknown) +
+                        (i === 0 ? " · " + t.versionNewest : ""),
+                    ),
+                    h(
+                      "span",
+                      { className: "pb-char-sub" },
+                      `${d.name || t.noName} · ${t.level} ${d.level || "—"} · HP ${d.hpCurrent || "—"}/${d.hpMax || "—"} · ${t.caps} ${d.caps || "0"}`,
+                    ),
+                  ),
+                  canRestore &&
+                    h(
+                      "button",
+                      { className: "pb-chip", onClick: () => onRestore(entry) },
+                      t.versionRestore,
+                    ),
+                );
+              }),
+    ),
+  );
+}
+
 function RollLogModal({ isOpen, onClose, rollLog, onClear, lang, t }) {
   if (!isOpen) return null;
   return h(
@@ -1633,7 +1903,30 @@ function FalloutSheetApp() {
   const [characters, setCharacters] = useState([]);
   const [selectedCharId, setSelectedCharId] = useState(null);
   const [localChar, setLocalChar] = useState(null);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  // Zásobník kroků Zpět/Znovu. `index` = o kolik kroků jsme vrácení zpátky,
+  // 0 = díváme se na nejnovější stav. Drží se i v localStorage, ať přežije
+  // refresh i zavření okna.
+  const [undoStack, setUndoStack] = useState({
+    charId: null,
+    steps: [],
+    index: 0,
+  });
+  // Rozpracovaný stav uložený lokálně pro případ, že zápis do cloudu neprošel.
+  const [draft, setDraft] = useState(null);
+  const [saveState, setSaveState] = useState({ status: "idle", at: null });
+  const [versions, setVersions] = useState({
+    charId: null,
+    loading: false,
+    entries: [],
+    error: null,
+  });
+  // Otisk posledního zápisu dokumentu a poslední verze — bez nich by se
+  // ukládalo i to, co se vůbec nezměnilo.
+  const savedHashRef = useRef(null);
+  const versionHashRef = useRef(null);
+  // Pořadí poslední verze. V ÚPRAVÁCH se list nesynchronizuje z cloudu, takže
+  // podle `localChar` by druhé uložení v jednom sezení přepsalo verzi první.
+  const historyMetaRef = useRef({ charId: null, seq: 0, count: 0 });
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState(
     () => localStorage.getItem("fallout_lang") || "cs",
@@ -1646,7 +1939,8 @@ function FalloutSheetApp() {
   });
   const isEditing = mode === "edit";
   const canPlay = mode === "edit" || mode === "play";
-  const [playDirty, setPlayDirty] = useState(false);
+  // `dirty` = v listu je změna, kterou ještě nepobral zápis do cloudu.
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("fallout_lang", lang);
@@ -1656,7 +1950,7 @@ function FalloutSheetApp() {
     if (mode !== "edit") localStorage.setItem("fallout_mode", mode);
   }, [mode]);
 
-  const [modal, setModal] = useState(null); // 'chars' | 'notes' | 'admin' | 'log' | 'print' | null
+  const [modal, setModal] = useState(null); // 'chars' | 'notes' | 'admin' | 'log' | 'print' | 'versions' | null
   const [templates, setTemplates] = useState({
     weapons: [],
     inventory: [],
@@ -1826,7 +2120,7 @@ function FalloutSheetApp() {
     if (from === -1 || to === -1) return;
     const [moved] = list.splice(from, 1);
     list.splice(to, 0, moved);
-    setLocalChar({ ...localChar, [listName]: list });
+    commitChar({ ...localChar, [listName]: list });
   };
   const moveItem = (listName, id, dir) => {
     if (!localChar) return;
@@ -1837,7 +2131,7 @@ function FalloutSheetApp() {
     const tmp = list[from];
     list[from] = list[to];
     list[to] = tmp;
-    setLocalChar({ ...localChar, [listName]: list });
+    commitChar({ ...localChar, [listName]: list });
   };
   const onDragStartRow = (listName, id) => (e) => {
     if (!isEditing) return;
@@ -1932,53 +2226,149 @@ function FalloutSheetApp() {
   }, [user]);
 
   // Sync local buffer from remote unless the user is editing (or has
-  // unsaved play-mode tweaks in flight).
+  // unsaved tweaks in flight).
   useEffect(() => {
     if (selectedCharId) {
       const found = characters.find((c) => c.id === selectedCharId);
-      if (found && mode !== "edit" && !playDirty) {
-        setLocalChar(normalizeCharacter(found));
-        setHistoryIndex(0);
+      if (found && mode !== "edit" && !dirty) {
+        const next = normalizeCharacter(found);
+        setLocalChar(next);
+        savedHashRef.current = fingerprint(next);
+        versionHashRef.current = found.historyHash || null;
+        historyMetaRef.current = {
+          charId: found.id,
+          seq: Number(found.historySeq) || 0,
+          count: Number(found.historyCount) || 0,
+        };
       }
     } else {
       setLocalChar(null);
-      setHistoryIndex(0);
     }
-  }, [selectedCharId, characters, mode, playDirty]);
+  }, [selectedCharId, characters, mode, dirty]);
 
-  // Play-mode autosave: debounce writes of play-time tweaks (HP, luck,
-  // ammo counts, injuries) straight to the cloud — no history snapshot.
+  // Kroky Zpět a lokální záloha patří ke konkrétní postavě — při přepnutí
+  // se načtou její vlastní.
   useEffect(() => {
-    if (mode !== "play" || !playDirty || !localChar || !user || !localChar.id)
+    if (!selectedCharId) {
+      setUndoStack({ charId: null, steps: [], index: 0 });
+      setDraft(null);
       return;
-    const timer = setTimeout(async () => {
-      try {
-        const { imageUrl, history, createdAt, ...data } = localChar;
-        await setDoc(
-          doc(
-            db,
-            "artifacts",
-            appId,
-            "public",
-            "data",
-            "fallout_characters",
-            localChar.id,
-          ),
-          data,
-          { merge: true },
-        );
-        setPlayDirty(false);
-      } catch (e) {
-        console.error("Play autosave error:", e);
-      }
-    }, 800);
+    }
+    const stored = readLocal(undoKey(selectedCharId));
+    setUndoStack({
+      charId: selectedCharId,
+      steps: Array.isArray(stored?.steps) ? stored.steps : [],
+      index: Number(stored?.index) || 0,
+    });
+    setDraft(readLocal(draftKey(selectedCharId)));
+    setSaveState({ status: "idle", at: null });
+  }, [selectedCharId]);
+
+  useEffect(() => {
+    if (!undoStack.charId || undoStack.charId !== selectedCharId) return;
+    const timer = setTimeout(() => {
+      const steps = trimSteps(undoStack.steps);
+      writeLocal(undoKey(undoStack.charId), {
+        steps,
+        index: Math.min(undoStack.index, steps.length),
+      });
+    }, 500);
     return () => clearTimeout(timer);
-  }, [localChar, playDirty, mode, user]);
+  }, [undoStack, selectedCharId]);
+
+  const currentHash = useMemo(
+    () => (localChar ? fingerprint(localChar) : null),
+    [localChar],
+  );
+
+  // Autosave: v HŘE i v ÚPRAVÁCH. Bez něj by se rozdělaná práce ztratila
+  // při zavření okna. Verzi v historii z toho ale nezakládáme — od toho je
+  // ruční uložení, jinak by log zaplavily desítky snapshotů za sezení.
+  useEffect(() => {
+    if (!dirty || !localChar || !localChar.id || !user) return;
+    if (mode !== "play" && mode !== "edit") return;
+    const timer = setTimeout(
+      () => {
+        persistChar(localChar, { version: false });
+      },
+      mode === "play" ? SAVE_DEBOUNCE.play : SAVE_DEBOUNCE.edit,
+    );
+    return () => clearTimeout(timer);
+  }, [localChar, dirty, mode, user]);
+
+  // Lokální záloha rozdělaného stavu — záchranná síť, když zápis do cloudu
+  // neprojde (výpadek sítě, zavřená záložka dřív, než doběhl debounce).
+  useEffect(() => {
+    if (!dirty || !localChar || !selectedCharId) return;
+    const timer = setTimeout(() => {
+      writeLocal(draftKey(selectedCharId), {
+        char: stripSnapshot(localChar),
+        hash: currentHash,
+        ts: Date.now(),
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [localChar, dirty, selectedCharId, currentHash]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  // Jediná cesta, kudy se mění list: zapíše krok do zásobníku Zpět a označí
+  // stav jako neuložený, o zbytek se postará autosave.
+  const commitChar = (next) => {
+    if (!localChar) return;
+    const resolved = typeof next === "function" ? next(localChar) : next;
+    if (!resolved) return;
+    recordStep(localChar, resolved);
+    setLocalChar(resolved);
+    setDirty(true);
+  };
+
+  const recordStep = (prev, next) => {
+    const changed = [];
+    new Set([...Object.keys(prev), ...Object.keys(next)]).forEach((k) => {
+      if (k === "id" || SNAPSHOT_OMIT.includes(k)) return;
+      if (stableStringify(prev[k]) !== stableStringify(next[k])) changed.push(k);
+    });
+    if (!changed.length) return;
+    const before = {},
+      after = {};
+    changed.forEach((k) => {
+      before[k] = prev[k];
+      after[k] = next[k];
+    });
+    const key = changed.sort().join(",");
+    const ts = Date.now();
+    setUndoStack((st) => {
+      const base =
+        st.charId === prev.id ? st : { charId: prev.id, steps: [], index: 0 };
+      // Nová změna po vrácení zahodí „budoucí" kroky — jako v každém editoru.
+      const live = base.index > 0 ? base.steps.slice(base.index) : base.steps;
+      const top = live[0];
+      // Souvislé psaní do jednoho pole je jeden krok, ne krok na písmeno.
+      if (top && top.key === key && ts - top.ts < STEP_MERGE_MS)
+        return {
+          charId: prev.id,
+          index: 0,
+          steps: [{ ...top, after, ts }, ...live.slice(1)],
+        };
+      return {
+        charId: prev.id,
+        index: 0,
+        steps: [{ key, before, after, ts }, ...live].slice(0, UNDO_LIMIT),
+      };
+    });
+  };
 
   const updateField = (path, value) => {
-    if (!localChar) return;
-    setLocalChar((prev) => {
-      if (!prev) return null;
+    commitChar((prev) => {
       const copy = { ...prev };
       if (path.includes(".")) {
         const pts = path.split(".");
@@ -1994,11 +2384,8 @@ function FalloutSheetApp() {
       return copy;
     });
   };
-  // Play-editable fields route through this so play mode autosaves.
-  const updatePlayField = (path, value) => {
-    updateField(path, value);
-    if (mode === "play") setPlayDirty(true);
-  };
+  // Pole editovatelná i v režimu HRA jdou podle konvence tudy.
+  const updatePlayField = (path, value) => updateField(path, value);
   const addItem = (listName) => {
     if (!localChar) return;
     const id = crypto.randomUUID();
@@ -2022,11 +2409,11 @@ function FalloutSheetApp() {
     if (listName === "inventory")
       item = { id, type: "other", name: "", quantity: "1", weight: "" };
     if (listName === "perks") item = { id, name: "", rank: "1", effect: "" };
-    setLocalChar({ ...localChar, [listName]: [...localChar[listName], item] });
+    commitChar({ ...localChar, [listName]: [...localChar[listName], item] });
   };
   const removeItem = (listName, id) => {
     if (!localChar) return;
-    setLocalChar({
+    commitChar({
       ...localChar,
       [listName]: localChar[listName].filter((i) => i.id !== id),
     });
@@ -2036,7 +2423,7 @@ function FalloutSheetApp() {
     const list = localChar[listName].map((i) =>
       i.id === id ? { ...i, [f]: v } : i,
     );
-    setLocalChar({ ...localChar, [listName]: list });
+    commitChar({ ...localChar, [listName]: list });
   };
   const stepQty = (id, dir) => {
     if (!localChar) return;
@@ -2048,8 +2435,7 @@ function FalloutSheetApp() {
           }
         : i,
     );
-    setLocalChar({ ...localChar, inventory: list });
-    if (mode === "play") setPlayDirty(true);
+    commitChar({ ...localChar, inventory: list });
   };
   // --- munice ---
   // Zdrojem pravdy je inventář; u zbraně se jen ukazuje a odečítá.
@@ -2165,7 +2551,7 @@ function FalloutSheetApp() {
     const ln = pickerConfig.type;
     const id = crypto.randomUUID();
     if (ln === "weapons") {
-      setLocalChar({
+      commitChar({
         ...localChar,
         weapons: [
           ...localChar.weapons,
@@ -2189,7 +2575,7 @@ function FalloutSheetApp() {
       return;
     }
     if (ln === "inventory") {
-      setLocalChar({
+      commitChar({
         ...localChar,
         inventory: [
           ...localChar.inventory,
@@ -2206,7 +2592,7 @@ function FalloutSheetApp() {
       return;
     }
     if (ln === "perks") {
-      setLocalChar({
+      commitChar({
         ...localChar,
         perks: [
           ...localChar.perks,
@@ -2257,71 +2643,138 @@ function FalloutSheetApp() {
     }
   };
 
-  const handleSave = async (nextMode = "locked") => {
-    if (!user || !localChar) return;
+  // Ořez nejstarších verzí. Chyba tady nesmí shodit ukládání.
+  const trimVersions = async (charId, count) => {
     try {
-      // Prepare snapshot - strip unnecessary/large fields
-      const { imageUrl, history, createdAt, ...snapshot } = localChar;
-
-      const newHistory = [snapshot, ...(localChar.history || [])].slice(0, 50);
-
-      await setDoc(
-        doc(
-          db,
-          "artifacts",
-          appId,
-          "public",
-          "data",
-          "fallout_characters",
-          localChar.id,
-        ),
-        { ...localChar, history: newHistory },
-        { merge: true },
+      const snap = await getDocs(
+        query(historyColRef(charId), orderBy("seq"), limit(count - HISTORY_LIMIT)),
       );
+      if (snap.empty) return count;
+      const batch = writeBatch(db);
+      snap.docs.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+      return count - snap.size;
+    } catch (e) {
+      console.error("History trim error:", e);
+      return count;
+    }
+  };
 
-      setMode(nextMode);
-      setHistoryIndex(0);
+  // Nová verze do podkolekce. Při prvním uložení starší postavy se sem
+  // přesune i historie, která dřív bydlela v dokumentu postavy.
+  const appendVersion = async (char, hash) => {
+    const col = historyColRef(char.id);
+    const legacy = Array.isArray(char.history) ? char.history : [];
+    const meta =
+      historyMetaRef.current.charId === char.id
+        ? historyMetaRef.current
+        : {
+            seq: Number(char.historySeq) || 0,
+            count: Number(char.historyCount) || 0,
+          };
+    let seq = meta.seq;
+    let count = meta.count;
+    if (legacy.length && !seq) {
+      const batch = writeBatch(db);
+      // Staré pole je řazené od nejnovějšího, do podkolekce jde odzadu.
+      const older = legacy.slice(0, HISTORY_LIMIT - 1).reverse();
+      older.forEach((entry) => {
+        seq += 1;
+        batch.set(doc(col, versionDocId(seq)), {
+          seq,
+          savedAt: null,
+          legacy: true,
+          data: stripSnapshot(entry),
+        });
+      });
+      await batch.commit();
+      count += older.length;
+      setLocalChar((prev) =>
+        prev && prev.id === char.id ? { ...prev, history: [] } : prev,
+      );
+    }
+    seq += 1;
+    count += 1;
+    await setDoc(doc(col, versionDocId(seq)), {
+      seq,
+      savedAt: serverTimestamp(),
+      hash,
+      data: stripSnapshot(char),
+    });
+    if (count > HISTORY_LIMIT) count = await trimVersions(char.id, count);
+    historyMetaRef.current = { charId: char.id, seq, count };
+    return { seq, count };
+  };
+
+  // Zápis stavu postavy. `version: true` k tomu založí záchytný bod.
+  // Když se od posledního zápisu nic nezměnilo, neděje se nic — tím se
+  // historie přestala plnit identickými snapshoty při přepínání režimů.
+  const persistChar = async (char, { version = false } = {}) => {
+    if (!user || !char || !char.id) return false;
+    const hash = fingerprint(char);
+    const needsDoc = hash !== savedHashRef.current;
+    const needsVersion = version && hash !== versionHashRef.current;
+    if (!needsDoc && !needsVersion) {
+      setDirty(false);
+      return true;
+    }
+    setSaveState({ status: "saving", at: null });
+    try {
+      const payload = stripSnapshot(char);
+      if (needsVersion) {
+        const { seq, count } = await appendVersion(char, hash);
+        payload.historySeq = seq;
+        payload.historyCount = count;
+        payload.historyHash = hash;
+        versionHashRef.current = hash;
+      }
+      // Staré pole `history` smažeme až ve chvíli, kdy je jeho obsah
+      // bezpečně v podkolekci — jinak by ho autosave zahodil nemigrované.
+      const migratedSeq =
+        Number(payload.historySeq) ||
+        (historyMetaRef.current.charId === char.id
+          ? historyMetaRef.current.seq
+          : Number(char.historySeq) || 0);
+      if (Array.isArray(char.history) && char.history.length && migratedSeq)
+        payload.history = deleteField();
+      await setDoc(charDocRef(char.id), payload, { merge: true });
+      savedHashRef.current = hash;
+      setDirty(false);
+      setSaveState({ status: "saved", at: Date.now() });
+      setDraft(null);
+      dropDraft(char.id);
+      return true;
     } catch (e) {
       console.error("Save error:", e);
-      alert("Chyba při ukládání: " + (e.message || "Nedostatečná oprávnění"));
+      setSaveState({ status: "error", at: Date.now(), message: e.message });
+      return false;
     }
   };
 
-  // Immediately persist pending play-mode tweaks (skips the debounce).
-  const flushPlaySave = async () => {
-    if (!user || !localChar || !localChar.id) return;
-    try {
-      const { imageUrl, history, createdAt, ...data } = localChar;
-      await setDoc(
-        doc(
-          db,
-          "artifacts",
-          appId,
-          "public",
-          "data",
-          "fallout_characters",
-          localChar.id,
-        ),
-        data,
-        { merge: true },
-      );
-      setPlayDirty(false);
-    } catch (e) {
-      console.error("Play save error:", e);
-    }
+  // Ruční uložení = záchytný bod. Režim přepneme jen když zápis prošel,
+  // ať se rozdělaná práce neztratí kvůli tichému selhání.
+  const handleSave = async (nextMode = "locked") => {
+    if (!user || !localChar) return;
+    const ok = await persistChar(localChar, { version: true });
+    if (ok) setMode(nextMode);
   };
 
-  // Leaving edit mode always saves first (no silent data loss).
+  const flushSave = async () => {
+    if (!localChar) return;
+    await persistChar(localChar, { version: false });
+  };
+
   const switchMode = (m) => {
     if (m === mode) return;
     setQtyPop(null);
     // Výběr dvojice pro hod žije jen v režimu HRA.
     if (m !== "play") setRollSel({ attr: null, skill: null });
+    // Opuštění ÚPRAV založí verzi — ale jen když se data opravdu liší.
     if (mode === "edit" && localChar) {
       handleSave(m);
       return;
     }
-    if (mode === "play" && playDirty) flushPlaySave();
+    if (dirty) flushSave();
     setMode(m);
   };
 
@@ -2335,19 +2788,30 @@ function FalloutSheetApp() {
       createdAt: serverTimestamp(),
     };
     try {
-      // Create initial snapshot (exclude large/circular/invalid fields)
-      const { imageUrl, history, createdAt, ...snapshot } = nc;
-      nc.history = [snapshot];
+      const snapshot = stripSnapshot(nc);
+      const hash = hashString(stableStringify(snapshot));
+      await setDoc(charDocRef(id), {
+        ...snapshot,
+        imageUrl: "",
+        createdAt: serverTimestamp(),
+        historySeq: 1,
+        historyCount: 1,
+        historyHash: hash,
+      });
+      await setDoc(doc(historyColRef(id), versionDocId(1)), {
+        seq: 1,
+        savedAt: serverTimestamp(),
+        hash,
+        data: snapshot,
+      });
 
-      await setDoc(
-        doc(db, "artifacts", appId, "public", "data", "fallout_characters", id),
-        nc,
-      );
-
+      savedHashRef.current = hash;
+      versionHashRef.current = hash;
+      historyMetaRef.current = { charId: id, seq: 1, count: 1 };
       setSelectedCharId(id);
       setMode("edit");
       setLocalChar(normalizeCharacter(nc));
-      setHistoryIndex(0);
+      setDirty(false);
       setModal(null);
     } catch (e) {
       console.error("Create error:", e);
@@ -2356,52 +2820,119 @@ function FalloutSheetApp() {
   };
 
   const handleSelectChar = (id) => {
-    if (mode === "edit" && localChar && localChar.id !== id) {
-      handleSave("locked");
-    }
-    if (mode === "play" && playDirty && localChar && localChar.id !== id) {
-      flushPlaySave();
+    if (localChar && localChar.id !== id) {
+      if (mode === "edit") handleSave("locked");
+      else if (dirty) flushSave();
     }
     setSelectedCharId(id || null);
-    setPlayDirty(false);
+    setDirty(false);
     setQtyPop(null);
     setRollSel({ attr: null, skill: null });
     setModal(null);
   };
 
+  // Zpět/Znovu jede po jednotlivých změnách, ne po uložených verzích, a
+  // nesahá na režim. Vrácení je běžná změna, takže ho rovnou pobere autosave.
+  const canUndo = canPlay && undoStack.index < undoStack.steps.length;
+  const canRedo = canPlay && undoStack.index > 0;
+
   const handleUndo = () => {
-    const hist = localChar?.history || [];
-    if (hist.length > 0 && historyIndex < hist.length - 1) {
-      const nextIndex = historyIndex + 1;
-      const entry = hist[nextIndex];
-      const img = localChar.imageUrl;
-      const fullHist = localChar.history;
-
-      const restored = normalizeCharacter({ ...entry, id: localChar.id });
-      restored.imageUrl = img;
-      restored.history = fullHist;
-
-      setHistoryIndex(nextIndex);
-      setLocalChar(restored);
-      setMode("edit");
-    }
+    if (!localChar || !canUndo) return;
+    const step = undoStack.steps[undoStack.index];
+    setUndoStack((st) => ({ ...st, index: st.index + 1 }));
+    setLocalChar(applyStep(localChar, step.before));
+    setDirty(true);
   };
 
   const handleRedo = () => {
-    const hist = localChar?.history || [];
-    if (hist.length > 0 && historyIndex > 0) {
-      const nextIndex = historyIndex - 1;
-      const entry = hist[nextIndex];
-      const img = localChar.imageUrl;
-      const fullHist = localChar.history;
+    if (!localChar || !canRedo) return;
+    const step = undoStack.steps[undoStack.index - 1];
+    setUndoStack((st) => ({ ...st, index: st.index - 1 }));
+    setLocalChar(applyStep(localChar, step.after));
+    setDirty(true);
+  };
 
-      const restored = normalizeCharacter({ ...entry, id: localChar.id });
-      restored.imageUrl = img;
-      restored.history = fullHist;
+  const openVersions = async () => {
+    if (!selectedCharId) return;
+    setModal("versions");
+    setVersions({
+      charId: selectedCharId,
+      loading: true,
+      entries: [],
+      error: null,
+    });
+    try {
+      const snap = await getDocs(
+        query(
+          historyColRef(selectedCharId),
+          orderBy("seq", "desc"),
+          limit(HISTORY_LIMIT),
+        ),
+      );
+      let entries = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // Postava, která ještě neprošla migrací, má historii v dokumentu.
+      if (!entries.length && Array.isArray(localChar?.history))
+        entries = localChar.history.map((data, i) => ({
+          id: "legacy-" + i,
+          seq: localChar.history.length - i,
+          savedAt: null,
+          legacy: true,
+          data,
+        }));
+      setVersions({
+        charId: selectedCharId,
+        loading: false,
+        entries,
+        error: null,
+      });
+    } catch (e) {
+      console.error("History load error:", e);
+      setVersions({
+        charId: selectedCharId,
+        loading: false,
+        entries: [],
+        error: e.message,
+      });
+    }
+  };
 
-      setHistoryIndex(nextIndex);
-      setLocalChar(restored);
-      setMode("edit");
+  // Obnovení je běžná změna (jde vzít Zpět) a zároveň se rovnou uloží jako
+  // nová verze navrch — historie je append-only, nic se nepřepisuje.
+  const restoreVersion = async (entry) => {
+    if (!localChar || !entry?.data) return;
+    const restored = normalizeCharacter({ ...entry.data, id: localChar.id });
+    restored.imageUrl = localChar.imageUrl;
+    restored.history = localChar.history;
+    restored.historySeq = localChar.historySeq;
+    restored.historyCount = localChar.historyCount;
+    recordStep(localChar, restored);
+    setLocalChar(restored);
+    setDirty(true);
+    setModal(null);
+    await persistChar(restored, { version: true });
+  };
+
+  const restoreDraft = () => {
+    if (!draft?.char || !localChar) return;
+    commitChar(
+      normalizeCharacter({
+        ...draft.char,
+        id: localChar.id,
+        imageUrl: localChar.imageUrl,
+        history: localChar.history,
+        historySeq: localChar.historySeq,
+        historyCount: localChar.historyCount,
+      }),
+    );
+    setDraft(null);
+  };
+
+  const discardDraft = () => {
+    setDraft(null);
+    if (selectedCharId) {
+      try {
+        localStorage.removeItem(draftKey(selectedCharId));
+      } catch (_) {}
     }
   };
 
@@ -2410,19 +2941,22 @@ function FalloutSheetApp() {
     if (!user || !selectedCharId || mode !== "edit") return;
     if (window.confirm(t.confirmDelete)) {
       try {
-        await deleteDoc(
-          doc(
-            db,
-            "artifacts",
-            appId,
-            "public",
-            "data",
-            "fallout_characters",
-            selectedCharId,
-          ),
-        );
+        // Firestore podkolekce nemaže samo — jinak by historie zůstala navěky.
+        const snap = await getDocs(historyColRef(selectedCharId));
+        if (!snap.empty) {
+          const batch = writeBatch(db);
+          snap.docs.forEach((d) => batch.delete(d.ref));
+          await batch.commit();
+        }
+      } catch (e) {
+        console.error("History delete error:", e);
+      }
+      try {
+        await deleteDoc(charDocRef(selectedCharId));
+        dropLocal(selectedCharId);
         setSelectedCharId(null);
         setLocalChar(null);
+        setDirty(false);
         setMode("locked");
       } catch (e) {
         console.error(e);
@@ -2457,23 +2991,18 @@ function FalloutSheetApp() {
         cvs.getContext("2d")?.drawImage(img, 0, 0, w, hh);
         const b64 = cvs.toDataURL("image/jpeg", 0.8);
         updateField("imageUrl", b64);
+        // Portrét se ukládá hned a zvlášť — do verzí ani do kroků Zpět
+        // nepatří, je na to moc velký.
         try {
           if (localChar?.id)
             await setDoc(
-              doc(
-                db,
-                "artifacts",
-                appId,
-                "public",
-                "data",
-                "fallout_characters",
-                localChar.id,
-              ),
+              charDocRef(localChar.id),
               { imageUrl: b64 },
               { merge: true },
             );
         } catch (err) {
           console.error(err);
+          setSaveState({ status: "error", at: Date.now(), message: err.message });
         }
       };
       img.src = e.target?.result;
@@ -2700,6 +3229,22 @@ function FalloutSheetApp() {
 
   const modeBadge =
     mode === "edit" ? t.badgeEdit : mode === "play" ? t.badgePlay : t.badgeLock;
+
+  // Stav ukládání místo dřívějšího slibu „AUTOSAVE", který mimo režim HRA
+  // neplatil. Chyba zápisu tak přestala končit jen v konzoli.
+  const saveInfo =
+    saveState.status === "saving"
+      ? t.saving
+      : saveState.status === "error"
+        ? t.saveError
+        : dirty
+          ? t.unsaved
+          : saveState.at
+            ? t.savedAt + " " + formatClock(saveState.at, lang)
+            : canPlay
+              ? t.autosave
+              : t.readonly;
+  const draftPending = !!(draft && localChar && draft.hash !== currentHash);
 
   const dCount = diceType === "d20" ? diceCounts.d20 : diceCounts.d6;
   const activeTest = readTest();
@@ -2950,8 +3495,7 @@ function FalloutSheetApp() {
                 {
                   className: "pb-chip dim",
                   title: t.btnUndo,
-                  disabled:
-                    historyIndex >= (localChar?.history?.length || 0) - 1,
+                  disabled: !canUndo,
                   onClick: handleUndo,
                 },
                 "↶",
@@ -2961,10 +3505,33 @@ function FalloutSheetApp() {
                 {
                   className: "pb-chip dim",
                   title: t.btnRedo,
-                  disabled: historyIndex <= 0,
+                  disabled: !canRedo,
                   onClick: handleRedo,
                 },
                 "↷",
+              ),
+              undoStack.index > 0 &&
+                h(
+                  "span",
+                  { className: "pb-badge" },
+                  "↶ " + t.undoSteps + " " + undoStack.index,
+                ),
+              h(
+                "button",
+                {
+                  className: "pb-chip dim",
+                  title: t.versionsTitle,
+                  onClick: openVersions,
+                },
+                "⟲ " + t.btnVersions,
+              ),
+              h(
+                "span",
+                {
+                  className: `pb-savestate ${saveState.status === "error" ? "error" : dirty ? "pending" : ""}`,
+                  title: saveState.message || "",
+                },
+                saveInfo,
               ),
               h(
                 "div",
@@ -3006,6 +3573,30 @@ function FalloutSheetApp() {
             ),
         ),
       ),
+
+      // ---------- NEULOŽENÁ LOKÁLNÍ ZÁLOHA ----------
+      // Vyskočí, když v prohlížeči zůstal rozpracovaný stav, který se
+      // nestihl (nebo nedokázal) uložit do cloudu.
+      draftPending &&
+        h(
+          "div",
+          { className: "pb-draftbar pb-noprint" },
+          h(
+            "span",
+            null,
+            "⚠ " + t.draftFound + " " + formatClock(draft.ts, lang),
+          ),
+          h(
+            "button",
+            { className: "pb-chip accent", onClick: restoreDraft },
+            t.draftRestore,
+          ),
+          h(
+            "button",
+            { className: "pb-chip dim", onClick: discardDraft },
+            t.draftDiscard,
+          ),
+        ),
 
       // ---------- SHEET ----------
       !localChar
@@ -4184,7 +4775,7 @@ function FalloutSheetApp() {
               { className: "pb-panel" },
               h(PanelHead, {
                 title: t.notesTitle,
-                note: h("span", { className: "pb-head-note" }, t.autosave),
+                note: h("span", { className: "pb-head-note" }, saveInfo),
               }),
               h(
                 "div",
@@ -4193,8 +4784,10 @@ function FalloutSheetApp() {
                   className: "pb-textarea",
                   value: localChar.notes || "",
                   placeholder: t.notesPh,
-                  onChange: (e) => updateField("notes", e.target.value),
-                  disabled: !isEditing,
+                  // Zápisky vznikají u stolu, ne v administraci — proto jdou
+                  // psát i v režimu HRA a autosave je opravdu pobere.
+                  onChange: (e) => updatePlayField("notes", e.target.value),
+                  disabled: !canPlay,
                 }),
               ),
             ),
@@ -4207,9 +4800,9 @@ function FalloutSheetApp() {
               h("span", { className: "sep" }, "//"),
               h(
                 "span",
-                null,
-                t.autosave + ": ",
-                h("b", null, mode === "play" ? t.active : t.manual),
+                { className: saveState.status === "error" ? "pb-save-bad" : null },
+                t.saveLabel + ": ",
+                h("b", null, saveInfo),
               ),
               h("span", { className: "sep" }, "//"),
               h("span", null, t.storage + ": CLOUD"),
@@ -4258,8 +4851,17 @@ function FalloutSheetApp() {
       isOpen: modal === "notes",
       onClose: () => setModal(null),
       value: localChar?.notes,
-      onChange: (v) => updateField("notes", v),
-      disabled: !isEditing,
+      onChange: (v) => updatePlayField("notes", v),
+      disabled: !canPlay,
+      t: t,
+    }),
+    h(VersionsModal, {
+      isOpen: modal === "versions",
+      onClose: () => setModal(null),
+      state: versions,
+      onRestore: restoreVersion,
+      canRestore: canPlay,
+      lang: lang,
       t: t,
     }),
     h(RollLogModal, {
