@@ -64,6 +64,7 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 - [x] **HOTOVO — Zranění jako počitadlo na lokaci** včetně textu efektu a pravidla o 5+ poškození.
 - [ ] **P2 — Rychlé akce v režimu HRA:** HP −/+, zátky −/+, „přidat kořist" jedním klikem. (Munice už −/+ má.)
 - [ ] **P2 — Přednačtené šablony z příručky** (zbraně, chemie, perky) místo prázdné administrace. *(Munice už doplnit jde.)*
+- [x] **HOTOVO — Filtrování v administraci** podle názvu a podle typu vybavení či dovednosti zbraně.
 - [ ] **P3 — Export/import postavy do JSON** + offline režim (service worker, lokální kopie).
 - [ ] **P3 — Průvodce tvorbou postavy** (rozdělení SPECIAL, 3 tagy, INT×2 bodů dovedností, hlídání limitů) a průvodce postupem na úroveň.
 - [ ] **P3 — Sdílený log hodů a iniciativní pořadí družiny** (kdo je na řadě).
