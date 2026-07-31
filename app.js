@@ -2152,7 +2152,7 @@ function FalloutSheetApp() {
             "fallout_templates_perks",
             crypto.randomUUID(),
           ),
-          perkTemplateDoc(p, lang),
+          perkTemplateDoc(p),
         );
       } catch (e) {
         console.error("Perk seed error:", e);

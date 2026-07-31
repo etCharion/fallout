@@ -5,6 +5,9 @@
 // Delší „přesný popis" se schválně nepřenáší — na kartě je místo na jednu
 // řádku a k pravidlům je příručka.
 //
+// Dvojjazyčný je jen název; zkrácený popis je česky i v anglickém režimu,
+// protože je to přepis české příručky, ne text aplikace.
+//
 // Katalog se z Administrace jednorázově nasype do Firestore jako šablony
 // perků; požadavky se ukládají spolu s nimi, aby se podle nich dalo
 // filtrovat i po ruční úpravě šablony.
@@ -29,10 +32,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 3,
     req: { endurance: 7 },
-    effect: {
-      cs: "Práh krit. zásahu +1 BZ/stupeň. Min. úroveň +3/stupeň.",
-      en: "Crit hit threshold +1 HP per rank. Min. level +3/rank.",
-    },
+    effect: "Práh krit. zásahu +1 BZ/stupeň. Min. úroveň +3/stupeň.",
   },
   {
     key: "akcnichlapecdivka",
@@ -42,10 +42,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: {},
-    effect: {
-      cs: "Dodatečná velká akce za AB bez zvýšení obtížnosti ověření.",
-      en: "Extra major action for AP without raising the difficulty of your tests.",
-    },
+    effect: "Dodatečná velká akce za AB bez zvýšení obtížnosti ověření.",
   },
   {
     key: "barbar",
@@ -56,10 +53,7 @@ export const PERK_CATALOG = [
     levelStep: 0,
     req: { strength: 7 },
     noRobot: true,
-    effect: {
-      cs: "Bez energozbroje fyz. OZ: SIL 7–8 +1; SIL 9–10 +2; SIL 11+ +3.",
-      en: "Without power armor, physical DR: STR 7-8 +1; STR 9-10 +2; STR 11+ +3.",
-    },
+    effect: "Bez energozbroje fyz. OZ: SIL 7–8 +1; SIL 9–10 +2; SIL 11+ +3.",
   },
   {
     key: "bavic",
@@ -69,10 +63,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { charisma: 6 },
-    effect: {
-      cs: "Vzájemné ověření Obchodování/Řečnictví: opakuj 1k20.",
-      en: "Barter/Speech opposed test: re-roll 1d20.",
-    },
+    effect: "Vzájemné ověření Obchodování/Řečnictví: opakuj 1k20.",
   },
   {
     key: "blitz",
@@ -82,10 +73,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 3,
     req: { agility: 9 },
-    effect: {
-      cs: "S1: Přesun na dosah + Útok na blízko ve stejném tahu → opakuj 1k20. S2: navíc +1 EF na d6 zranění. Min. úroveň +3/stupeň.",
-      en: "R1: Move into reach + melee attack in the same turn -> re-roll 1d20. R2: also +1 CD damage. Min. level +3/rank.",
-    },
+    effect: "S1: Přesun na dosah + Útok na blízko ve stejném tahu → opakuj 1k20. S2: navíc +1 EF na d6 zranění. Min. úroveň +3/stupeň.",
   },
   {
     key: "brokovychirurg",
@@ -95,10 +83,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 5, agility: 7 },
-    effect: {
-      cs: "Brokovnice: Průbojný 1, nebo existující Průbojný X +1.",
-      en: "Shotguns: gain Piercing 1, or existing Piercing X +1.",
-    },
+    effect: "Brokovnice: Průbojný 1, nebo existující Průbojný X +1.",
   },
   {
     key: "cernavdovazabijakzen",
@@ -108,10 +93,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { charisma: 6 },
-    effect: {
-      cs: "Proti zvolenému pohlaví: test CHA → opakuj 1k20; Útoky +1 EF na d6 zranění.",
-      en: "Against the chosen gender: CHA test -> re-roll 1d20; attacks +1 CD damage.",
-    },
+    effect: "Proti zvolenému pohlaví: test CHA → opakuj 1k20; Útoky +1 EF na d6 zranění.",
   },
   {
     key: "darebak",
@@ -121,10 +103,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { charisma: 7 },
-    effect: {
-      cs: "CHA + Řečnictví při přesvědčivém lhaní: ignoruj 1. komplikaci.",
-      en: "CHA + Speech when lying convincingly: ignore the first complication.",
-    },
+    effect: "CHA + Řečnictví při přesvědčivém lhaní: ignoruj 1. komplikaci.",
   },
   {
     key: "demolicniexpert",
@@ -134,10 +113,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 6, luck: 6 },
-    effect: {
-      cs: "Plošné zbraně: Zákeřný; odemkne recepty výbušnin vyžadující perk.",
-      en: "Area weapons: gain Vicious; unlocks explosive recipes that require the perk.",
-    },
+    effect: "Plošné zbraně: Zákeřný; odemkne recepty výbušnin vyžadující perk.",
   },
   {
     key: "desivydojem",
@@ -147,10 +123,7 @@ export const PERK_CATALOG = [
     level: 3,
     levelStep: 5,
     req: { strength: 6, charisma: 8 },
-    effect: {
-      cs: "S1: Řečnictví při hrozbě/zastrašování → opakuj 1k20. S2: velká akce, cíl krátká/střední; SIL + Řečnictví, obt. 2 → příští tah se musí vzdálit. Min. úroveň +5/stupeň.",
-      en: "R1: Speech when threatening/intimidating -> re-roll 1d20. R2: major action, target at close/medium; STR + Speech, diff. 2 -> the target must move away next turn. Min. level +5/rank.",
-    },
+    effect: "S1: Řečnictví při hrozbě/zastrašování → opakuj 1k20. S2: velká akce, cíl krátká/střední; SIL + Řečnictví, obt. 2 → příští tah se musí vzdálit. Min. úroveň +5/stupeň.",
   },
   {
     key: "duch",
@@ -160,10 +133,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 5, agility: 6 },
-    effect: {
-      cs: "HBI + Plížení ve stínu/tmě: 1. dodatečný k20 zdarma; limit 5k20.",
-      en: "AGI + Sneak in shadow/darkness: first extra d20 free; limit 5d20.",
-    },
+    effect: "HBI + Plížení ve stínu/tmě: 1. dodatečný k20 zdarma; limit 5k20.",
   },
   {
     key: "entomolog",
@@ -173,10 +143,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { intelligence: 7 },
-    effect: {
-      cs: "Proti hmyzu: Průbojný 1, nebo existující Průbojný X +1.",
-      en: "Against insects: gain Piercing 1, or existing Piercing X +1.",
-    },
+    effect: "Proti hmyzu: Průbojný 1, nebo existující Průbojný X +1.",
   },
   {
     key: "expertpresroboty",
@@ -186,10 +153,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { intelligence: 8 },
-    effect: {
-      cs: "S1/S2/S3: robotí modifikace stejného stupně. S2: opravy robotů obt. −1. S3: dle PH přeprogramování chování/funkcí. Min. úroveň +4/stupeň.",
-      en: "R1/R2/R3: robot mods up to that rank. R2: robot repairs diff. -1. R3: reprogram behavior/functions at the GM's discretion. Min. level +4/rank.",
-    },
+    effect: "S1/S2/S3: robotí modifikace stejného stupně. S2: opravy robotů obt. −1. S3: dle PH přeprogramování chování/funkcí. Min. úroveň +4/stupeň.",
   },
   {
     key: "farmanafarmaka",
@@ -199,10 +163,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { luck: 6 },
-    effect: {
-      cs: "Loot léků/chemikálií: +1 náhodný předmět bez AB.",
-      en: "Looting meds/chems: +1 random item without spending AP.",
-    },
+    effect: "Loot léků/chemikálií: +1 náhodný předmět bez AB.",
   },
   {
     key: "gunfu",
@@ -212,10 +173,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 5,
     req: { agility: 10 },
-    effect: {
-      cs: "Po úspěšném Útoku na dálku: zaplať X AB + X munice → zasáhni X dalších cílů v krátké vzdál. od původního za stejné zranění (X = stupeň). Min. úroveň +5/stupeň.",
-      en: "After a successful ranged attack: spend X AP + X ammo -> hit X more targets at close range from the original for the same damage (X = rank). Min. level +5/rank.",
-    },
+    effect: "Po úspěšném Útoku na dálku: zaplať X AB + X munice → zasáhni X dalších cílů v krátké vzdál. od původního za stejné zranění (X = stupeň). Min. úroveň +5/stupeň.",
   },
   {
     key: "hacker",
@@ -225,10 +183,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { intelligence: 8 },
-    effect: {
-      cs: "Hackování: obtížnost −1 (min. 0).",
-      en: "Hacking: difficulty -1 (min. 0).",
-    },
+    effect: "Hackování: obtížnost −1 (min. 0).",
   },
   {
     key: "chapavost",
@@ -238,10 +193,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { intelligence: 6 },
-    effect: {
-      cs: "Po využití bonusu časopisu hoď 1 EF na d6; účinek → použij bonus ještě 1×.",
-      en: "After using a magazine bonus roll 1 CD; on an effect -> use the bonus once more.",
-    },
+    effect: "Po využití bonusu časopisu hoď 1 EF na d6; účinek → použij bonus ještě 1×.",
   },
   {
     key: "intenzivnitrenink",
@@ -251,10 +203,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 2,
     req: {},
-    effect: {
-      cs: "+1 libovolná vlastnost (max. 10). Min. úroveň +2/stupeň.",
-      en: "+1 to any SPECIAL attribute (max. 10). Min. level +2/rank.",
-    },
+    effect: "+1 libovolná vlastnost (max. 10). Min. úroveň +2/stupeň.",
   },
   {
     key: "jadernyfyzik",
@@ -264,10 +213,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { intelligence: 9 },
-    effect: {
-      cs: "Radiační/Radioaktivní zbraň: každý účinek +1 rad. zranění. Fúzní jádro: +3 energetické náboje.",
-      en: "Radiation/Radioactive weapons: each effect +1 rad injury. Fusion core: +3 energy ammo.",
-    },
+    effect: "Radiační/Radioaktivní zbraň: každý účinek +1 rad. zranění. Fúzní jádro: +3 energetické náboje.",
   },
   {
     key: "kapsar",
@@ -277,10 +223,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 3,
     req: { perception: 8, agility: 8 },
-    effect: {
-      cs: "S1: HBI + Plížení při kapsářství/nastrčení → ignoruj 1. komplikaci. S2: opakuj 1k20. S3: obtížnost −1. Min. úroveň +3/stupeň.",
-      en: "R1: AGI + Sneak when pickpocketing/planting -> ignore the first complication. R2: re-roll 1d20. R3: difficulty -1. Min. level +3/rank.",
-    },
+    effect: "S1: HBI + Plížení při kapsářství/nastrčení → ignoruj 1. komplikaci. S2: opakuj 1k20. S3: obtížnost −1. Min. úroveň +3/stupeň.",
   },
   {
     key: "kasar",
@@ -290,10 +233,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 8 },
-    effect: {
-      cs: "Otevírání zámků dveří/schránky: opakuj 1k20.",
-      en: "Picking locks on doors/containers: re-roll 1d20.",
-    },
+    effect: "Otevírání zámků dveří/schránky: opakuj 1k20.",
   },
   {
     key: "komando",
@@ -303,10 +243,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 3,
     req: { agility: 8 },
-    effect: {
-      cs: "Útok na dálku, RoF 3+ (ne těžká): +1 EF na d6 zranění/stupeň. Min. úroveň +3/stupeň.",
-      en: "Ranged attack, RoF 3+ (not heavy): +1 CD damage per rank. Min. level +3/rank.",
-    },
+    effect: "Útok na dálku, RoF 3+ (ne těžká): +1 EF na d6 zranění/stupeň. Min. úroveň +3/stupeň.",
   },
   {
     key: "kovar",
@@ -316,10 +253,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { strength: 6 },
-    effect: {
-      cs: "Chladné zbraně: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
-      en: "Melee weapons: unlocks mods up to the perk's rank. Min. level +4/rank.",
-    },
+    effect: "Chladné zbraně: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
   },
   {
     key: "krvavymasakr",
@@ -329,10 +263,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { luck: 6 },
-    effect: {
-      cs: "Po krit. zásahu hoď 1 EF na d6; účinek → +1 náhodný úraz.",
-      en: "After a crit hit roll 1 CD; on an effect -> +1 random injury.",
-    },
+    effect: "Po krit. zásahu hoď 1 EF na d6; účinek → +1 náhodný úraz.",
   },
   {
     key: "lecitel",
@@ -342,10 +273,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 5,
     req: { intelligence: 7 },
-    effect: {
-      cs: "První pomoc: +1 obnovený BZ/stupeň. Min. úroveň +5/stupeň.",
-      en: "First aid: +1 HP restored per rank. Min. level +5/rank.",
-    },
+    effect: "První pomoc: +1 obnovený BZ/stupeň. Min. úroveň +5/stupeň.",
   },
   {
     key: "lehkykrok",
@@ -355,10 +283,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: {},
-    effect: {
-      cs: "Test s HBI: 1 AB → ignoruj 1 komplikaci. HBI + Atletika proti nášlapným/mechanickým pastem: opakuj 1k20.",
-      en: "Test using AGI: 1 AP -> ignore one complication. AGI + Athletics against tripwires/mechanical traps: re-roll 1d20.",
-    },
+    effect: "Test s HBI: 1 AB → ignoruj 1 komplikaci. HBI + Atletika proti nášlapným/mechanickým pastem: opakuj 1k20.",
   },
   {
     key: "lekarnik",
@@ -368,10 +293,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { intelligence: 7 },
-    effect: {
-      cs: "Vyrobené chemikálie: 2× trvání; odemkne recepty vyžadující perk.",
-      en: "Crafted chems: double duration; unlocks recipes that require the perk.",
-    },
+    effect: "Vyrobené chemikálie: 2× trvání; odemkne recepty vyžadující perk.",
   },
   {
     key: "lepsikritickezasahy",
@@ -381,10 +303,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { luck: 9 },
-    effect: {
-      cs: "Po udělení ≥1 zranění: 1 Bod štěstí → automatický krit. zásah + úraz.",
-      en: "After dealing 1+ injury: 1 Luck point -> automatic crit hit + injury.",
-    },
+    effect: "Po udělení ≥1 zranění: 1 Bod štěstí → automatický krit. zásah + úraz.",
   },
   {
     key: "lovec",
@@ -394,10 +313,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { endurance: 6 },
-    effect: {
-      cs: "Proti zmutovanému savci/ještěru/hmyzu: Útok získá Zákeřný.",
-      en: "Against mutated mammals/reptiles/insects: your attack gains Vicious.",
-    },
+    effect: "Proti zmutovanému savci/ještěru/hmyzu: Útok získá Zákeřný.",
   },
   {
     key: "medik",
@@ -407,10 +323,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { intelligence: 8 },
-    effect: {
-      cs: "První pomoc při zotavení z úrazu: opakuj 1k20.",
-      en: "First aid to recover from an injury: re-roll 1d20.",
-    },
+    effect: "První pomoc při zotavení z úrazu: opakuj 1k20.",
   },
   {
     key: "mistrlaseru",
@@ -420,10 +333,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { perception: 8 },
-    effect: {
-      cs: "Energetická zbraň na dálku: +1 EF na d6 zranění/stupeň. Min. úroveň +4/stupeň.",
-      en: "Ranged energy weapons: +1 CD damage per rank. Min. level +4/rank.",
-    },
+    effect: "Energetická zbraň na dálku: +1 EF na d6 zranění/stupeň. Min. úroveň +4/stupeň.",
   },
   {
     key: "mlaticka",
@@ -433,10 +343,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 6 },
-    effect: {
-      cs: "Úder střelnou zbraní na blízko: Zákeřný.",
-      en: "Bashing with a ranged weapon in melee: gains Vicious.",
-    },
+    effect: "Úder střelnou zbraní na blízko: Zákeřný.",
   },
   {
     key: "mrstnost",
@@ -446,10 +353,7 @@ export const PERK_CATALOG = [
     level: 4,
     levelStep: 6,
     req: { agility: 6 },
-    effect: {
-      cs: "S1: velká akce Obrana → obtížnost −1. S2: další +1 Ochrana stojí 1 AB. Min. úroveň +6/stupeň.",
-      en: "R1: Defend major action -> difficulty -1. R2: another +1 Defense costs 1 AP. Min. level +6/rank.",
-    },
+    effect: "S1: velká akce Obrana → obtížnost −1. S2: další +1 Ochrana stojí 1 AB. Min. úroveň +6/stupeň.",
   },
   {
     key: "navelikostizalezi",
@@ -459,10 +363,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 4,
     req: { endurance: 7, agility: 6 },
-    effect: {
-      cs: "Těžká zbraň na dálku: +1 EF na d6 zranění/stupeň. Min. úroveň +4/stupeň.",
-      en: "Ranged heavy weapons: +1 CD damage per rank. Min. level +4/rank.",
-    },
+    effect: "Těžká zbraň na dálku: +1 EF na d6 zranění/stupeň. Min. úroveň +4/stupeň.",
   },
   {
     key: "navaladrenalinu",
@@ -472,10 +373,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 7 },
-    effect: {
-      cs: "Při BZ < max.: pro Útoky na blízko a testy se SIL počítej SIL 10.",
-      en: "While HP is below max.: count STR as 10 for melee attacks and STR tests.",
-    },
+    effect: "Při BZ < max.: pro Útoky na blízko a testy se SIL počítej SIL 10.",
   },
   {
     key: "ninja",
@@ -485,10 +383,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { agility: 8 },
-    effect: {
-      cs: "Nenápadný Útok chladnou/beze zbraně: +2 EF na d6 zranění; nefunguje v energozbroji.",
-      en: "Sneak attack with a melee/unarmed weapon: +2 CD damage; does not work in power armor.",
-    },
+    effect: "Nenápadný Útok chladnou/beze zbraně: +2 EF na d6 zranění; nefunguje v energozbroji.",
   },
   {
     key: "nocniptak",
@@ -498,10 +393,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 7 },
-    effect: {
-      cs: "Postih obtížnosti za tmu −1.",
-      en: "Darkness difficulty penalty -1.",
-    },
+    effect: "Postih obtížnosti za tmu −1.",
   },
   {
     key: "obezretnost",
@@ -512,10 +404,7 @@ export const PERK_CATALOG = [
     levelStep: 0,
     req: { perception: 7 },
     excludes: ["odvazlivec"],
-    effect: {
-      cs: "Když kupuješ dodatečné k20 za AB: opakuj 1k20. Nelze s Odvážlivcem.",
-      en: "When buying extra d20s with AP: re-roll 1d20. Cannot be combined with Daring Nature.",
-    },
+    effect: "Když kupuješ dodatečné k20 za AB: opakuj 1k20. Nelze s Odvážlivcem.",
   },
   {
     key: "odolnostvuciradiaci",
@@ -525,10 +414,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 4,
     req: { endurance: 8 },
-    effect: {
-      cs: "Radiační OZ všech míst zásahu +1/stupeň. Min. úroveň +4/stupeň.",
-      en: "Radiation DR of every hit location +1 per rank. Min. level +4/rank.",
-    },
+    effect: "Radiační OZ všech míst zásahu +1/stupeň. Min. úroveň +4/stupeň.",
   },
   {
     key: "odrazenistrel",
@@ -538,10 +424,7 @@ export const PERK_CATALOG = [
     level: 5,
     levelStep: 0,
     req: { luck: 10 },
-    effect: {
-      cs: "Nepřítelův Útok na dálku s komplikací: 1 Bod štěstí → střela zasáhne útočníka; hoď jeho zranění.",
-      en: "Enemy ranged attack with a complication: 1 Luck point -> the shot hits the attacker; roll its damage.",
-    },
+    effect: "Nepřítelův Útok na dálku s komplikací: 1 Bod štěstí → střela zasáhne útočníka; hoď jeho zranění.",
   },
   {
     key: "odstrelovac",
@@ -551,10 +434,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 8, agility: 6 },
-    effect: {
-      cs: "Míření + obouruční Přesná zbraň: zvol místo zásahu bez zvýšení obtížnosti.",
-      en: "Aim + two-handed Accurate weapon: choose the hit location without raising the difficulty.",
-    },
+    effect: "Míření + obouruční Přesná zbraň: zvol místo zásahu bez zvýšení obtížnosti.",
   },
   {
     key: "odvazlivec",
@@ -565,10 +445,7 @@ export const PERK_CATALOG = [
     levelStep: 0,
     req: { luck: 7 },
     excludes: ["obezretnost"],
-    effect: {
-      cs: "Když kupuješ dodatečné k20 za AB pro PH: opakuj 1k20. Nelze s Obezřetností.",
-      en: "When buying extra d20s with AP for the GM: re-roll 1d20. Cannot be combined with Cautious Nature.",
-    },
+    effect: "Když kupuješ dodatečné k20 za AB pro PH: opakuj 1k20. Nelze s Obezřetností.",
   },
   {
     key: "olovenyzaludek",
@@ -578,10 +455,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 4,
     req: { endurance: 6 },
-    effect: {
-      cs: "S1: rad. zranění z jídla/nápojů → opakuj EF na d6. S2: imunita vůči tomuto rad. zranění. Min. úroveň +4/stupeň.",
-      en: "R1: rad injury from food/drink -> re-roll the CD. R2: immune to that rad injury. Min. level +4/rank.",
-    },
+    effect: "S1: rad. zranění z jídla/nápojů → opakuj EF na d6. S2: imunita vůči tomuto rad. zranění. Min. úroveň +4/stupeň.",
   },
   {
     key: "panpanisnu",
@@ -591,10 +465,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { agility: 9 },
-    effect: {
-      cs: "Nenápadný Útok Tichou/tlumenou zbraní: +2 EF na d6 zranění; nefunguje v energozbroji.",
-      en: "Sneak attack with a Silent/suppressed weapon: +2 CD damage; does not work in power armor.",
-    },
+    effect: "Nenápadný Útok Tichou/tlumenou zbraní: +2 EF na d6 zranění; nefunguje v energozbroji.",
   },
   {
     key: "paralyzujicidlan",
@@ -604,10 +475,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 8 },
-    effect: {
-      cs: "Útok beze zbraně na konkrétní místo zásahu: Omračující.",
-      en: "Unarmed attack against a called hit location: gains Stun.",
-    },
+    effect: "Útok beze zbraně na konkrétní místo zásahu: Omračující.",
   },
   {
     key: "parmenparmenka",
@@ -617,10 +485,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { endurance: 6, charisma: 7 },
-    effect: {
-      cs: "Imunita vůči závislosti na alkoholu; každý alkohol +2 BZ.",
-      en: "Immune to alcohol addiction; every drink also restores +2 HP.",
-    },
+    effect: "Imunita vůči závislosti na alkoholu; každý alkohol +2 BZ.",
   },
   {
     key: "pevnaruka",
@@ -630,10 +495,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 8, agility: 7 },
-    effect: {
-      cs: "Po Míření: buď 1. Útok opakuj 2k20, nebo všechny Útoky v tahu opakuj 1k20.",
-      en: "After Aiming: either re-roll 2d20 on the first attack, or re-roll 1d20 on every attack that turn.",
-    },
+    effect: "Po Míření: buď 1. Útok opakuj 2k20, nebo všechny Útoky v tahu opakuj 1k20.",
   },
   {
     key: "pistolnik",
@@ -643,10 +505,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { agility: 7 },
-    effect: {
-      cs: "Jednoruční zbraň na dálku, RoF ≤2: +1 EF na d6 zranění/stupeň; opakuj hod na místo zásahu. Min. úroveň +4/stupeň.",
-      en: "One-handed ranged weapon, RoF 2 or less: +1 CD damage per rank; re-roll the hit location. Min. level +4/rank.",
-    },
+    effect: "Jednoruční zbraň na dálku, RoF ≤2: +1 EF na d6 zranění/stupeň; opakuj hod na místo zásahu. Min. úroveň +4/stupeň.",
   },
   {
     key: "platner",
@@ -656,10 +515,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 4,
     req: { strength: 5, intelligence: 6 },
-    effect: {
-      cs: "Zbroje: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
-      en: "Armor: unlocks mods up to the perk's rank. Min. level +4/rank.",
-    },
+    effect: "Zbroje: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
   },
   {
     key: "podomniprodavac",
@@ -669,10 +525,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { charisma: 8 },
-    effect: {
-      cs: "CHA + Obchodování při nákupu/prodeji: obtížnost −1 (min. 0).",
-      en: "CHA + Barter when buying/selling: difficulty -1 (min. 0).",
-    },
+    effect: "CHA + Obchodování při nákupu/prodeji: obtížnost −1 (min. 0).",
   },
   {
     key: "pohyblivycil",
@@ -682,10 +535,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { agility: 6 },
-    effect: {
-      cs: "Po Sprintu +1 Ochrana do začátku příštího tahu.",
-      en: "After a Sprint +1 Defense until the start of your next turn.",
-    },
+    effect: "Po Sprintu +1 Ochrana do začátku příštího tahu.",
   },
   {
     key: "polykachadu",
@@ -695,10 +545,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { endurance: 7 },
-    effect: {
-      cs: "Jedové OZ +2.",
-      en: "Poison DR +2.",
-    },
+    effect: "Jedové OZ +2.",
   },
   {
     key: "posukdozbrani",
@@ -708,10 +555,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { intelligence: 6 },
-    effect: {
-      cs: "Lehké/těžké zbraně: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
-      en: "Small/big guns: unlocks mods up to the perk's rank. Min. level +4/rank.",
-    },
+    effect: "Lehké/těžké zbraně: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
   },
   {
     key: "pronikavyuder",
@@ -721,10 +565,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 7 },
-    effect: {
-      cs: "Beze zbraně + sečné chladné: Průbojný 1, nebo existující Průbojný X +1.",
-      en: "Unarmed + bladed melee: gain Piercing 1, or existing Piercing X +1.",
-    },
+    effect: "Beze zbraně + sečné chladné: Průbojný 1, nebo existující Průbojný X +1.",
   },
   {
     key: "provizorniopravy",
@@ -734,10 +575,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: {},
-    effect: {
-      cs: "Oprav bez součástek; dočasně. Předmět se rozbije při příští komplikaci; rozsah komplikací při použití +1 (19–20).",
-      en: "Repair without spare parts; temporary only. The item breaks on the next complication; its complication range while in use +1 (19-20).",
-    },
+    effect: "Oprav bez součástek; dočasně. Předmět se rozbije při příští komplikaci; rozsah komplikací při použití +1 (19–20).",
   },
   {
     key: "pruvodce",
@@ -747,10 +585,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 6, endurance: 6 },
-    effect: {
-      cs: "Dlouhá cesta Pustinou: VNI + Přežití (obt. PH) → čas cesty ÷2.",
-      en: "Long journey through the Wasteland: PER + Survival (difficulty set by the GM) -> travel time halved.",
-    },
+    effect: "Dlouhá cesta Pustinou: VNI + Přežití (obt. PH) → čas cesty ÷2.",
   },
   {
     key: "prvniliga",
@@ -760,10 +595,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 8 },
-    effect: {
-      cs: "Obouruční chladná zbraň: Zákeřný.",
-      en: "Two-handed melee weapon: gains Vicious.",
-    },
+    effect: "Obouruční chladná zbraň: Zákeřný.",
   },
   {
     key: "pritelzvirat",
@@ -773,10 +605,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 5,
     req: { charisma: 6 },
-    effect: {
-      cs: "S1: napadne tě savec/ještěr/hmyz → 1 EF na d6; bez účinku nezaútočí na tebe. S2: velká akce, CHA + Přežití, obt. 2 → tvor tě brání (i mocný/legendární). Min. úroveň +5/stupeň.",
-      en: "R1: a mammal/reptile/insect attacks you -> 1 CD; with no effect it will not attack you. R2: major action, CHA + Survival, diff. 2 -> the creature defends you (even a mighty/legendary one). Min. level +5/rank.",
-    },
+    effect: "S1: napadne tě savec/ještěr/hmyz → 1 EF na d6; bez účinku nezaútočí na tebe. S2: velká akce, CHA + Přežití, obt. 2 → tvor tě brání (i mocný/legendární). Min. úroveň +5/stupeň.",
   },
   {
     key: "prizivnik",
@@ -786,10 +615,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 5,
     req: { luck: 6 },
-    effect: {
-      cs: "Loot munice: S1 +3 EF na d6, S2 +6 EF na d6, S3 +10 EF na d6 stejného typu; při více typech nejnižší vzácnost (shoda: PH). Min. úroveň +5/stupeň.",
-      en: "Looting ammo: R1 +3 CD, R2 +6 CD, R3 +10 CD of the same type; with several types use the lowest rarity (ties: GM). Min. level +5/rank.",
-    },
+    effect: "Loot munice: S1 +3 EF na d6, S2 +6 EF na d6, S3 +10 EF na d6 stejného typu; při více typech nejnižší vzácnost (shoda: PH). Min. úroveň +5/stupeň.",
   },
   {
     key: "pyromaniak",
@@ -799,10 +625,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { endurance: 6 },
-    effect: {
-      cs: "Ohnivé zbraně: +1 EF na d6 zranění/stupeň. Min. úroveň +4/stupeň.",
-      en: "Fire weapons: +1 CD damage per rank. Min. level +4/rank.",
-    },
+    effect: "Ohnivé zbraně: +1 EF na d6 zranění/stupeň. Min. úroveň +4/stupeň.",
   },
   {
     key: "refraktor",
@@ -812,10 +635,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 4,
     req: { perception: 6, luck: 7 },
-    effect: {
-      cs: "Energetické OZ všech míst zásahu +1/stupeň. Min. úroveň +4/stupeň.",
-      en: "Energy DR of every hit location +1 per rank. Min. level +4/rank.",
-    },
+    effect: "Energetické OZ všech míst zásahu +1/stupeň. Min. úroveň +4/stupeň.",
   },
   {
     key: "roztaveni",
@@ -825,10 +645,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 10 },
-    effect: {
-      cs: "Zabití energetickou zbraní → exploze. Hoď floor(Poškození/2) EF na d6; za každý účinek zasáhni 1 bytost v krátké vzdál. (od nejbližší) energetickým zraněním = součet EF na d6.",
-      en: "A kill with an energy weapon -> explosion. Roll floor(damage/2) CD; for each effect hit 1 creature at close range (nearest first) for energy damage equal to the CD total.",
-    },
+    effect: "Zabití energetickou zbraní → exploze. Hoď floor(Poškození/2) EF na d6; za každý účinek zasáhni 1 bytost v krátké vzdál. (od nejbližší) energetickým zraněním = součet EF na d6.",
   },
   {
     key: "rychleruce",
@@ -838,10 +655,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { agility: 8 },
-    effect: {
-      cs: "Útok na dálku: 2 AB → RoF +2 pro tento Útok.",
-      en: "Ranged attack: 2 AP -> RoF +2 for that attack.",
-    },
+    effect: "Útok na dálku: 2 AB → RoF +2 pro tento Útok.",
   },
   {
     key: "rychletaseni",
@@ -851,10 +665,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { agility: 6 },
-    effect: {
-      cs: "1× za tah Vytáhni zbraň/věc zdarma (bez malé akce).",
-      en: "Once per turn Draw a weapon/item for free (no minor action).",
-    },
+    effect: "1× za tah Vytáhni zbraň/věc zdarma (bez malé akce).",
   },
   {
     key: "rychlejsiuzdravovani",
@@ -865,10 +676,7 @@ export const PERK_CATALOG = [
     levelStep: 0,
     req: { endurance: 6 },
     noRobot: true,
-    effect: {
-      cs: "ODO + Přežití na zotavení z úrazu: 1. dodatečný k20 zdarma; limit 5k20.",
-      en: "END + Survival to recover from an injury: first extra d20 free; limit 5d20.",
-    },
+    effect: "ODO + Přežití na zotavení z úrazu: 1. dodatečný k20 zdarma; limit 5k20.",
   },
   {
     key: "rychlymetabolismus",
@@ -879,10 +687,7 @@ export const PERK_CATALOG = [
     levelStep: 3,
     req: { endurance: 6 },
     noRobot: true,
-    effect: {
-      cs: "Léčení BZ mimo odpočinek: +1 BZ/stupeň. Min. úroveň +3/stupeň.",
-      en: "Healing HP outside of rest: +1 HP per rank. Min. level +3/rank.",
-    },
+    effect: "Léčení BZ mimo odpočinek: +1 BZ/stupeň. Min. úroveň +3/stupeň.",
   },
   {
     key: "radenismrtky",
@@ -892,10 +697,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { luck: 8 },
-    effect: {
-      cs: "Útok zabije ≥1 nepřítele: 1 EF na d6; účinek → skupina +2 AB.",
-      en: "An attack kills 1+ enemy: roll 1 CD; on an effect -> the party gains +2 AP.",
-    },
+    effect: "Útok zabije ≥1 nepřítele: 1 EF na d6; účinek → skupina +2 AB.",
   },
   {
     key: "sberaczatek",
@@ -905,10 +707,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { charisma: 5 },
-    effect: {
-      cs: "Nákup/prodej: cenu zboží změň o 10 % ve svůj prospěch.",
-      en: "Buying/selling: shift the price of goods by 10 % in your favor.",
-    },
+    effect: "Nákup/prodej: cenu zboží změň o 10 % ve svůj prospěch.",
   },
   {
     key: "slunickovyclovek",
@@ -918,10 +717,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { endurance: 7 },
-    effect: {
-      cs: "Přímé slunce: vyléč 1 rad. zranění/hodinu.",
-      en: "Direct sunlight: heal 1 rad injury per hour.",
-    },
+    effect: "Přímé slunce: vyléč 1 rad. zranění/hodinu.",
   },
   {
     key: "smazka",
@@ -931,10 +727,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 4,
     req: { endurance: 7 },
-    effect: {
-      cs: "S1: test závislosti na chemikáliích −1 EF na d6 (min. 0). S2: imunita vůči závislosti. Min. úroveň +4/stupeň.",
-      en: "R1: chem addiction test -1 CD (min. 0). R2: immune to addiction. Min. level +4/rank.",
-    },
+    effect: "S1: test závislosti na chemikáliích −1 EF na d6 (min. 0). S2: imunita vůči závislosti. Min. úroveň +4/stupeň.",
   },
   {
     key: "soustredenapalba",
@@ -944,10 +737,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 8, agility: 6 },
-    effect: {
-      cs: "Útok na dálku s municí na +zranění: opakuj až 3 EF na d6 zranění.",
-      en: "Ranged attack with ammo that adds damage: re-roll up to 3 CD of damage.",
-    },
+    effect: "Útok na dálku s municí na +zranění: opakuj až 3 EF na d6 zranění.",
   },
   {
     key: "stehovak",
@@ -957,10 +747,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 2,
     req: { strength: 5 },
-    effect: {
-      cs: "Max. zátěž +12,5 kg/stupeň. Min. úroveň +2/stupeň.",
-      en: "Max. carry weight +12.5 kg per rank. Min. level +2/rank.",
-    },
+    effect: "Max. zátěž +12,5 kg/stupeň. Min. úroveň +2/stupeň.",
   },
   {
     key: "strelec",
@@ -970,10 +757,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { agility: 7 },
-    effect: {
-      cs: "Obouruční zbraň na dálku, RoF ≤2, ne těžká: +1 EF na d6 zranění/stupeň. S2 navíc Průbojný 1 / Průbojný X +1. Min. úroveň +4/stupeň.",
-      en: "Two-handed ranged weapon, RoF 2 or less, not heavy: +1 CD damage per rank. R2 also Piercing 1 / Piercing X +1. Min. level +4/rank.",
-    },
+    effect: "Obouruční zbraň na dálku, RoF ≤2, ne těžká: +1 EF na d6 zranění/stupeň. S2 navíc Průbojný 1 / Průbojný X +1. Min. úroveň +4/stupeň.",
   },
   {
     key: "sikovnost",
@@ -983,10 +767,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { agility: 9 },
-    effect: {
-      cs: "1× za boj opakuj všechny EF na d6 jednoho hodu na zranění zdarma.",
-      en: "Once per combat re-roll all CD of one damage roll for free.",
-    },
+    effect: "1× za boj opakuj všechny EF na d6 jednoho hodu na zranění zdarma.",
   },
   {
     key: "srotak",
@@ -996,10 +777,7 @@ export const PERK_CATALOG = [
     level: 3,
     levelStep: 5,
     req: {},
-    effect: {
-      cs: "S1: recyklace dává i neobvyklé materiály/komponenty. S2: i vzácné. Min. úroveň +5/stupeň.",
-      en: "R1: scrapping also yields uncommon materials/components. R2: rare ones too. Min. level +5/rank.",
-    },
+    effect: "S1: recyklace dává i neobvyklé materiály/komponenty. S2: i vzácné. Min. úroveň +5/stupeň.",
   },
   {
     key: "tajemnycizinec",
@@ -1009,10 +787,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { luck: 7 },
-    effect: {
-      cs: "Začátek boje: utratíš 1 Bod štěstí; PH může vyvolat Cizince k 1 Útoku na dálku proti tvému útočníkovi/cíli; pokud nepřijde, bod se vrátí. Cizinec: HBI 10, Lehké zbraně 6 + talent, hází 3k20, .44 Magnum 8 EF na d6, Průbojný 1, Zákeřný.",
-      en: "Start of combat: spend 1 Luck point; the GM may summon the Stranger for 1 ranged attack against your attacker/target; if he does not show up, the point is refunded. Stranger: AGI 10, Small Guns 6 + tag, rolls 3d20, .44 Magnum 8 CD, Piercing 1, Vicious.",
-    },
+    effect: "Začátek boje: utratíš 1 Bod štěstí; PH může vyvolat Cizince k 1 Útoku na dálku proti tvému útočníkovi/cíli; pokud nepřijde, bod se vrátí. Cizinec: HBI 10, Lehké zbraně 6 + talent, hází 3k20, .44 Magnum 8 EF na d6, Průbojný 1, Zákeřný.",
   },
   {
     key: "talent",
@@ -1022,10 +797,7 @@ export const PERK_CATALOG = [
     level: 5,
     levelStep: 0,
     req: {},
-    effect: {
-      cs: "Přidej talent k 1 dovednosti: +2 (max. 6); její k20 ≤ hodnota dovednosti = krit. úspěch.",
-      en: "Add a tag to 1 skill: +2 (max. 6); a d20 <= that skill value counts as a crit success.",
-    },
+    effect: "Přidej talent k 1 dovednosti: +2 (max. 6); její k20 ≤ hodnota dovednosti = krit. úspěch.",
   },
   {
     key: "tuhykorinek",
@@ -1035,10 +807,7 @@ export const PERK_CATALOG = [
     level: 5,
     levelStep: 5,
     req: {},
-    effect: {
-      cs: "Max. BZ +ODO/stupeň. Min. úroveň +5/stupeň.",
-      en: "Max. HP +END per rank. Min. level +5/rank.",
-    },
+    effect: "Max. BZ +ODO/stupeň. Min. úroveň +5/stupeň.",
   },
   {
     key: "tvrdak",
@@ -1048,10 +817,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 4,
     req: { endurance: 6, luck: 6 },
-    effect: {
-      cs: "Fyzické OZ všech míst zásahu +1/stupeň. Min. úroveň +4/stupeň.",
-      en: "Physical DR of every hit location +1 per rank. Min. level +4/rank.",
-    },
+    effect: "Fyzické OZ všech míst zásahu +1/stupeň. Min. úroveň +4/stupeň.",
   },
   {
     key: "veda",
@@ -1061,10 +827,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { intelligence: 6 },
-    effect: {
-      cs: "Energetické zbraně + některé pokročilé zbroje: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
-      en: "Energy weapons + some advanced armor: unlocks mods up to the perk's rank. Min. level +4/rank.",
-    },
+    effect: "Energetické zbraně + některé pokročilé zbroje: odemkne modifikace do stupně perku. Min. úroveň +4/stupeň.",
   },
   {
     key: "vlacekbolesti",
@@ -1074,10 +837,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 5,
     req: { strength: 9, endurance: 7 },
-    effect: {
-      cs: "Jen energozbroj/supermutant: velká pohybová akce Zteč na cíl ve střední (1 zóna); v tahu nelze Přesun/Sprint. SIL + Atletika, obt. 2 → zranění jako beze zbraně + Ležící. S2: +1 EF na d6, Omračující. Velké/odolné cíle dle PH nemusí spadnout. Min. úroveň +5/stupeň.",
-      en: "Power armor/super mutant only: major movement action Charge at a target at medium range (1 zone); no Move/Sprint that turn. STR + Athletics, diff. 2 -> unarmed damage + Prone. R2: +1 CD, Stun. Large/sturdy targets may not fall, at the GM's discretion. Min. level +5/rank.",
-    },
+    effect: "Jen energozbroj/supermutant: velká pohybová akce Zteč na cíl ve střední (1 zóna); v tahu nelze Přesun/Sprint. SIL + Atletika, obt. 2 → zranění jako beze zbraně + Ležící. S2: +1 EF na d6, Omračující. Velké/odolné cíle dle PH nemusí spadnout. Min. úroveň +5/stupeň.",
   },
   {
     key: "vodnichlapecdivka",
@@ -1087,10 +847,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 3,
     req: { endurance: 5 },
-    effect: {
-      cs: "S1: plavání v rad. vodě bez rad. zranění; zadržení dechu 2×. S2: pod vodou obtížnost odhalení +2. Min. úroveň +3/stupeň.",
-      en: "R1: swim in irradiated water with no rad injury; hold your breath twice as long. R2: underwater the difficulty to detect you +2. Min. level +3/rank.",
-    },
+    effect: "S1: plavání v rad. vodě bez rad. zranění; zadržení dechu 2×. S2: pod vodou obtížnost odhalení +2. Min. úroveň +3/stupeň.",
   },
   {
     key: "vrhac",
@@ -1100,10 +857,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 8 },
-    effect: {
-      cs: "Vrhací zbraň: 1 AB → dosah +1 zóna (krátká→střední→dlouhá).",
-      en: "Thrown weapon: 1 AP -> range +1 zone (close->medium->long).",
-    },
+    effect: "Vrhací zbraň: 1 AB → dosah +1 zóna (krátká→střední→dlouhá).",
   },
   {
     key: "vsimavost",
@@ -1113,10 +867,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 7 },
-    effect: {
-      cs: "Míření na cíl v krátké: příští Útok proti němu Průbojný 1 / Průbojný X +1.",
-      en: "Aiming at a target at close range: your next attack against it gains Piercing 1 / Piercing X +1.",
-    },
+    effect: "Míření na cíl v krátké: příští Útok proti němu Průbojný 1 / Průbojný X +1.",
   },
   {
     key: "vytribenycuch",
@@ -1126,10 +877,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { luck: 5 },
-    effect: {
-      cs: "Loot jídla: +1 náhodná potravina bez AB.",
-      en: "Looting food: +1 random ration without spending AP.",
-    },
+    effect: "Loot jídla: +1 náhodná potravina bez AB.",
   },
   {
     key: "zabijak",
@@ -1139,10 +887,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { strength: 8 },
-    effect: {
-      cs: "Po zranění beze zbraně/chladnou: 1 Bod štěstí → krit. zásah + úraz v místě zásahu.",
-      en: "After damaging with unarmed/melee: 1 Luck point -> crit hit + injury to that hit location.",
-    },
+    effect: "Po zranění beze zbraně/chladnou: 1 Bod štěstí → krit. zásah + úraz v místě zásahu.",
   },
   {
     key: "zarnypriklad",
@@ -1152,10 +897,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { charisma: 8 },
-    effect: {
-      cs: "Max. skupinové AB +1.",
-      en: "Max. party AP +1.",
-    },
+    effect: "Max. skupinové AB +1.",
   },
   {
     key: "zasahdoprostred",
@@ -1165,10 +907,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { agility: 7 },
-    effect: {
-      cs: "Útok na dálku: zvol trup bez zvýšení obtížnosti; opakuj 1k20.",
-      en: "Ranged attack: choose the torso without raising the difficulty; re-roll 1d20.",
-    },
+    effect: "Útok na dálku: zvol trup bez zvýšení obtížnosti; opakuj 1k20.",
   },
   {
     key: "zkusenyzkusena",
@@ -1178,10 +917,7 @@ export const PERK_CATALOG = [
     level: 3,
     levelStep: 3,
     req: {},
-    effect: {
-      cs: "Buď 2 dovednosti +1, nebo 1 dovednost +2; max. 6. Min. úroveň +3/stupeň.",
-      en: "Either 2 skills +1, or 1 skill +2; max. 6. Min. level +3/rank.",
-    },
+    effect: "Buď 2 dovednosti +1, nebo 1 dovednost +2; max. 6. Min. úroveň +3/stupeň.",
   },
   {
     key: "zlatokop",
@@ -1191,10 +927,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 4,
     req: { luck: 5 },
-    effect: {
-      cs: "Loot zátek: S1 +3 EF na d6, S2 +6 EF na d6, S3 +10 EF na d6. Min. úroveň +4/stupeň.",
-      en: "Looting caps: R1 +3 CD, R2 +6 CD, R3 +10 CD. Min. level +4/rank.",
-    },
+    effect: "Loot zátek: S1 +3 EF na d6, S2 +6 EF na d6, S3 +10 EF na d6. Min. úroveň +4/stupeň.",
   },
   {
     key: "zlodejskymistr",
@@ -1204,10 +937,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { perception: 8, agility: 9 },
-    effect: {
-      cs: "Při odemykání/kapsářství: obtížnost soupeřova odhalení +1.",
-      en: "When lockpicking/pickpocketing: the difficulty for others to spot you +1.",
-    },
+    effect: "Při odemykání/kapsářství: obtížnost soupeřova odhalení +1.",
   },
   {
     key: "zurivost",
@@ -1217,10 +947,7 @@ export const PERK_CATALOG = [
     level: 2,
     levelStep: 5,
     req: { intelligence: 8 },
-    effect: {
-      cs: "Při BZ < ¼ max.: fyz. i energ. OZ +stupeň; všechny Útoky +stupeň EF na d6 zranění. Min. úroveň +5/stupeň.",
-      en: "While HP is below 1/4 max.: physical and energy DR +rank; every attack +rank CD damage. Min. level +5/rank.",
-    },
+    effect: "Při BZ < ¼ max.: fyz. i energ. OZ +stupeň; všechny Útoky +stupeň EF na d6 zranění. Min. úroveň +5/stupeň.",
   },
   {
     key: "zeleznapest",
@@ -1230,10 +957,7 @@ export const PERK_CATALOG = [
     level: 1,
     levelStep: 5,
     req: { strength: 6 },
-    effect: {
-      cs: "S1: Útoky beze zbraně +1 EF na d6 zranění. S2: navíc Zákeřný. Min. úroveň +5/stupeň.",
-      en: "R1: unarmed attacks +1 CD damage. R2: also Vicious. Min. level +5/rank.",
-    },
+    effect: "S1: Útoky beze zbraně +1 EF na d6 zranění. S2: navíc Zákeřný. Min. úroveň +5/stupeň.",
   },
   {
     key: "zeryk",
@@ -1243,10 +967,7 @@ export const PERK_CATALOG = [
     level: 0,
     levelStep: 0,
     req: { charisma: 5 },
-    effect: {
-      cs: "Získáš psa jako spřátelenou NPC pod svým velením; sám si shání potravu/vodu. Po smrti lze před dalším dobrodružstvím získat nového, nebo na konci dobrodružství perk vyměnit.",
-      en: "You gain a dog as a friendly NPC under your command; it forages its own food/water. If it dies you may get a new one before the next adventure, or swap the perk out at the end of an adventure.",
-    },
+    effect: "Získáš psa jako spřátelenou NPC pod svým velením; sám si shání potravu/vodu. Po smrti lze před dalším dobrodružstvím získat nového, nebo na konci dobrodružství perk vyměnit.",
   },
 ];
 
@@ -1327,11 +1048,11 @@ export function perkRules(row) {
 
 // Dokument šablony do Firestore. `rank` je stupeň, se kterým perk přistane
 // na kartě, zbytek jsou podmínky pro filtrování.
-export function perkTemplateDoc(p, lang) {
+export function perkTemplateDoc(p) {
   return {
     name: perkFullName(p),
     rank: "1",
-    effect: lang === "en" ? p.effect.en : p.effect.cs,
+    effect: p.effect,
     perkKey: p.key,
     ranks: p.ranks,
     reqLevel: p.level,
