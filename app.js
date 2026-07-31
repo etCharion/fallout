@@ -102,6 +102,7 @@ const TRANSLATIONS = {
     dr_en: "Energet.",
     dr_rad: "Radiač.",
     dr_hp: "Body zdraví",
+    dr_inj: "Zranění",
     poisonRes: "JEDOVÉ OZ",
     loc_head: "HLAVA (1-2)",
     loc_torso: "TRUP (3-8)",
@@ -209,6 +210,41 @@ const TRANSLATIONS = {
     tplName_inventory: "Název předmětu",
     tplName_perks: "Název perku",
     emptyList: "Zatím prázdné.",
+    // test dovednosti
+    tnLabel: "CČ",
+    critLE: "krit ≤",
+    rollPick: "Klepni na atribut a dovednost",
+    rollClear: "Zrušit výběr",
+    rollNoTn: "Bez cílového čísla — vyber atribut a dovednost",
+    // radiace
+    rads: "RADIACE",
+    radsShort: "RAD",
+    radsTip:
+      "Radiace snižuje maximální body zdraví. Přirozeně se neléčí — jen RadAway a podobnými prostředky.",
+    // nosnost
+    carry: "NOSNOST",
+    carryOver: "PŘETÍŽENO",
+    carryTip: "Zbraně + vybavení · nosnost = 150 + 10 × SÍLA",
+    carryOverTip:
+      "Přetížení: +1 obtížnost na testy SÍLY a HBITOSTI, nelze použít Sprint, iniciativa −1.",
+    // zranění
+    injTitle: "ZRANĚNÍ",
+    injRule:
+      "Kritický zásah: jeden zásah způsobí 5 a více poškození po odečtení odolnosti. Každý kritický zásah znamená jedno zranění zasažené zóny.",
+    injTip_head:
+      "HLAVA — jsi omráčen a v příštím tahu přicházíš o běžné akce (akce navíc za AP můžeš použít normálně).",
+    injTip_torso:
+      "TRUP — silně krvácíš. Na konci každého svého tahu utrpíš 2 CD fyzického poškození, které ignoruje veškerou odolnost.",
+    injTip_arm:
+      "RUKA — upustíš, co jsi v ní držel, a ruka je zlomená či jinak nehybná. Nemůžeš s ní provádět žádné akce — ani samostatně, ani spolu s druhou rukou.",
+    injTip_leg:
+      "NOHA — okamžitě padáš na zem, protože noha povolila. Nemůžeš použít Sprint a Pohyb se pro tebe stává hlavní akcí.",
+    // munice
+    w_ammoQty: "KS",
+    ammoNone: "—",
+    ammoPick: "-- typ munice --",
+    ammoTip: "Počet v inventáři — mění se i v seznamu vybavení",
+    seedAmmo: "Doplnit typy munice",
   },
   en: {
     headerTitle: "THE ROLEPLAYING GAME",
@@ -255,6 +291,7 @@ const TRANSLATIONS = {
     dr_en: "Energy",
     dr_rad: "Radiation",
     dr_hp: "Health pts",
+    dr_inj: "Injuries",
     poisonRes: "POISON DR",
     loc_head: "HEAD (1-2)",
     loc_torso: "TORSO (3-8)",
@@ -362,8 +399,169 @@ const TRANSLATIONS = {
     tplName_inventory: "Item name",
     tplName_perks: "Perk name",
     emptyList: "Empty so far.",
+    // skill test
+    tnLabel: "TN",
+    critLE: "crit ≤",
+    rollPick: "Tap an attribute and a skill",
+    rollClear: "Clear selection",
+    rollNoTn: "No target number — pick an attribute and a skill",
+    // radiation
+    rads: "RADIATION",
+    radsShort: "RAD",
+    radsTip:
+      "Radiation damage reduces your maximum health points. It never heals naturally — only RadAway and similar items remove it.",
+    // carry weight
+    carry: "CARRY WEIGHT",
+    carryOver: "OVER-ENCUMBERED",
+    carryTip: "Weapons + equipment · carry weight = 150 + 10 × STR",
+    carryOverTip:
+      "Over-encumbered: +1 difficulty to Strength and Agility tests, you cannot Sprint, Initiative is reduced by 1.",
+    // injuries
+    injTitle: "INJURIES",
+    injRule:
+      "Critical hit: a single hit inflicts 5 or more damage after damage resistance. Each critical hit causes one injury to the location hit.",
+    injTip_head:
+      "HEAD — you are momentarily dazed and lose your normal actions on your next turn (you may still spend AP for extra actions).",
+    injTip_torso:
+      "TORSO — you begin bleeding heavily. At the end of each of your turns you suffer 2 CD physical damage, ignoring all damage resistance.",
+    injTip_arm:
+      "ARM — you drop anything held in that hand and the arm is broken or otherwise unable to move. You cannot perform actions with it, alone or alongside the other arm.",
+    injTip_leg:
+      "LEG — you immediately fall prone as the leg gives out. You can no longer Sprint and the Move action becomes a major action for you.",
+    // ammo
+    w_ammoQty: "QTY",
+    ammoNone: "—",
+    ammoPick: "-- ammo type --",
+    ammoTip: "Amount in inventory — also updates the equipment list",
+    seedAmmo: "Add ammo types",
   },
 };
+
+// Typy munice podle tabulky v příručce (váha < 0,5 zapsána jako 0,5).
+const AMMO_TYPES = [
+  { key: "308", cs: ".308", en: ".308", weight: "0,5" },
+  { key: "38", cs: ".38", en: ".38", weight: "0,5" },
+  { key: "44magnum", cs: ".44 Magnum", en: ".44 Magnum", weight: "0,5" },
+  { key: "45", cs: ".45", en: ".45", weight: "0,5" },
+  { key: "50", cs: ".50", en: ".50", weight: "0,5" },
+  { key: "10mm", cs: "10 mm", en: "10mm", weight: "0,5" },
+  { key: "2mmEC", cs: "2mm EZ", en: "2mm EC", weight: "0,5" },
+  { key: "5mm", cs: "5 mm", en: "5mm", weight: "0,5" },
+  { key: "556mm", cs: "5,56 mm", en: "5.56mm", weight: "0,5" },
+  { key: "shotgun", cs: "Brokový náboj", en: "Shotgun shell", weight: "0,5" },
+  { key: "fusionCell", cs: "Fúzní článek", en: "Fusion cell", weight: "0,5" },
+  { key: "fusionCore", cs: "Fúzní jádro", en: "Fusion core", weight: "2" },
+  { key: "gammaRound", cs: "G článek", en: "Gamma round", weight: "0,5" },
+  { key: "miniNuke", cs: "Miniatomovka", en: "Mini nuke", weight: "6" },
+  {
+    key: "syringer",
+    cs: "Munice do jehlometu",
+    en: "Syringer ammo",
+    weight: "0,5",
+  },
+  {
+    key: "flamerFuel",
+    cs: "Náplň do plamenometu",
+    en: "Flamer fuel",
+    weight: "0,5",
+  },
+  { key: "missile", cs: "Raketa", en: "Missile", weight: "3,5" },
+  { key: "flare", cs: "Světlice", en: "Flare", weight: "0,5" },
+  {
+    key: "plasmaCartridge",
+    cs: "Zásobník plazmy",
+    en: "Plasma cartridge",
+    weight: "0,5",
+  },
+  { key: "railwaySpike", cs: "Železniční hřeb", en: "Railway spike", weight: "0,5" },
+];
+
+function getAmmoLabel(key, lang) {
+  const a = AMMO_TYPES.find((x) => x.key === key);
+  if (!a) return key || "";
+  return lang === "en" ? a.en : a.cs;
+}
+
+const SPECIAL_CODES = {
+  strength: { cs: "SIL", en: "STR" },
+  perception: { cs: "VNI", en: "PER" },
+  endurance: { cs: "ODO", en: "END" },
+  charisma: { cs: "CHA", en: "CHA" },
+  intelligence: { cs: "INT", en: "INT" },
+  agility: { cs: "HBI", en: "AGI" },
+  luck: { cs: "STE", en: "LCK" },
+};
+
+// Popisky dovedností nesou doporučený atribut v hranaté závorce — pro
+// jméno v logu ho odřízni.
+function skillName(t, key) {
+  return (t[`s_${key}`] || key).replace(/\s*\[[^\]]*\]\s*$/, "");
+}
+
+// Doporučený atribut u dovednosti — jen návod, hod jde složit libovolně.
+const SKILL_ATTR = {
+  athletics: "strength",
+  unarmed: "strength",
+  meleeWeapons: "strength",
+  energyWeapons: "perception",
+  lockpick: "perception",
+  pilot: "perception",
+  explosives: "perception",
+  survival: "endurance",
+  bigGuns: "endurance",
+  barter: "charisma",
+  speech: "charisma",
+  medicine: "intelligence",
+  repair: "intelligence",
+  science: "intelligence",
+  smallGuns: "agility",
+  sneak: "agility",
+  throwing: "agility",
+};
+
+// Váhy v příručce jsou psané jako „< 0,5" i „3,5" — vytáhni z toho číslo.
+function parseWeight(v) {
+  const m = String(v ?? "")
+    .replace(",", ".")
+    .match(/\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : 0;
+}
+
+function formatWeight(n, lang) {
+  const r = Math.round(n * 10) / 10;
+  const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return lang === "en" ? s : s.replace(".", ",");
+}
+
+// Čeština skloňuje podle počtu, angličtina jen jedn./mn. číslo.
+function plural(lang, n, cs, en) {
+  if (lang === "en") return n === 1 ? en[0] : en[1];
+  if (n === 1) return cs[0];
+  if (n >= 2 && n <= 4) return cs[1];
+  return cs[2];
+}
+
+const wordSucc = (lang, n) =>
+  plural(lang, n, ["úspěch", "úspěchy", "úspěchů"], ["success", "successes"]);
+const wordCrit = (lang, n) =>
+  plural(lang, n, ["kritický", "kritické", "kritických"], ["crit", "crits"]);
+const wordCompl = (lang, n) =>
+  plural(
+    lang,
+    n,
+    ["komplikace", "komplikace", "komplikací"],
+    ["complication", "complications"],
+  );
+
+// Shrnutí hodu 2d20 do jedné řádky — sdílí ho panel s kostkami i log.
+function d20SummaryBits(lang, sm) {
+  const bits = [];
+  if (sm.successes !== null && sm.successes !== undefined)
+    bits.push(sm.successes + " " + wordSucc(lang, sm.successes));
+  if (sm.crits) bits.push(sm.crits + " " + wordCrit(lang, sm.crits));
+  if (sm.compl) bits.push(sm.compl + " " + wordCompl(lang, sm.compl));
+  return bits;
+}
 
 const ITEM_TYPES = [
   { key: "food", cs: "Jídlo", en: "Food" },
@@ -439,15 +637,17 @@ const DEFAULT_CHARACTER = {
   },
   hpMax: "10",
   hpCurrent: "10",
+  rads: "0",
   initiative: "0",
   defense: "0",
   meleeDamage: "0",
-  resHead: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
-  resTorso: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
-  resLArm: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
-  resRArm: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
-  resLLeg: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
-  resRLeg: { phys: "0", en: "0", rad: "0", bz: "0", injured: false },
+  // `inj` = počet zranění zóny; `bz` je pozůstatek po dřívějším poli, nepoužívá se
+  resHead: { phys: "0", en: "0", rad: "0", inj: "0", injured: false },
+  resTorso: { phys: "0", en: "0", rad: "0", inj: "0", injured: false },
+  resLArm: { phys: "0", en: "0", rad: "0", inj: "0", injured: false },
+  resRArm: { phys: "0", en: "0", rad: "0", inj: "0", injured: false },
+  resLLeg: { phys: "0", en: "0", rad: "0", inj: "0", injured: false },
+  resRLeg: { phys: "0", en: "0", rad: "0", inj: "0", injured: false },
   poisonRes: "0",
   weapons: [],
   inventory: [],
@@ -471,10 +671,15 @@ function normalizeCharacter(raw) {
   c.resLLeg = { ...base.resLLeg, ...(raw?.resLLeg || {}) };
   c.resRLeg = { ...base.resRLeg, ...(raw?.resRLeg || {}) };
   c.weapons = Array.isArray(raw?.weapons)
-    ? raw.weapons.map((w) => ({ assigned: false, ...w }))
+    ? raw.weapons.map((w) => ({ assigned: false, ammo: "", ...w }))
     : [];
   c.inventory = Array.isArray(raw?.inventory)
-    ? raw.inventory.map((it) => ({ type: "other", quantity: "1", ...it }))
+    ? raw.inventory.map((it) => ({
+        type: "other",
+        quantity: "1",
+        ammoKey: "",
+        ...it,
+      }))
     : [];
   c.perks = Array.isArray(raw?.perks) ? raw.perks.map((p) => ({ ...p })) : [];
   c.history = Array.isArray(raw?.history) ? raw.history : [];
@@ -548,19 +753,43 @@ function PanelHead({ title, note, children }) {
   );
 }
 
-function BodyPartCard({ name, data, field, update, canEdit, canPlay, t }) {
+function HelpDot({ tip }) {
+  return h(
+    "span",
+    { className: "pb-help", "data-tip": tip, tabIndex: 0, role: "note" },
+    "?",
+  );
+}
+
+function BodyPartCard({ name, data, field, update, canPlay, tip, t }) {
+  const injuries = Math.max(0, parseInt(data.inj, 10) || 0);
   const injured = !!data.injured;
+  // Zaškrtávátko a počet drží krok — nechceme „zraněno" s nulou ani naopak.
+  const setInjured = (on) => {
+    update(`${field}.injured`, on);
+    update(`${field}.inj`, on ? String(Math.max(1, injuries)) : "0");
+  };
+  const setCount = (raw) => {
+    update(`${field}.inj`, raw);
+    const n = Math.max(0, parseInt(raw, 10) || 0);
+    if (n > 0 !== injured) update(`${field}.injured`, n > 0);
+  };
   return h(
     "div",
     { className: `pb-loc-card ${injured ? "injured" : ""}` },
-    h("span", { className: "pb-loc-name" }, name),
+    h(
+      "span",
+      { className: "pb-loc-name" },
+      name,
+      h(HelpDot, { tip: `${tip}\n\n${t.injRule}` }),
+    ),
     h(
       "label",
       { className: "pb-loc-status" },
       h("input", {
         type: "checkbox",
         checked: injured,
-        onChange: (e) => update(`${field}.injured`, e.target.checked),
+        onChange: (e) => setInjured(e.target.checked),
         disabled: !canPlay,
       }),
       injured ? t.locInjured : t.locOk,
@@ -568,13 +797,15 @@ function BodyPartCard({ name, data, field, update, canEdit, canPlay, t }) {
     h(
       "div",
       { className: "pb-loc-vals" },
-      ["phys", "en", "rad", "bz"].map((k) =>
+      ["phys", "en", "rad", "inj"].map((k) =>
         h("input", {
           key: k,
           type: "number",
-          className: `pb-num sm ${k === "bz" ? "hp" : ""}`,
-          value: data[k],
-          onChange: (e) => update(`${field}.${k}`, e.target.value),
+          min: k === "inj" ? 0 : undefined,
+          className: `pb-num sm ${k === "inj" ? "inj" : ""}`,
+          value: k === "inj" ? data.inj : data[k],
+          onChange: (e) =>
+            k === "inj" ? setCount(e.target.value) : update(`${field}.${k}`, e.target.value),
           disabled: !canPlay,
           title:
             k === "phys"
@@ -583,7 +814,7 @@ function BodyPartCard({ name, data, field, update, canEdit, canPlay, t }) {
                 ? t.dr_en
                 : k === "rad"
                   ? t.dr_rad
-                  : t.dr_hp,
+                  : t.injTitle,
         }),
       ),
     ),
@@ -827,7 +1058,7 @@ function NotesModal({ isOpen, onClose, value, onChange, disabled, t }) {
   );
 }
 
-function RollLogModal({ isOpen, onClose, rollLog, onClear, t }) {
+function RollLogModal({ isOpen, onClose, rollLog, onClear, lang, t }) {
   if (!isOpen) return null;
   return h(
     ModalShell,
@@ -860,12 +1091,7 @@ function RollLogModal({ isOpen, onClose, rollLog, onClear, t }) {
             const d20 = r.type === "d20";
             let sum;
             if (d20) {
-              const bits = [t.diceSum + " " + r.summary.sum];
-              if (r.summary.crit)
-                bits.push(r.summary.crit + " " + t.diceCrit);
-              if (r.summary.compl)
-                bits.push(r.summary.compl + " " + t.diceCompl);
-              sum = bits.join(" · ");
+              sum = d20SummaryBits(lang, r.summary).join(" · ") || "—";
             } else {
               sum =
                 t.diceDmg +
@@ -887,6 +1113,15 @@ function RollLogModal({ isOpen, onClose, rollLog, onClear, t }) {
               h(
                 "div",
                 { className: "pb-log-main" },
+                r.test &&
+                  h(
+                    "span",
+                    { className: "pb-log-test" },
+                    `${r.test.label} · ${t.tnLabel} ${r.test.tn}` +
+                      (r.test.critRange > 1
+                        ? ` · ${t.critLE} ${r.test.critRange}`
+                        : ""),
+                  ),
                 h("span", { className: "pb-log-sum" }, sum),
                 h(
                   "span",
@@ -920,7 +1155,14 @@ function defaultTemplate(tab) {
       weight: "",
     };
   if (tab === "inventory")
-    return { id, name: "", type: "other", weight: "", quantity: "1" };
+    return {
+      id,
+      name: "",
+      type: "other",
+      weight: "",
+      quantity: "1",
+      ammoKey: "",
+    };
   if (tab === "perks") return { id, name: "", rank: "1", effect: "" };
   return { id, name: "" };
 }
@@ -1033,6 +1275,8 @@ function FalloutSheetApp() {
   // dice state
   const [diceType, setDiceType] = useState("d20");
   const [diceCounts, setDiceCounts] = useState({ d20: 2, d6: 3 });
+  // Výběr pro test dovednosti: jeden atribut + jedna dovednost, libovolná dvojice.
+  const [rollSel, setRollSel] = useState({ attr: null, skill: null });
   const [rolling, setRolling] = useState(false);
   const [spinFaces, setSpinFaces] = useState(null);
   const [lastRoll, setLastRoll] = useState(null);
@@ -1307,6 +1551,71 @@ function FalloutSheetApp() {
     setLocalChar({ ...localChar, inventory: list });
     if (mode === "play") setPlayDirty(true);
   };
+  // --- munice ---
+  // Zdrojem pravdy je inventář; u zbraně se jen ukazuje a odečítá.
+  const normName = (v) => String(v ?? "").trim().toLowerCase();
+  const ammoStacks = (key) => {
+    if (!key || !localChar) return [];
+    const a = AMMO_TYPES.find((x) => x.key === key);
+    return localChar.inventory.filter((it) => {
+      if (it.type !== "ammo") return false;
+      if (it.ammoKey) return it.ammoKey === key;
+      if (!a) return normName(it.name) === normName(key);
+      return (
+        normName(it.name) === normName(a.cs) ||
+        normName(it.name) === normName(a.en)
+      );
+    });
+  };
+  const ammoCount = (key) =>
+    ammoStacks(key).reduce(
+      (s, it) => s + Math.max(0, parseInt(it.quantity, 10) || 0),
+      0,
+    );
+  const stepAmmo = (key, dir) => {
+    const stacks = ammoStacks(key);
+    if (!stacks.length) return;
+    const target =
+      dir < 0
+        ? stacks.find((s) => (parseInt(s.quantity, 10) || 0) > 0)
+        : stacks[0];
+    if (target) stepQty(target.id, dir);
+  };
+
+  const seedAmmoTemplates = async () => {
+    const taken = new Set();
+    (templates.inventory || []).forEach((tp) => {
+      if (tp.ammoKey) taken.add(tp.ammoKey);
+      taken.add(normName(tp.name));
+    });
+    for (const a of AMMO_TYPES) {
+      if (taken.has(a.key) || taken.has(normName(a.cs)) || taken.has(normName(a.en)))
+        continue;
+      try {
+        await setDoc(
+          doc(
+            db,
+            "artifacts",
+            appId,
+            "public",
+            "data",
+            "fallout_templates_inventory",
+            crypto.randomUUID(),
+          ),
+          {
+            name: lang === "en" ? a.en : a.cs,
+            type: "ammo",
+            weight: a.weight,
+            quantity: "1",
+            ammoKey: a.key,
+          },
+        );
+      } catch (e) {
+        console.error("Ammo seed error:", e);
+      }
+    }
+  };
+
   const addFromTemplate = (tpl) => {
     if (!localChar) return;
     const ln = pickerConfig.type;
@@ -1346,6 +1655,7 @@ function FalloutSheetApp() {
             name: tpl.name || "",
             weight: tpl.weight || "",
             quantity: tpl.quantity || "1",
+            ammoKey: tpl.ammoKey || "",
           },
         ],
       });
@@ -1459,6 +1769,8 @@ function FalloutSheetApp() {
   const switchMode = (m) => {
     if (m === mode) return;
     setQtyPop(null);
+    // V ÚPRAVÁCH patří kliknutí na kartu editaci, ne výběru hodu.
+    if (m === "edit") setRollSel({ attr: null, skill: null });
     if (mode === "edit" && localChar) {
       handleSave(m);
       return;
@@ -1507,6 +1819,7 @@ function FalloutSheetApp() {
     setSelectedCharId(id || null);
     setPlayDirty(false);
     setQtyPop(null);
+    setRollSel({ attr: null, skill: null });
     setModal(null);
   };
 
@@ -1622,14 +1935,71 @@ function FalloutSheetApp() {
     rd.readAsDataURL(file);
   };
 
+  // --- test dovednosti ---
+  // Výběr běží mimo režim ÚPRAVY — tam kliknutí patří editaci hodnot.
+  const canPickTest = mode !== "edit";
+  const clearTest = () => setRollSel({ attr: null, skill: null });
+  const pickAttr = (key) =>
+    setRollSel((p) => ({ ...p, attr: p.attr === key ? null : key }));
+  const pickSkill = (key) =>
+    setRollSel((p) =>
+      p.skill === key
+        ? { ...p, skill: null }
+        : // Doporučený atribut doplň jen tehdy, když si hráč žádný nevybral.
+          { attr: p.attr || SKILL_ATTR[key] || null, skill: key },
+    );
+
+  // CČ = atribut + dovednost. Tagnutá dovednost rozšiřuje kritický rozsah
+  // na svou hodnotu; přirozená 1 je kritický úspěch vždy. Krit = 2 úspěchy.
+  const readTest = () => {
+    if (!localChar) return null;
+    const { attr, skill } = rollSel;
+    if (!attr && !skill) return null;
+    const attrVal = attr ? Math.max(0, parseInt(localChar[attr], 10) || 0) : 0;
+    const skillVal = skill
+      ? Math.max(0, parseInt(localChar.skills[`${skill}Val`], 10) || 0)
+      : 0;
+    const tagged = skill ? !!localChar.skills[skill] : false;
+    const bits = [];
+    if (attr)
+      bits.push(`${SPECIAL_CODES[attr][lang === "en" ? "en" : "cs"]} ${attrVal}`);
+    if (skill) bits.push(`${skillName(t, skill)} ${skillVal}`);
+    return {
+      attr,
+      skill,
+      attrVal,
+      skillVal,
+      tagged,
+      tn: attrVal + skillVal,
+      critRange: tagged ? Math.max(1, skillVal) : 1,
+      label: bits.join(" + "),
+    };
+  };
+
   // --- dice ---
-  const buildRoll = (type, values) => {
+  const buildRoll = (type, values, test) => {
     let summary;
     if (type === "d20") {
+      const tn = test ? test.tn : null;
+      const critRange = test ? test.critRange : 1;
+      let successes = 0,
+        crits = 0,
+        compl = 0;
+      values.forEach((v) => {
+        if (v === 20) compl += 1;
+        if (v <= critRange) {
+          crits += 1;
+          successes += 2;
+        } else if (tn !== null && v <= tn) {
+          successes += 1;
+        }
+      });
       summary = {
-        sum: values.reduce((a, b) => a + b, 0),
-        crit: values.filter((v) => v === 1).length,
-        compl: values.filter((v) => v === 20).length,
+        tn,
+        critRange,
+        successes: tn === null ? null : successes,
+        crits,
+        compl,
       };
     } else {
       let dmg = 0,
@@ -1657,6 +2027,10 @@ function FalloutSheetApp() {
       type,
       values,
       summary,
+      test:
+        type === "d20" && test
+          ? { label: test.label, tn: test.tn, critRange: test.critRange }
+          : null,
       ts,
     };
   };
@@ -1673,12 +2047,14 @@ function FalloutSheetApp() {
       () => setSpinFaces(Array.from({ length: n }, rnd)),
       70,
     );
+    const test = diceType === "d20" ? readTest() : null;
     clearTimeout(settleRef.current);
     settleRef.current = setTimeout(() => {
       clearInterval(spinRef.current);
       const rec = buildRoll(
         diceType,
         Array.from({ length: n }, rnd),
+        test,
       );
       setRolling(false);
       setSpinFaces(null);
@@ -1694,14 +2070,15 @@ function FalloutSheetApp() {
       return { ...p, d6: Math.max(1, Math.min(12, p.d6 + dir)) };
     });
   };
-  const dieFace = (type, v) => {
+  const dieFace = (type, v, test) => {
     if (type === "d20") {
-      return {
-        big: String(v),
-        sub: "",
-        tag: "d20",
-        cls: v === 1 ? "crit" : v === 20 ? "compl" : "",
-      };
+      const critRange = test ? test.critRange : 1;
+      const tn = test ? test.tn : null;
+      let cls = "";
+      if (v === 20) cls = "compl";
+      else if (v <= critRange) cls = "crit";
+      else if (tn !== null && v <= tn) cls = "hit";
+      return { big: String(v), sub: "", tag: "d20", cls };
     }
     if (v === 1) return { big: "1", sub: "", tag: "CD", cls: "" };
     if (v === 2) return { big: "2", sub: "", tag: "CD", cls: "" };
@@ -1736,28 +2113,57 @@ function FalloutSheetApp() {
   if (loading) return h("div", { className: "pb-loading" }, t.loading);
 
   // --- derived render values ---
+  // Radiace ukrajuje z maxima HP a přirozeně se neléčí; když maximum klesne
+  // pod aktuální stav, srazí se s ním i aktuální body.
   const hpMax = Math.max(0, parseInt(localChar?.hpMax, 10) || 0);
-  const hpCur = Math.max(0, parseInt(localChar?.hpCurrent, 10) || 0);
+  const rads = Math.max(0, parseInt(localChar?.rads, 10) || 0);
+  const hpEffMax = Math.max(0, hpMax - rads);
+  const hpCurRaw = Math.max(0, parseInt(localChar?.hpCurrent, 10) || 0);
+  const hpCur = Math.min(hpCurRaw, hpEffMax);
   const segCount = Math.min(hpMax, 40);
-  const hpSegs = Array.from({ length: segCount }, (_, i) => i < hpCur);
-  const hpRatio = hpMax ? hpCur / hpMax : 0;
-  const hpCritical = hpRatio < 0.34;
+  const radFrom = Math.min(hpEffMax, segCount);
+  const hpRatio = hpEffMax ? hpCur / hpEffMax : 0;
+  const hpCritical = hpEffMax > 0 && hpRatio < 0.34;
+  const hpSegs = Array.from({ length: segCount }, (_, i) => ({
+    on: i < hpCur,
+    rad: i >= radFrom,
+  }));
+
+  const setRads = (v) => {
+    updatePlayField("rads", v);
+    const eff = Math.max(0, hpMax - Math.max(0, parseInt(v, 10) || 0));
+    if (hpCurRaw > eff) updatePlayField("hpCurrent", String(eff));
+  };
+
+  // Nosnost = 150 + 10 × SÍLA; váhy v příručce bývají psané „< 0,5".
+  const carryLoad =
+    (localChar?.weapons || []).reduce((s, w) => s + parseWeight(w.weight), 0) +
+    (localChar?.inventory || []).reduce(
+      (s, it) =>
+        s +
+        parseWeight(it.weight) * Math.max(0, parseInt(it.quantity, 10) || 0),
+      0,
+    );
+  const carryMax =
+    150 + 10 * Math.max(0, parseInt(localChar?.strength, 10) || 0);
+  const carryOver = carryLoad > carryMax;
 
   const modeBadge =
     mode === "edit" ? t.badgeEdit : mode === "play" ? t.badgePlay : t.badgeLock;
 
   const dCount = diceType === "d20" ? diceCounts.d20 : diceCounts.d6;
+  const activeTest = readTest();
   let diceView;
   if (rolling && spinFaces) {
     diceView = spinFaces.map((v, i) => ({
       key: i,
-      ...dieFace(diceType, v),
+      ...dieFace(diceType, v, activeTest),
       anim: "spin",
     }));
   } else if (lastRoll) {
     diceView = lastRoll.values.map((v, i) => ({
       key: i,
-      ...dieFace(lastRoll.type, v),
+      ...dieFace(lastRoll.type, v, lastRoll.test),
       anim: "pop",
     }));
   } else {
@@ -1775,10 +2181,9 @@ function FalloutSheetApp() {
   if (lastRoll) {
     const sm = lastRoll.summary;
     if (lastRoll.type === "d20") {
-      lastLine = t.diceSum + " " + sm.sum;
-      const bits = [];
-      if (sm.crit) bits.push(sm.crit + " " + t.diceCrit);
-      if (sm.compl) bits.push(sm.compl + " " + t.diceCompl);
+      // Bez vybraného CČ nelze počítat úspěchy — hlas aspoň kritické a 20.
+      const bits = d20SummaryBits(lang, sm);
+      lastLine = bits.length ? bits.shift() : "—";
       lastExtra = bits.length ? "· " + bits.join(" · ") : "";
     } else {
       lastLine = t.diceDmg + ": " + sm.dmg;
@@ -1787,26 +2192,55 @@ function FalloutSheetApp() {
   }
 
   const specialDefs = [
-    { key: "strength", code: "SIL", codeEn: "STR", label: t.strength },
-    { key: "perception", code: "VNI", codeEn: "PER", label: t.perception },
-    { key: "endurance", code: "ODO", codeEn: "END", label: t.endurance },
-    { key: "charisma", code: "CHA", codeEn: "CHA", label: t.charisma },
-    { key: "intelligence", code: "INT", codeEn: "INT", label: t.intelligence },
-    { key: "agility", code: "HBI", codeEn: "AGI", label: t.agility },
-    { key: "luck", code: "STE", codeEn: "LCK", label: t.luck },
-  ];
+    { key: "strength", label: t.strength },
+    { key: "perception", label: t.perception },
+    { key: "endurance", label: t.endurance },
+    { key: "charisma", label: t.charisma },
+    { key: "intelligence", label: t.intelligence },
+    { key: "agility", label: t.agility },
+    { key: "luck", label: t.luck },
+  ].map((s) => ({
+    ...s,
+    code: SPECIAL_CODES[s.key][lang === "en" ? "en" : "cs"],
+  }));
 
   const locDefs = [
-    { field: "resHead", name: t.loc_head, area: { gridColumn: 2, gridRow: 1 } },
-    { field: "resLArm", name: t.loc_larm, area: { gridColumn: 1, gridRow: 2 } },
+    {
+      field: "resHead",
+      name: t.loc_head,
+      tip: t.injTip_head,
+      area: { gridColumn: 2, gridRow: 1 },
+    },
+    {
+      field: "resLArm",
+      name: t.loc_larm,
+      tip: t.injTip_arm,
+      area: { gridColumn: 1, gridRow: 2 },
+    },
     {
       field: "resTorso",
       name: t.loc_torso,
+      tip: t.injTip_torso,
       area: { gridColumn: 2, gridRow: 2 },
     },
-    { field: "resRArm", name: t.loc_rarm, area: { gridColumn: 3, gridRow: 2 } },
-    { field: "resLLeg", name: t.loc_lleg, area: { gridColumn: 1, gridRow: 3 } },
-    { field: "resRLeg", name: t.loc_rleg, area: { gridColumn: 3, gridRow: 3 } },
+    {
+      field: "resRArm",
+      name: t.loc_rarm,
+      tip: t.injTip_arm,
+      area: { gridColumn: 3, gridRow: 2 },
+    },
+    {
+      field: "resLLeg",
+      name: t.loc_lleg,
+      tip: t.injTip_leg,
+      area: { gridColumn: 1, gridRow: 3 },
+    },
+    {
+      field: "resRLeg",
+      name: t.loc_rleg,
+      tip: t.injTip_leg,
+      area: { gridColumn: 3, gridRow: 3 },
+    },
   ];
 
   const weaponCols = [
@@ -1821,8 +2255,10 @@ function FalloutSheetApp() {
     t.w_range,
     t.w_qual,
     t.w_ammo,
+    t.w_ammoQty,
     t.w_weight,
   ];
+  const weaponColsCentered = [2, 3, 4, 7, 8, 11, 12];
 
   const rowButtons = (listName, id) =>
     h(
@@ -2196,21 +2632,30 @@ function FalloutSheetApp() {
                       onChange: (e) => updateField("hpMax", e.target.value),
                       disabled: !isEditing,
                     }),
+                    rads > 0 &&
+                      h("span", { className: "pb-hp-eff" }, "→ " + hpEffMax),
                     h(
-                      "span",
-                      {
-                        className: `pb-badge pb-push-right ${hpCritical ? "warn" : ""}`,
-                      },
-                      hpCritical ? t.hpCritical : t.hpStable,
+                      "div",
+                      { className: `pb-rad-box ${rads > 0 ? "on" : ""}` },
+                      h("span", { className: "pb-label" }, "☢ " + t.radsShort),
+                      h("input", {
+                        className: "pb-num",
+                        value: localChar.rads,
+                        onChange: (e) => setRads(e.target.value),
+                        disabled: !canPlay,
+                      }),
+                      h(HelpDot, { tip: t.radsTip }),
                     ),
                   ),
                   h(
                     "div",
                     { className: "pb-hp-track" },
-                    hpSegs.map((on, i) =>
+                    hpSegs.map((s, i) =>
                       h("span", {
                         key: i,
-                        className: `pb-hp-seg ${on ? "on" : ""}`,
+                        className: `pb-hp-seg ${s.rad ? "rad" : ""} ${
+                          s.on ? "on" : ""
+                        } ${hpCritical ? "low" : ""}`,
                       }),
                     ),
                   ),
@@ -2238,18 +2683,30 @@ function FalloutSheetApp() {
                 specialDefs.map((s) =>
                   h(
                     "div",
-                    { key: s.key, className: "pb-special-card" },
+                    {
+                      key: s.key,
+                      className: `pb-special-card ${canPickTest ? "pickable" : ""} ${
+                        rollSel.attr === s.key ? "picked" : ""
+                      }`,
+                      onClick: canPickTest ? () => pickAttr(s.key) : undefined,
+                      role: canPickTest ? "button" : undefined,
+                      tabIndex: canPickTest ? 0 : undefined,
+                      onKeyDown: canPickTest
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              pickAttr(s.key);
+                            }
+                          }
+                        : undefined,
+                    },
                     h("input", {
                       className: "pb-num",
                       value: localChar[s.key],
                       onChange: (e) => updateField(s.key, e.target.value),
                       disabled: !isEditing,
                     }),
-                    h(
-                      "span",
-                      { className: "pb-special-code" },
-                      lang === "en" ? s.codeEn : s.code,
-                    ),
+                    h("span", { className: "pb-special-code" }, s.code),
                     h("span", { className: "pb-special-label" }, s.label),
                   ),
                 ),
@@ -2333,7 +2790,25 @@ function FalloutSheetApp() {
                   skillsList.map((sk) =>
                     h(
                       "div",
-                      { key: sk.key, className: "pb-skill-row" },
+                      {
+                        key: sk.key,
+                        className: `pb-skill-row ${canPickTest ? "pickable" : ""} ${
+                          rollSel.skill === sk.key ? "picked" : ""
+                        }`,
+                        onClick: canPickTest
+                          ? () => pickSkill(sk.key)
+                          : undefined,
+                        role: canPickTest ? "button" : undefined,
+                        tabIndex: canPickTest ? 0 : undefined,
+                        onKeyDown: canPickTest
+                          ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                pickSkill(sk.key);
+                              }
+                            }
+                          : undefined,
+                      },
                       h("input", {
                         type: "checkbox",
                         className: "pb-check",
@@ -2364,7 +2839,7 @@ function FalloutSheetApp() {
                   h("span", null, "FYZ · " + t.dr_phys),
                   h("span", null, "EN · " + t.dr_en),
                   h("span", null, "RAD · " + t.dr_rad),
-                  h("span", null, "BZ · " + t.dr_hp),
+                  h("span", { className: "inj" }, "ZR · " + t.dr_inj),
                 ),
                 h(
                   "div",
@@ -2378,8 +2853,8 @@ function FalloutSheetApp() {
                         data: localChar[ld.field],
                         field: ld.field,
                         update: updatePlayField,
-                        canEdit: isEditing,
                         canPlay: canPlay,
+                        tip: ld.tip,
                         t: t,
                       }),
                     ),
@@ -2453,6 +2928,48 @@ function FalloutSheetApp() {
                       "▤ " + t.diceLog + " · " + rollLog.length,
                     ),
                   ),
+                  // Cílové číslo z vybraného atributu a dovednosti
+                  diceType === "d20" &&
+                    (activeTest || canPickTest) &&
+                    h(
+                      "div",
+                      { className: `pb-test-bar ${activeTest ? "on" : ""}` },
+                      activeTest
+                        ? h(
+                            React.Fragment,
+                            null,
+                            h(
+                              "span",
+                              { className: "pb-test-label" },
+                              activeTest.label,
+                            ),
+                            h(
+                              "span",
+                              { className: "pb-test-tn" },
+                              `${t.tnLabel} ${activeTest.tn}`,
+                            ),
+                            activeTest.critRange > 1 &&
+                              h(
+                                "span",
+                                { className: "pb-test-crit" },
+                                `${t.critLE} ${activeTest.critRange}`,
+                              ),
+                            h(
+                              "button",
+                              {
+                                className: "pb-test-clear",
+                                title: t.rollClear,
+                                onClick: clearTest,
+                              },
+                              "✕",
+                            ),
+                          )
+                        : h(
+                            "span",
+                            { className: "pb-test-hint" },
+                            "◈ " + t.rollPick,
+                          ),
+                    ),
                   h(
                     "div",
                     { className: "pb-dice-controls" },
@@ -2574,10 +3091,9 @@ function FalloutSheetApp() {
                         "span",
                         {
                           key: i,
-                          style:
-                            i === 2 || i === 3 || i === 4 || i === 7 || i === 8 || i === 11
-                              ? { textAlign: "center" }
-                              : null,
+                          style: weaponColsCentered.includes(i)
+                            ? { textAlign: "center" }
+                            : null,
                         },
                         c,
                       ),
@@ -2707,13 +3223,72 @@ function FalloutSheetApp() {
                             e.target.value,
                           ),
                       }),
-                      h("input", {
-                        className: "pb-cell",
-                        value: w.ammo,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem("weapons", w.id, "ammo", e.target.value),
-                      }),
+                      isEditing
+                        ? h(
+                            "select",
+                            {
+                              className: "pb-type-pill",
+                              value: w.ammo || "",
+                              onChange: (e) =>
+                                updateListItem(
+                                  "weapons",
+                                  w.id,
+                                  "ammo",
+                                  e.target.value,
+                                ),
+                            },
+                            h("option", { value: "" }, t.ammoPick),
+                            AMMO_TYPES.map((a) =>
+                              h(
+                                "option",
+                                { key: a.key, value: a.key },
+                                lang === "en" ? a.en : a.cs,
+                              ),
+                            ),
+                            // starší ručně psaná hodnota ať se neztratí
+                            w.ammo &&
+                              !AMMO_TYPES.some((a) => a.key === w.ammo) &&
+                              h("option", { value: w.ammo }, w.ammo),
+                          )
+                        : h(
+                            "span",
+                            { className: "pb-cell" },
+                            getAmmoLabel(w.ammo, lang),
+                          ),
+                      (() => {
+                        const stacks = ammoStacks(w.ammo);
+                        if (!stacks.length)
+                          return h(
+                            "span",
+                            {
+                              className: "pb-ammo-count dim",
+                              title: t.ammoTip,
+                            },
+                            t.ammoNone,
+                          );
+                        const cnt = ammoCount(w.ammo);
+                        if (mode !== "play")
+                          return h(
+                            "span",
+                            { className: "pb-ammo-count", title: t.ammoTip },
+                            String(cnt),
+                          );
+                        return h(
+                          "div",
+                          { className: "pb-ammo-step", title: t.ammoTip },
+                          h(
+                            "button",
+                            { onClick: () => stepAmmo(w.ammo, -1) },
+                            "−",
+                          ),
+                          h("span", { className: "val" }, String(cnt)),
+                          h(
+                            "button",
+                            { onClick: () => stepAmmo(w.ammo, 1) },
+                            "+",
+                          ),
+                        );
+                      })(),
                       h("input", {
                         className: "pb-cell center",
                         value: w.weight,
@@ -2750,6 +3325,25 @@ function FalloutSheetApp() {
                     " · ",
                     h("b", null, localChar.caps),
                   ),
+                  h(
+                    "span",
+                    {
+                      className: `pb-head-note pb-carry ${carryOver ? "over" : ""}`,
+                    },
+                    t.carry,
+                    " · ",
+                    h(
+                      "b",
+                      null,
+                      `${formatWeight(carryLoad, lang)} / ${carryMax}`,
+                    ),
+                    carryOver &&
+                      h("span", { className: "pb-carry-flag" }, "⚠ " + t.carryOver),
+                    h(HelpDot, {
+                      tip: `${t.carryTip}\n\n${t.carryOverTip}`,
+                    }),
+                  ),
+                  h("span", { className: "pb-push-right" }),
                   isEditing &&
                     h(
                       React.Fragment,
@@ -3078,6 +3672,7 @@ function FalloutSheetApp() {
       onClose: () => setModal(null),
       rollLog: rollLog,
       onClear: () => setRollLog([]),
+      lang: lang,
       t: t,
     }),
 
@@ -3110,8 +3705,11 @@ function FalloutSheetApp() {
                 onClick: () => {
                   setModal(null);
                   printSheet(
-                    buildCharacterSheetHTML(localChar, lang, (key) =>
-                      getTypeLabel(key, lang),
+                    buildCharacterSheetHTML(
+                      localChar,
+                      lang,
+                      (key) => getTypeLabel(key, lang),
+                      (key) => getAmmoLabel(key, lang),
                     ),
                   );
                 },
@@ -3173,10 +3771,17 @@ function FalloutSheetApp() {
               ),
             ),
           ),
+          h("span", { className: "pb-push-right" }),
+          tplTab === "inventory" &&
+            h(
+              "button",
+              { className: "pb-chip dim", onClick: seedAmmoTemplates },
+              "⁙ " + t.seedAmmo,
+            ),
           h(
             "button",
             {
-              className: "pb-chip accent pb-push-right",
+              className: "pb-chip accent",
               onClick: () =>
                 setTplDraft((p) => ({
                   ...p,
