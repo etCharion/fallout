@@ -10,10 +10,10 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 
 ## A. Rozpory s pravidly
 
-- [ ] **P1 — Hod 2d20 nepočítá úspěchy.** Roller ukazuje „Součet" (`app.js:1630`, `app.js:1778`), což v tomhle systému nic neznamená. Správně: každá kostka ≤ **CČ = atribut + dovednost** = 1 úspěch, ≤ hodnota tag dovednosti = kritický úspěch (2 úspěchy), 20 = komplikace.
-- [ ] **P1 — Crit range se neřídí tag dovedností.** Aplikace počítá krit jen na přirozenou 1 (`app.js:1631`). Zaškrtávátko „vycvičená" je tedy na listu, ale mechanicky nedělá nic.
-- [ ] **P1 — Chybí Action Points.** Skupinová zásoba max 6 AP, přebytečné úspěchy je generují, extra k20 se kupují za 1/2/3 AP (max tři navíc). Roller nabízí 1–5 d20 bez vazby na AP (`app.js:1689`); minimum má být 2, ne 1.
-- [ ] **P1 — Odvozené statistiky se nepočítají**, jsou to ruční textová pole (`app.js:2260`–`2313`). Vzorce:
+- [x] **HOTOVO — Hod 2d20 počítá úspěchy.** V režimu HRA i NÁHLED jde klepnout na jeden atribut a jednu dovednost (žlutě se označí); roller pak hlásí úspěchy proti CČ = atribut + dovednost místo dřívějšího nesmyslného „Součtu".
+- [x] **HOTOVO — Crit range podle tag dovednosti.** Kostka ≤ hodnota tagnuté dovednosti = kritický úspěch za 2 úspěchy; přirozená 1 kritická vždy; 20 = komplikace. Rozsah se ukazuje v liště nad kostkami.
+- [ ] ~~**Chybí Action Points.**~~ **VYŘAZENO** — AP jsou skupinová mechanika, aplikace je karta jedné postavy. Nedělá se.
+- [ ] ~~**Odvozené statistiky se nepočítají.**~~ **VĚDOMĚ RUČNÍ** — vzorce sice jednoznačné jsou, ale perky je mění a modelovat to je zatím moc složité. Necháváme ruční pole. Vzorce pro referenci:
   | Statistika | Vzorec |
   |---|---|
   | Max HP (1. úroveň) | ODO + ŠTĚ (dál +ODO, když to postup dává) |
@@ -22,12 +22,12 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
   | Poškození nablízko | bonusové CD podle SÍLY |
   | Nosnost | 150 + (10 × SÍLA) |
   | Body štěstí | max = ŠTĚSTÍ |
-- [ ] **P1 — Nosnost chybí úplně.** Váha se eviduje u každé zbraně i předmětu (včetně množství), ale nikde se nesčítá a nemá se s čím porovnat. Přetížení = +1 obtížnost na testy SÍLY a HBITOSTI, nelze Sprint, −1 iniciativa.
-- [ ] **P2 — Radiace nikde není.** Rady snižují **maximální** HP, přirozeně se neléčí (jen RadAway a spol.). U lokací je RAD odolnost, ale chybí počitadlo radů i efektivní max HP.
-- [ ] **P2 — Zranění je jen ano/ne** (`app.js:551`–`591`). Pravidlo: 5+ poškození v jednom zásahu po odečtení DR = kritický zásah = zranění lokace s efektem (hlava = ztráta akce, trup = krvácení 2 CD/kolo ignorující DR, ruka = pustíš předmět a nefunguje, noha = padneš a Move se stává hlavní akcí). Chybí počet zranění i text efektu.
-- [ ] **P2 — Munice se nedá odečítat.** Pole `ammo` je jen text s typem. Chybí i pravidlo „utrať extra munici za +1 CD poškození".
-- [ ] **P2 — Pevné atributy u dovedností** (`app.js:79`–`95`, např. „Řečnictví [CHA]"). Dvojici atribut+dovednost vybírá Vypravěč podle situace. Závorka jako *výchozí* je OK, ale u hodu musí jít atribut přepnout.
-- [ ] **P3 — Čtvrtý sloupec u lokací „BZ / body zdraví"** (`app.js:104`, `print.js:213`). Zásahové zóny v 2d20 vlastní HP nemají; podle typů poškození tam patří spíš **Jed**. Rozhodnout: homebrew, nebo špatný popisek?
+- [x] **HOTOVO — Nosnost se sčítá.** Zbraně + vybavení (váha × množství) proti nosnosti 150 + 10 × SÍLA, v hlavičce panelu VYBAVENÍ. Při překročení červené „PŘETÍŽENO" a nápověda s postihy. Váhy typu „< 0,5" se parsují správně.
+- [x] **HOTOVO — Radiace u HP.** Pole ☢ RAD nahradilo popisek Stabilní/Kritický. Rady ukrajují z maxima (13 → 10), odečtená část pruhu se šrafuje, a když efektivní maximum klesne pod aktuální HP, srazí se i ta.
+- [x] **HOTOVO — Zranění jako počet.** Čtvrtý sloupec u lokace je počet zranění (červeně), zaškrtávátko ANO/NE zůstalo a s počtem se drží v souladu. U názvu zóny je „?" s popisem efektu zranění a s pravidlem o 5+ poškození.
+- [x] **ČÁSTEČNĚ — Munice.** Typ munice je teď výběr z 20 typů podle příručky, vedle je počitadlo propojené s municí v inventáři (odečítá se na obou místech). V administraci tlačítko „Doplnit typy munice". **Zbývá:** utracení extra munice za +1 CD poškození.
+- [x] **HOTOVO — Atribut u dovednosti není závazný.** Závorka s doporučením zůstala a klik na dovednost doporučený atribut předvyplní, ale jde označit libovolná dvojice.
+- [x] **VYŘEŠENO — Čtvrtý sloupec u lokací** už není „BZ / body zdraví", ale počet zranění (`ZR`). Staré hodnoty `bz` zůstaly v databázi, ale nikde se nepoužívají.
 
 **Co je naopak správně (needitovat bez důvodu):** interpretace Combat Dice (`app.js:1634`) — 1→1 dmg, 2→2 dmg, 3–4→0, 5–6→1 dmg + efekt. Tabulka zásahových zón 1‑2 / 3‑8 / 9‑11 / 12‑14 / 15‑17 / 18‑20.
 
@@ -55,14 +55,13 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 
 ## C. Nové funkce (podle přínosu)
 
-- [ ] **P1 — Hod přímo z listu.** Klik na dovednost → 2d20 proti CČ = atribut + dovednost, spočítá úspěchy, kritické (≤ tag rank) a komplikace, nabídne dokoupení kostek. Největší přidaná hodnota — udělá z listu nástroj, kvůli kterému člověk odloží papír.
+- [x] **HOTOVO — Hod přímo z listu** (bez dokupování kostek za AP — AP se nedělají).
 - [ ] **P1 — Hod poškození z řádku zbraně.** CD ze zbraně + bonus ze SÍLY, vyhodnocení efektů, volba „utratit munici za +1 CD".
-- [ ] **P1 — Automatické odvozené statistiky** z SPECIAL s možností ručního přepsání, včetně nosnosti a varování o přetížení.
 - [ ] **P1 — Body štěstí** s maximem = ŠTĚSTÍ, tlačítka −/+ a v rolleru „přehodit tuhle kostku za bod štěstí" (1 k20 nebo až 3 CD).
-- [ ] **P2 — Sdílená zásoba AP pro družinu** (max 6) v reálném čase. Databáze už je společná a `onSnapshot` běží, takže je to skoro zadarmo.
-- [ ] **P2 — Rady a efektivní max HP**, tlačítka na léčení / RadAway.
-- [ ] **P2 — Zranění jako počitadlo na lokaci** + automatická hláška „5+ poškození po DR = kritický zásah" s textem efektu dané zóny.
-- [ ] **P2 — Rychlé akce v režimu HRA:** HP −/+, zátky −/+, „přidat kořist" jedním klikem.
+- [x] **HOTOVO — Nosnost a varování o přetížení.** (Automatický výpočet ostatních odvozených statistik se vědomě nedělá, viz sekce A.)
+- [x] **HOTOVO — Rady a efektivní max HP.** Zbývá případně tlačítko na RadAway.
+- [x] **HOTOVO — Zranění jako počitadlo na lokaci** včetně textu efektu a pravidla o 5+ poškození.
+- [ ] **P2 — Rychlé akce v režimu HRA:** HP −/+, zátky −/+, „přidat kořist" jedním klikem. (Munice už −/+ má.)
 - [ ] **P2 — Přednačtené šablony z příručky** (zbraně, chemie, perky) místo prázdné administrace.
 - [ ] **P3 — Export/import postavy do JSON** + offline režim (service worker, lokální kopie).
 - [ ] **P3 — Průvodce tvorbou postavy** (rozdělení SPECIAL, 3 tagy, INT×2 bodů dovedností, hlídání limitů) a průvodce postupem na úroveň.
@@ -73,10 +72,11 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 
 ## Navržené pořadí prací
 
-1. **Balíček „hraní":** C1 (hod z listu) + C3 (odvozené statistiky) + C4 (body štěstí) — drží spolu, sdílí stejný výpočetní základ.
+1. ~~Balíček „hraní"~~ — **hotovo** (hod z listu, nosnost, radiace, zranění, munice).
 2. **Balíček „nešahej mi na data":** B1 (historie do podkolekce) + B2 (neukládat beze změny) + B4 (viditelné chyby ukládání).
-3. **Balíček „režim HRA":** B3 (odemknout zátky/XP/poznámky/loot) + C8 (rychlé akce).
-4. Zbytek podle chuti.
+3. **Balíček „režim HRA":** B3 (odemknout zátky/XP/poznámky/loot) + rychlé akce.
+4. **Balíček „boj":** hod poškození z řádku zbraně + body štěstí s přehazováním.
+5. Zbytek podle chuti.
 
 ---
 

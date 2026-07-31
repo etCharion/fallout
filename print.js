@@ -28,6 +28,9 @@ const T = {
     dLuck: "Body štěstí",
     dPoison: "Jedové OZ",
     caps: "Zátky",
+    rads: "Radiace",
+    carry: "Nosnost",
+    carryOver: "Přetíženo",
     zone: "Zóna",
     roll: "Hod",
     equipped: "nasazeno",
@@ -50,7 +53,7 @@ const T = {
     gearTitle: "VYBAVENÍ · ZÁZNAMY",
     blankTag: "PRÁZDNÝ FORMULÁŘ",
     locLegend:
-      "FYZ · fyzická / EN · energetická / RAD · radiační / BZ · body zdraví — odolnost (OZ)",
+      "FYZ · fyzická / EN · energetická / RAD · radiační — odolnost (OZ) / ZR · počet zranění",
   },
   en: {
     docChar: "Pip-Boy — Character sheet",
@@ -77,6 +80,9 @@ const T = {
     dLuck: "Luck points",
     dPoison: "Poison DR",
     caps: "Caps",
+    rads: "Radiation",
+    carry: "Carry",
+    carryOver: "Over-encumbered",
     zone: "Zone",
     roll: "Roll",
     equipped: "equipped",
@@ -99,7 +105,7 @@ const T = {
     gearTitle: "EQUIPMENT · RECORDS",
     blankTag: "BLANK FORM",
     locLegend:
-      "FYZ · physical / EN · energy / RAD · radiation / BZ · health pts — resistance (DR)",
+      "FYZ · physical / EN · energy / RAD · radiation — resistance (DR) / ZR · injury count",
   },
 };
 
@@ -148,6 +154,20 @@ function esc(v) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+// Váhy v příručce jsou psané „< 0,5" i „3,5".
+function pWeight(v) {
+  const m = String(v ?? "")
+    .replace(",", ".")
+    .match(/\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : 0;
+}
+
+function fWeight(n, lang) {
+  const r = Math.round(n * 10) / 10;
+  const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return lang === "en" ? s : s.replace(".", ",");
 }
 
 function initials(name) {
@@ -211,7 +231,7 @@ function locHeaderRow(t) {
 <span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">FYZ</span>
 <span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">EN</span>
 <span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">RAD</span>
-<span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">BZ</span>`;
+<span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">ZR</span>`;
 }
 
 function weaponHeaderRow(t) {
@@ -261,19 +281,45 @@ ${body}
 
 // ---------- vyplněná karta postavy ----------
 
-export function buildCharacterSheetHTML(c, lang, typeLabel) {
+export function buildCharacterSheetHTML(c, lang, typeLabel, ammoTypeLabel) {
   const t = T[lang === "en" ? "en" : "cs"];
   const label = typeLabel || ((key) => key || "");
+  const ammoLabel = ammoTypeLabel || ((key) => key || "");
 
+  // Radiace ukrajuje z maxima HP — na archu se šrafuje odečtená část pruhu.
   const hpMax = Math.max(0, parseInt(c.hpMax, 10) || 0);
-  const hpCur = Math.max(0, parseInt(c.hpCurrent, 10) || 0);
+  const rads = Math.max(0, parseInt(c.rads, 10) || 0);
+  const hpEffMax = Math.max(0, hpMax - rads);
+  const hpCur = Math.min(Math.max(0, parseInt(c.hpCurrent, 10) || 0), hpEffMax);
   const segCount = Math.min(hpMax, 20);
-  const hpSegs = Array.from(
-    { length: segCount },
-    (_, i) =>
-      `<span style="flex:1;height:9px;border:1px solid var(--line2);background:${i < hpCur ? "var(--ink2)" : "transparent"};"></span>`,
-  ).join("");
-  const hpStatus = (hpMax ? hpCur / hpMax : 0) < 0.34 ? t.critical : t.stable;
+  const radFrom = Math.min(hpEffMax, segCount);
+  const hpSegs = Array.from({ length: segCount }, (_, i) => {
+    const fill =
+      i >= radFrom
+        ? "repeating-linear-gradient(-45deg,var(--line2) 0,var(--line2) 1.5px,transparent 1.5px,transparent 3.5px)"
+        : i < hpCur
+          ? "var(--ink2)"
+          : "transparent";
+    return `<span style="flex:1;height:9px;border:1px solid var(--line2);background:${fill};"></span>`;
+  }).join("");
+  const hpStatus =
+    rads > 0
+      ? `${t.rads} ${rads} → ${hpEffMax}`
+      : (hpEffMax ? hpCur / hpEffMax : 0) < 0.34
+        ? t.critical
+        : t.stable;
+
+  const carryLoad =
+    (c.weapons || []).reduce((s2, w) => s2 + pWeight(w.weight), 0) +
+    (c.inventory || []).reduce(
+      (s2, it) =>
+        s2 + pWeight(it.weight) * Math.max(0, parseInt(it.quantity, 10) || 0),
+      0,
+    );
+  const carryMax = 150 + 10 * Math.max(0, parseInt(c.strength, 10) || 0);
+  const carryNote = `${t.carry} ${fWeight(carryLoad, lang)} / ${carryMax}${
+    carryLoad > carryMax ? " · " + t.carryOver : ""
+  }`;
 
   const photo = c.imageUrl
     ? `<img src="${esc(c.imageUrl)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1);">`
@@ -332,7 +378,7 @@ export function buildCharacterSheetHTML(c, lang, typeLabel) {
 <div style="display:contents;">
   <span style="padding:4px 6px;color:var(--ink);border-bottom:1px solid var(--line);background:${rowBg};display:flex;align-items:center;gap:4px;"><span style="font-size:9px;color:var(--ink2);">${mark}</span>${name}</span>
   <span style="padding:4px;color:var(--ink2);text-align:center;border-bottom:1px solid var(--line);background:${rowBg};font-family:'VT323',monospace;font-size:13px;">${ld.roll}</span>
-  ${cell(o.phys)}${cell(o.en)}${cell(o.rad)}${cell(o.bz)}
+  ${cell(o.phys)}${cell(o.en)}${cell(o.rad)}${cell(o.inj)}
 </div>`;
   }).join("");
 
@@ -346,7 +392,7 @@ export function buildCharacterSheetHTML(c, lang, typeLabel) {
   <span style="padding:4px 2px;text-align:center;color:var(--ink);border-bottom:1px solid var(--line);font-family:'VT323',monospace;font-size:14px;">${esc(w.targetNum)}</span>
   <span style="padding:4px 2px;text-align:center;color:var(--ink);border-bottom:1px solid var(--line);font-family:'VT323',monospace;font-size:14px;">${esc(w.damage)}</span>
   <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.effects)}</span>
-  <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.ammo)}</span>
+  <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(ammoLabel(w.ammo))}</span>
   <span style="padding:4px 2px;text-align:center;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.weight)}</span>
 </div>`,
     )
@@ -485,7 +531,7 @@ ${brackets}
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:start;">
   <div style="border:1px solid var(--line2);border-radius:6px;overflow:hidden;">
-    ${panelHead(t.inventory)}
+    ${panelHead(t.inventory, carryNote)}
     <div style="display:grid;grid-template-columns:2fr 1fr .6fr .5fr;font-size:9px;">
       ${invHeaderRow(t)}
       ${inventory}
