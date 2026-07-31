@@ -25,6 +25,12 @@ nad kořenem repa a proklikáním v prohlížeči.
   a pokud v `play`, musí jít přes `updatePlayField`, ne `updateField`.
 - Data jsou ve sdílené veřejné Firestore kolekci `artifacts/falloutpostava/public/data/…`,
   přihlášení je anonymní. Nepřidávej sem nic osobního.
+- Ukládání má tři vrstvy: **kroky** Zpět/Znovu (lokálně v `localStorage`), **průběžný
+  autosave** dokumentu postavy (debounce 800 ms v HŘE, 2 s v ÚPRAVÁCH) a **verze**
+  v podkolekci `history` (vzniká jen při ručním uložení a jen při skutečné změně,
+  drží se 30). Každá změna listu musí jít přes `commitChar` — jinak se nezapíše krok
+  Zpět a autosave o ní neví. Do dokumentu postavy nepřidávej velká pole; portrét se
+  ukládá zvlášť a do snapshotů se nepočítá (`SNAPSHOT_OMIT`).
 - API klíč ve `firebaseConfig` je záměrně veřejný, viz `SECURITY.md`.
 
 ## Backlog
