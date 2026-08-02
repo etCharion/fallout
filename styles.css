@@ -1358,6 +1358,60 @@ input[type="number"] {
   width: 100%;
 }
 
+/* Obal buňky je na velkém displeji průhledný — mřížku tvoří až jeho obsah.
+   Na mobilu (viz media query dole) se z něj stane řádek karty s popiskem. */
+.pb-wcell {
+  display: contents;
+}
+
+.pb-wgrid.row.picked {
+  background: color-mix(in srgb, var(--pb-warn) 8%, transparent);
+  box-shadow: inset 2px 0 0 var(--pb-warn);
+}
+
+/* Název zbraně mimo ÚPRAVY: klepnutím se složí test na zásah. */
+.pb-wname {
+  width: 100%;
+  padding: 3px 5px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: none;
+  color: var(--pb-fg-bright);
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+  text-shadow: 0 0 6px currentColor;
+}
+
+.pb-wname.pickable {
+  cursor: pointer;
+  border-color: var(--pb-border);
+}
+
+.pb-wname.pickable:hover {
+  border-color: var(--pb-warn);
+  color: var(--pb-warn);
+}
+
+.pb-wname.picked {
+  border-color: var(--pb-warn);
+  background: color-mix(in srgb, var(--pb-warn) 14%, transparent);
+  color: var(--pb-warn);
+}
+
+/* Dopočítané CČ — čte se jako číslo, needituje se. */
+.pb-tn-auto {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-family: "VT323", monospace;
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--pb-fg-bright);
+  text-shadow: 0 0 8px currentColor;
+  cursor: help;
+}
+
 /* ---------- inventory / perks ---------- */
 .pb-igrid {
   display: grid;
@@ -2514,6 +2568,87 @@ input[type="number"] {
   }
   .pb-admin-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Na úzkém displeji je tabulka zbraní karta na zbraň — vodorovné
+   scrollování uvnitř panelu bylo na mobilu k neužitku. Jen pro obrazovku,
+   ať se do toho tisk nezaplete. */
+@media screen and (max-width: 760px) {
+  .pb-tablewrap {
+    overflow-x: visible;
+    padding: 6px 10px 12px;
+  }
+
+  .pb-wtable {
+    min-width: 0;
+  }
+
+  .pb-wgrid.head {
+    display: none;
+  }
+
+  .pb-wgrid.row {
+    display: block;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--pb-border);
+    border-radius: 8px;
+    background: var(--pb-bg-inset);
+  }
+
+  .pb-wcell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+  }
+
+  .pb-wcell::before {
+    content: attr(data-label);
+    flex: 0 0 74px;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--pb-fg-dim);
+  }
+
+  .pb-wcell > * {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Název je titulek karty, popisek u něj by byl jen šum. */
+  .pb-wcell.name {
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed var(--pb-border);
+  }
+
+  .pb-wcell.name::before,
+  .pb-wcell.actions::before {
+    display: none;
+  }
+
+  .pb-wcell.name .pb-cell,
+  .pb-wcell.name .pb-wname {
+    font-size: 14px;
+  }
+
+  .pb-wcell .pb-check {
+    flex: 0 0 auto;
+    margin-right: auto;
+  }
+
+  .pb-wcell .pb-num,
+  .pb-wcell .pb-tn-auto {
+    width: 72px;
+    flex: 0 0 72px;
+  }
+
+  .pb-wcell.actions {
+    justify-content: flex-end;
+    padding-top: 6px;
   }
 }
 
