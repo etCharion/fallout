@@ -33,7 +33,7 @@ const T = {
     carryOver: "Přetíženo",
     zone: "Zóna",
     roll: "Hod",
-    equipped: "nasazeno",
+    equipped: "TAG zbraň",
     rank: "St.",
     fillHint: "Vyplň hodnoty",
     perkHint: "název · účinek",
@@ -44,6 +44,9 @@ const T = {
     wTn: "CČ",
     wDmg: "Pošk.",
     wEff: "Účinky",
+    wRate: "Rych.",
+    wRange: "Dostřel",
+    wAttrs: "Atributy",
     wAmmo: "Munice",
     wWt: "Váha",
     iItem: "Předmět",
@@ -85,7 +88,7 @@ const T = {
     carryOver: "Over-encumbered",
     zone: "Zone",
     roll: "Roll",
-    equipped: "equipped",
+    equipped: "tag weapon",
     rank: "Rk.",
     fillHint: "Fill in values",
     perkHint: "name · effect",
@@ -96,6 +99,9 @@ const T = {
     wTn: "TN",
     wDmg: "Dmg",
     wEff: "Effects",
+    wRate: "RoF",
+    wRange: "Range",
+    wAttrs: "Qualities",
     wAmmo: "Ammo",
     wWt: "Wt",
     iItem: "Item",
@@ -242,6 +248,9 @@ function weaponHeaderRow(t) {
 <span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">${t.wTn}</span>
 <span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">${t.wDmg}</span>
 <span style="padding:3px 6px;background:var(--head);color:var(--dim);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--line2);">${t.wEff}</span>
+<span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">${t.wRate}</span>
+<span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">${t.wRange}</span>
+<span style="padding:3px 6px;background:var(--head);color:var(--dim);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--line2);">${t.wAttrs}</span>
 <span style="padding:3px 6px;background:var(--head);color:var(--dim);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--line2);">${t.wAmmo}</span>
 <span style="padding:3px 2px;background:var(--head);color:var(--dim);text-align:center;border-bottom:1px solid var(--line2);">${t.wWt}</span>`;
 }
@@ -287,6 +296,8 @@ export function buildCharacterSheetHTML(c, lang, labels) {
   const label = (labels && labels.type) || id;
   const ammoLabel = (labels && labels.ammo) || id;
   const skillLabel = (labels && labels.weaponSkill) || id;
+  const weaponTag = labels && labels.weaponTag;
+  const weaponTn = labels && labels.weaponTn;
 
   // Radiace ukrajuje z maxima HP — na archu se šrafuje odečtená část pruhu.
   const hpMax = Math.max(0, parseInt(c.hpMax, 10) || 0);
@@ -385,32 +396,33 @@ export function buildCharacterSheetHTML(c, lang, labels) {
   }).join("");
 
   const weapons = (c.weapons || [])
-    .map(
-      (w) => `
+    .map((w) => {
+      // TAG zbraň i CČ jsou dopočítané z listu — aplikace je posílá
+      // v `labels`, aby pravidla zůstala na jednom místě.
+      const tag = weaponTag ? weaponTag(w) : !!w.assigned;
+      const tn = weaponTn ? weaponTn(w) : null;
+      return `
 <div style="display:contents;">
-  <span style="padding:4px 2px;text-align:center;color:var(--ink2);border-bottom:1px solid var(--line);">${w.assigned ? "●" : "○"}</span>
+  <span style="padding:4px 2px;text-align:center;color:var(--ink2);border-bottom:1px solid var(--line);">${tag ? "●" : "○"}</span>
   <span style="padding:4px 6px;color:var(--ink);border-bottom:1px solid var(--line);">${esc(w.name)}</span>
   <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(skillLabel(w.skill))}</span>
-  <span style="padding:4px 2px;text-align:center;color:var(--ink);border-bottom:1px solid var(--line);font-family:'VT323',monospace;font-size:14px;">${esc(w.targetNum)}</span>
+  <span style="padding:4px 2px;text-align:center;color:var(--ink);border-bottom:1px solid var(--line);font-family:'VT323',monospace;font-size:14px;">${esc(tn === null || tn === undefined ? w.targetNum : tn)}</span>
   <span style="padding:4px 2px;text-align:center;color:var(--ink);border-bottom:1px solid var(--line);font-family:'VT323',monospace;font-size:14px;">${esc(w.damage)}</span>
   <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.effects)}</span>
+  <span style="padding:4px 2px;text-align:center;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.rateOfFire)}</span>
+  <span style="padding:4px 2px;text-align:center;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.range)}</span>
+  <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.attributes)}</span>
   <span style="padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(ammoLabel(w.ammo))}</span>
   <span style="padding:4px 2px;text-align:center;color:var(--ink2);border-bottom:1px solid var(--line);">${esc(w.weight)}</span>
-</div>`,
-    )
+</div>`;
+    })
     .join("");
   const wEmpty = Array.from(
     { length: Math.max(0, 4 - (c.weapons || []).length) },
     () => `
 <div style="display:contents;">
   <span style="padding:8px 2px;border-bottom:1px solid var(--line);"> </span>
-  <span style="padding:8px 6px;border-bottom:1px solid var(--line);"> </span>
-  <span style="padding:8px 6px;border-bottom:1px solid var(--line);"> </span>
-  <span style="padding:8px 2px;border-bottom:1px solid var(--line);"> </span>
-  <span style="padding:8px 2px;border-bottom:1px solid var(--line);"> </span>
-  <span style="padding:8px 6px;border-bottom:1px solid var(--line);"> </span>
-  <span style="padding:8px 6px;border-bottom:1px solid var(--line);"> </span>
-  <span style="padding:8px 2px;border-bottom:1px solid var(--line);"> </span>
+  ${'<span style="padding:8px 4px;border-bottom:1px solid var(--line);"> </span>'.repeat(10)}
 </div>`,
   ).join("");
 
@@ -511,7 +523,7 @@ ${masthead(t)}
 
 <div style="border:1px solid var(--line2);border-radius:6px;overflow:hidden;">
   ${panelHead(t.weapons, "● = " + t.equipped)}
-  <div style="display:grid;grid-template-columns:.4fr 1.6fr 1.2fr .5fr .55fr 1.3fr .9fr .5fr;font-size:9px;">
+  <div style="display:grid;grid-template-columns:.35fr 1.45fr .95fr .42fr .45fr 1.2fr .4fr .5fr .95fr .8fr .42fr;font-size:8.5px;">
     ${weaponHeaderRow(t)}
     ${weapons}
     ${wEmpty}
@@ -611,7 +623,7 @@ export function buildBlankSheetHTML(lang) {
     () => `
 <div style="display:contents;">
   <span style="min-height:26px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;"><span style="width:11px;height:11px;border:1px solid var(--line2);border-radius:2px;"></span></span>
-  ${'<span style="border-bottom:1px solid var(--line);border-left:1px solid var(--hair);"></span>'.repeat(7)}
+  ${'<span style="border-bottom:1px solid var(--line);border-left:1px solid var(--hair);"></span>'.repeat(10)}
 </div>`,
   ).join("");
 
@@ -701,7 +713,7 @@ ${masthead(t)}
 
 <div style="border:1px solid var(--line2);border-radius:6px;overflow:hidden;flex:1;display:flex;flex-direction:column;">
   ${panelHead(t.weapons, "☐ = " + t.equipped)}
-  <div style="display:grid;grid-template-columns:.4fr 1.6fr 1.2fr .5fr .55fr 1.3fr .9fr .5fr;font-size:9px;flex:1;grid-auto-rows:1fr;">
+  <div style="display:grid;grid-template-columns:.35fr 1.45fr .95fr .42fr .45fr 1.2fr .4fr .5fr .95fr .8fr .42fr;font-size:8.5px;flex:1;grid-auto-rows:1fr;">
     ${weaponHeaderRow(t)}
     ${weaponRows}
   </div>

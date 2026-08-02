@@ -27,6 +27,8 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 - [x] **HOTOVO — Zranění jako počet.** Čtvrtý sloupec u lokace je počet zranění (červeně), zaškrtávátko ANO/NE zůstalo a s počtem se drží v souladu. U názvu zóny je „?" s popisem efektu zranění a s pravidlem o 5+ poškození.
 - [x] **ČÁSTEČNĚ — Munice.** Typ munice je výběr z 20 typů podle příručky, vedle je počitadlo propojené s municí v inventáři (odečítá se na obou místech). Párování jde přes výslovný typ u položky, jinak podle názvu („10. mm náboje" najde „10 mm"). V administraci se u typu „Munice" vybírá typ munice a nápověda nabízí doplnění chybějících typů. **Zbývá:** utracení extra munice za +1 CD poškození.
 - [x] **HOTOVO — Dovednost zbraně je z pevného seznamu** (CHL, BEZ, LEHK, VRH, TĚŽ, ENG) v tabulce útoků i v administraci, a je napojená na seznam dovedností — klik na zkratku vybere dvojici pro hod. Starší ručně psané hodnoty zůstávají zachované.
+- [x] **HOTOVO — CČ u zbraně se počítá.** Cílové číslo útoku = hodnota dovednosti zbraně + atribut, který k ní podle pravidel patří (LEHK → HBI, TĚŽ → ODO, ENG → VNI, CHL a BEZ → SIL, VRH → HBI). Needituje se, přepočítá se samo po postupu a stejné číslo jde i na tištěný arch. Ručně psané pole zůstává jen u zbraní s vlastní, neznámou dovedností.
+- [x] **HOTOVO — Přiřazená zbraň = TAG zbraň.** Zaškrtávátko PŘIŘ. se needituje (ani v ÚPRAVÁCH) a zrcadlí, jestli je dovednost zbraně tagnutá. Přepnutí tagu u dovednosti přeznačí všechny její zbraně naráz.
 - [x] **HOTOVO — Atribut u dovednosti není závazný.** Závorka s doporučením zůstala a klik na dovednost doporučený atribut předvyplní, ale jde označit libovolná dvojice.
 - [x] **VYŘEŠENO — Čtvrtý sloupec u lokací** už není „BZ / body zdraví", ale počet zranění (`ZR`). Staré hodnoty `bz` zůstaly v databázi, ale nikde se nepoužívají.
 
@@ -38,18 +40,18 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 
 - [x] **HOTOVO — Historie je v podkolekci.** Verze bydlí v `fallout_characters/{id}/history/{v000123}`, v dokumentu postavy zůstalo jen `historySeq`, `historyCount` a `historyHash`. Načítají se líně (až při otevření modalu VERZE), takže kolekční `onSnapshot` už netahá historie všech postav. Držíme posledních 30, starší se ořezávají. Postavy se starým polem `history` se migrují samy při prvním uložení.
 - [x] **HOTOVO — Neukládá se, když se nic nezměnilo.** Před každým zápisem se porovnává otisk stavu (`fingerprint`); přepínání režimů beze změny nezapisuje vůbec a nezakládá verzi.
-- [ ] **P1 — V režimu HRA nejde dělat to, co se při hře děje.** Zamčené jsou zátky, XP, přidání ukořistěného předmětu a přepnutí „přiřazené" zbraně. *(Poznámky už odemčené jsou, viz níže.)*
-- [ ] **ČÁSTEČNĚ — Tichá ztráta dat.** Selhání zápisu už není tiché: v liště i ve status baru je stav ukládání (`UKLÁDÁM… / ULOŽENO 18:42 / CHYBA ULOŽENÍ`) a rozdělaný stav se zálohuje do `localStorage` s nabídkou obnovy. **Zbývá:** natvrdo napsané „◉ ONLINE" pořád nesleduje skutečné připojení.
+- [ ] **P1 — V režimu HRA nejde dělat to, co se při hře děje.** Zamčené jsou zátky, XP a přidání ukořistěného předmětu. *(Poznámky už odemčené jsou, viz níže. „Přiřazená" zbraň z tohohle seznamu vypadla — je to TAG zbraň odvozená z tagnuté dovednosti, takže do HRY nepatří, viz sekce A.)*
+- [x] **HOTOVO — Tichá ztráta dat.** Selhání zápisu už není tiché: v liště i ve status baru je stav ukládání (`UKLÁDÁM… / ULOŽENO 18:42 / CHYBA ULOŽENÍ`) a rozdělaný stav se zálohuje do `localStorage` s nabídkou obnovy. Indikátor připojení sleduje `navigator.onLine` a události `online`/`offline` — při výpadku ukazuje červené „◌ OFFLINE".
 - [x] **HOTOVO — Poznámky a AUTOSAVE.** Poznámky jdou psát i v režimu HRA (přes `updatePlayField`) a popisek panelu ukazuje skutečný stav ukládání místo neplatného slibu.
 - [x] **HOTOVO — Undo/Redo.** Jede po jednotlivých změnách (ne po uložených verzích), nepřepíná režim a vrácení rovnou pobere autosave. Zásobník 100 kroků žije v `localStorage`, takže přežije refresh i zavření okna.
 - [ ] **P2 — Sdílená veřejná databáze + anonymní přihlášení.** Cesta `public/data/...`: kdokoliv s odkazem vidí, edituje a **maže** cizí postavy. Chybí vlastnictví a koš (soft delete).
 - [ ] **P2 — Číselná pole jsou textová a bez validace.** SPECIAL, dovednosti i HP spolknou cokoli. Chybí meze podle pravidel (SPECIAL 4–10, dovednost 0–6, 3 tagy).
 - [ ] **P2 — PWA je jen napůl.** `manifest.json:7-8` má barvy ze starého papírového motivu (`#fdfaf5` / `#d97706`) → bílo-oranžový splash proti tmavému Pip-Boyu. `apple-touch-icon` je SVG (`index.html:19`), což iOS na plochu nevezme. Není service worker — React, Firebase i fonty jdou z CDN, takže bez internetu aplikace vůbec nenaběhne.
-- [ ] **P2 — Tisk přeteče.** Slib „A4 · 2 strany" platí jen pro krátký seznam; arch má `min-height:297mm` (`print.js:204`), takže delší inventář zaláme uprostřed tabulky. V tištěné tabulce zbraní navíc chybí Rychlost, Dostřel a Atributy (`print.js:217`).
-- [ ] **P3 — Pole JEDOVÉ OZ je na obrazovce dvakrát**, obě kopie editovatelné (`app.js:2288` a `app.js:2400`).
-- [ ] **P3 — Mazání šablony je bez potvrzení** (`app.js:3245`), zatímco u postavy potvrzení je.
-- [ ] **P3 — Log hodů se nikde neukládá** — po refreshi je pryč a nesdílí se se zbytkem stolu.
-- [ ] **P3 — Na mobilu je tabulka zbraní širší než displej** → vodorovné scrollování uvnitř panelu.
+- [ ] **P2 — Tisk přeteče.** Slib „A4 · 2 strany" platí jen pro krátký seznam; arch má `min-height:297mm`, takže delší inventář zaláme uprostřed tabulky. *(Vědomě neřešíme.)* Tabulka zbraní už má všech jedenáct sloupců včetně Rychlosti, Dostřelu a Atributů a bere dopočítané CČ i TAG zbraň z aplikace.
+- [x] **HOTOVO — Pole JEDOVÉ OZ je jen jednou**, pod zásahovými zónami k ostatním odolnostem. Z odvozených statistik zmizelo.
+- [x] **HOTOVO — Mazání šablony se ptá** stejně jako mazání postavy.
+- [x] **ČÁSTEČNĚ — Log hodů přežije refresh** — drží se v `localStorage` (60 posledních, klíč `fallout_rolllog`). **Zbývá:** sdílení se zbytkem stolu.
+- [x] **HOTOVO — Na mobilu je z tabulky zbraní karta na zbraň** (do 760 px), s popiskem u každé hodnoty. Vodorovné scrollování je pryč.
 - [ ] **P3 — `server.log` je commitnutý v repu.**
 
 ---
@@ -57,7 +59,7 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 ## C. Nové funkce (podle přínosu)
 
 - [x] **HOTOVO — Hod přímo z listu** (bez dokupování kostek za AP — AP se nedělají).
-- [ ] **P1 — Hod poškození z řádku zbraně.** CD ze zbraně + bonus ze SÍLY, vyhodnocení efektů, volba „utratit munici za +1 CD".
+- [ ] **ČÁSTEČNĚ — Hod poškození z řádku zbraně.** Klik na zbraň v HŘE složí test na zásah (atribut + dovednost podle pravidel) a přepnutí na CD z ní vezme počet kostek podle poškození; stepper zůstává, takže si hráč počet upraví. **Zbývá:** bonus ze SÍLY u zbraní nablízko, automatické vyhodnocení efektů a volba „utratit munici za +1 CD".
 - [ ] **P1 — Body štěstí** s maximem = ŠTĚSTÍ, tlačítka −/+ a v rolleru „přehodit tuhle kostku za bod štěstí" (1 k20 nebo až 3 CD).
 - [x] **HOTOVO — Nosnost a varování o přetížení.** (Automatický výpočet ostatních odvozených statistik se vědomě nedělá, viz sekce A.)
 - [x] **HOTOVO — Rady a efektivní max HP.** Zbývá případně tlačítko na RadAway.
@@ -69,17 +71,18 @@ Legenda priorit: **P1** = poznáš při každé session · **P2** = vadí, ale d
 - [ ] **P3 — Export/import postavy do JSON** + offline režim (service worker, lokální kopie).
 - [ ] **P3 — Průvodce tvorbou postavy** (rozdělení SPECIAL, 3 tagy, INT×2 bodů dovedností, hlídání limitů) a průvodce postupem na úroveň.
 - [ ] **P3 — Sdílený log hodů a iniciativní pořadí družiny** (kdo je na řadě).
-- [ ] **P3 — Karty místo tabulky zbraní na mobilu.**
+- [x] **HOTOVO — Karty místo tabulky zbraní na mobilu.**
 
 ---
 
 ## Navržené pořadí prací
 
 1. ~~Balíček „hraní"~~ — **hotovo** (hod z listu, nosnost, radiace, zranění, munice).
-2. ~~Balíček „nešahej mi na data"~~ — **hotovo** (historie do podkolekce, neukládat beze změny, kroky Zpět, viditelný stav ukládání). Zbyl jen indikátor skutečného připojení.
-3. **Balíček „režim HRA":** B3 (odemknout zátky/XP/loot) + rychlé akce.
-4. **Balíček „boj":** hod poškození z řádku zbraně + body štěstí s přehazováním.
-5. Zbytek podle chuti.
+2. ~~Balíček „nešahej mi na data"~~ — **hotovo** (historie do podkolekce, neukládat beze změny, kroky Zpět, viditelný stav ukládání, poctivý indikátor připojení).
+3. ~~Balíček „odvozený útok"~~ — **hotovo** (CČ a TAG zbraň z pravidel, klik na zbraň skládá test, CD podle poškození, tisk se sloupci navíc, mobilní karty, log hodů v `localStorage`).
+4. **Balíček „režim HRA":** B3 (odemknout zátky/XP/loot) + rychlé akce.
+5. **Balíček „boj":** bonus ze SÍLY a munice za +1 CD u poškození + body štěstí s přehazováním.
+6. Zbytek podle chuti.
 
 ---
 

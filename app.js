@@ -141,7 +141,7 @@ const TRANSLATIONS = {
     w_qual: "ATRIBUTY",
     w_ammo: "MUNICE",
     w_weight: "VÁHA",
-    w_assigned: "PŘIŘ.",
+    w_assigned: "TAG",
     invTitle: "VYBAVENÍ",
     caps: "ZÁTKY",
     i_item: "PŘEDMĚT",
@@ -166,6 +166,7 @@ const TRANSLATIONS = {
     fromTpl: "Ze šablony",
     use: "Použít",
     confirmDelete: "Opravdu smazat tuto postavu?",
+    confirmDeleteTpl: "Opravdu smazat tuto šablonu?",
     mEdit: "UPRAVIT",
     mPlay: "HRÁT",
     mLock: "ZAMČENO",
@@ -218,6 +219,9 @@ const TRANSLATIONS = {
     diceLogTitle: "Historie hodů",
     diceLogEmpty: "Zatím žádné hody.",
     online: "ONLINE",
+    offline: "OFFLINE",
+    offlineTip:
+      "Prohlížeč hlásí, že jsi bez připojení. Změny se drží lokálně a odejdou, až se síť vrátí.",
     autosave: "AUTOSAVE",
     active: "AKTIVNÍ",
     manual: "RUČNÍ",
@@ -253,6 +257,13 @@ const TRANSLATIONS = {
     rollClear: "Zrušit výběr",
     rollNoTn: "Bez cílového čísla — vyber atribut a dovednost",
     dicePlayOnly: "Kostky jsou k dispozici jen v režimu HRA",
+    weaponPickTip: "Klepni a hoď útok touto zbraní",
+    weaponSel: "ZBRAŇ",
+    dmgPick: "Klepni na zbraň a nastaví se kostky poškození",
+    dmgFromWeapon: "Počet CD podle poškození zbraně — dá se přenastavit",
+    tagWeaponTip:
+      "TAG zbraň — nastaví se sama podle toho, jestli je dovednost zbraně tagnutá.",
+    tnAutoTip: "CČ se počítá z dovednosti zbraně a jejího atributu:",
     // radiace
     rads: "RADIACE",
     radsShort: "RAD",
@@ -390,7 +401,7 @@ const TRANSLATIONS = {
     w_qual: "QUALITIES",
     w_ammo: "AMMO",
     w_weight: "WT",
-    w_assigned: "EQ.",
+    w_assigned: "TAG",
     invTitle: "EQUIPMENT",
     caps: "CAPS",
     i_item: "ITEM",
@@ -415,6 +426,7 @@ const TRANSLATIONS = {
     fromTpl: "From template",
     use: "Use",
     confirmDelete: "Are you sure you want to delete this character?",
+    confirmDeleteTpl: "Are you sure you want to delete this template?",
     mEdit: "EDIT",
     mPlay: "PLAY",
     mLock: "LOCK",
@@ -467,6 +479,9 @@ const TRANSLATIONS = {
     diceLogTitle: "Roll history",
     diceLogEmpty: "No rolls yet.",
     online: "ONLINE",
+    offline: "OFFLINE",
+    offlineTip:
+      "The browser reports no connection. Changes stay local and sync once the network is back.",
     autosave: "AUTOSAVE",
     active: "ACTIVE",
     manual: "MANUAL",
@@ -502,6 +517,13 @@ const TRANSLATIONS = {
     rollClear: "Clear selection",
     rollNoTn: "No target number — pick an attribute and a skill",
     dicePlayOnly: "Dice are only available in PLAY mode",
+    weaponPickTip: "Tap to roll an attack with this weapon",
+    weaponSel: "WEAPON",
+    dmgPick: "Tap a weapon to set the damage dice",
+    dmgFromWeapon: "CD count from the weapon's damage — adjustable",
+    tagWeaponTip:
+      "Tag weapon — set automatically from whether the weapon's skill is tagged.",
+    tnAutoTip: "TN is derived from the weapon's skill and its attribute:",
     // radiation
     rads: "RADIATION",
     radsShort: "RAD",
@@ -679,6 +701,32 @@ const SKILL_ATTR = {
   sneak: "agility",
   throwing: "agility",
 };
+
+// TAG zbraň = zbraň, jejíž dovednost má postava tagnutou. Pole se needituje
+// ručně, jen zrcadlí stav tagů — proto se počítá i tady, ne jen čte z dat.
+function isTagWeapon(char, weapon) {
+  const key = weapon && weapon.skill;
+  if (!char || !key || !isWeaponSkillKey(key)) return false;
+  return !!(char.skills && char.skills[key]);
+}
+
+// CČ útoku = hodnota dovednosti + atribut, který k ní podle pravidel patří
+// (LEHK → HBI, TĚŽ → ODO, ENG → VNI, CHL a BEZ → SIL, VRH → HBI).
+function weaponTest(char, weapon) {
+  const skill = weapon && weapon.skill;
+  if (!char || !skill || !isWeaponSkillKey(skill)) return null;
+  const attr = SKILL_ATTR[skill];
+  const attrVal = Math.max(0, parseInt(char[attr], 10) || 0);
+  const skillVal = Math.max(0, parseInt(char.skills?.[`${skill}Val`], 10) || 0);
+  return { attr, skill, attrVal, skillVal, tn: attrVal + skillVal };
+}
+
+// Poškození zbraně bývá psané „4", „4 CD" i „3+1" — počet kostek je první číslo.
+function weaponDamageDice(weapon) {
+  const m = String((weapon && weapon.damage) ?? "").match(/\d+/);
+  if (!m) return null;
+  return Math.max(1, Math.min(12, parseInt(m[0], 10)));
+}
 
 // ---------- PERKY ----------
 // Filtr perků pracuje s podmínkami z tabulky perků: co už postava má,
@@ -1093,6 +1141,8 @@ const SAVE_DEBOUNCE = { play: 800, edit: 2000 };
 const LOCAL_MAX = 1200000; // ~1,2 MB strop pro zásobník kroků v localStorage
 const undoKey = (id) => "fallout_undo_" + id;
 const draftKey = (id) => "fallout_draft_" + id;
+const ROLLLOG_KEY = "fallout_rolllog"; // log hodů je společný pro celý prohlížeč
+const ROLLLOG_LIMIT = 60;
 
 // Pole, která nepatří do snapshotu verze ani do porovnání změn: portrét je
 // velký a zapisuje se zvlášť hned při nahrání, zbytek jsou služební údaje.
@@ -1862,7 +1912,7 @@ function defaultTemplate(tab) {
       id,
       name: "",
       skill: "",
-      assigned: false,
+      // `assigned` (TAG zbraň) tu není schválně — vyplývá z tagů postavy.
       targetNum: "",
       damage: "",
       effects: "",
@@ -1981,6 +2031,20 @@ function FalloutSheetApp() {
     localStorage.setItem("fallout_scanlines", scanlines ? "1" : "0");
   }, [scanlines]);
 
+  // Stav připojení podle prohlížeče. Není to záruka, že Firestore odpovídá —
+  // od toho je stav ukládání vedle —, ale offline aspoň nelže do očí.
+  const [online, setOnline] = useState(() => navigator.onLine !== false);
+  useEffect(() => {
+    const goOnline = () => setOnline(true);
+    const goOffline = () => setOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
+
   useEffect(() => {
     localStorage.setItem("fallout_theme", theme);
     const colors = THEME_COLORS[theme] || THEME_COLORS.green;
@@ -2037,10 +2101,20 @@ function FalloutSheetApp() {
   const [diceCounts, setDiceCounts] = useState({ d20: 2, d6: 3 });
   // Výběr pro test dovednosti: jeden atribut + jedna dovednost, libovolná dvojice.
   const [rollSel, setRollSel] = useState({ attr: null, skill: null });
+  // Zbraň vybraná v tabulce útoků — drží dvojici pro hod na zásah i počet CD.
+  const [selWeaponId, setSelWeaponId] = useState(null);
   const [rolling, setRolling] = useState(false);
   const [spinFaces, setSpinFaces] = useState(null);
   const [lastRoll, setLastRoll] = useState(null);
-  const [rollLog, setRollLog] = useState([]);
+  // Log hodů přežije refresh — u stolu se list běžně překlikne nebo obnoví
+  // a historie hodů z právě probíhajícího boje je to poslední, co má zmizet.
+  const [rollLog, setRollLog] = useState(() => {
+    const stored = readLocal(ROLLLOG_KEY);
+    return Array.isArray(stored) ? stored.slice(0, ROLLLOG_LIMIT) : [];
+  });
+  useEffect(() => {
+    writeLocal(ROLLLOG_KEY, rollLog);
+  }, [rollLog]);
   const spinRef = useRef(null);
   const settleRef = useRef(null);
   useEffect(
@@ -2425,6 +2499,26 @@ function FalloutSheetApp() {
     );
     commitChar({ ...localChar, [listName]: list });
   };
+  // TAG zbraň se needituje ručně — vyplývá z tagnuté dovednosti. Proto se
+  // dopočítá při každé změně, která na ni má vliv: dovednost u zbraně…
+  const setWeaponSkill = (id, skill) => {
+    if (!localChar) return;
+    const weapons = localChar.weapons.map((w) =>
+      w.id === id
+        ? { ...w, skill, assigned: isTagWeapon(localChar, { skill }) }
+        : w,
+    );
+    commitChar({ ...localChar, weapons });
+  };
+  // …a přepnutí tagu u dovednosti, které přeznačí všechny její zbraně.
+  const toggleSkillTag = (key, on) => {
+    if (!localChar) return;
+    const next = { ...localChar, skills: { ...localChar.skills, [key]: on } };
+    next.weapons = (localChar.weapons || []).map((w) =>
+      w.skill === key ? { ...w, assigned: isTagWeapon(next, w) } : w,
+    );
+    commitChar(next);
+  };
   const stepQty = (id, dir) => {
     if (!localChar) return;
     const list = localChar.inventory.map((i) =>
@@ -2559,7 +2653,8 @@ function FalloutSheetApp() {
             id,
             name: tpl.name || "",
             skill: tpl.skill || "",
-            assigned: !!tpl.assigned,
+            // TAG zbraň vyplývá z tagnuté dovednosti, ne ze šablony.
+            assigned: isTagWeapon(localChar, { skill: tpl.skill || "" }),
             targetNum: tpl.targetNum || "",
             damage: tpl.damage || "",
             effects: tpl.effects || "",
@@ -2767,8 +2862,11 @@ function FalloutSheetApp() {
   const switchMode = (m) => {
     if (m === mode) return;
     setQtyPop(null);
-    // Výběr dvojice pro hod žije jen v režimu HRA.
-    if (m !== "play") setRollSel({ attr: null, skill: null });
+    // Výběr dvojice pro hod (i zbraně) žije jen v režimu HRA.
+    if (m !== "play") {
+      setRollSel({ attr: null, skill: null });
+      setSelWeaponId(null);
+    }
     // Opuštění ÚPRAV založí verzi — ale jen když se data opravdu liší.
     if (mode === "edit" && localChar) {
       handleSave(m);
@@ -2828,6 +2926,7 @@ function FalloutSheetApp() {
     setDirty(false);
     setQtyPop(null);
     setRollSel({ attr: null, skill: null });
+    setSelWeaponId(null);
     setModal(null);
   };
 
@@ -3013,7 +3112,10 @@ function FalloutSheetApp() {
   // --- test dovednosti ---
   // Kostky i výběr dvojice pro hod patří výhradně do režimu HRA.
   const canPickTest = mode === "play";
-  const clearTest = () => setRollSel({ attr: null, skill: null });
+  const clearTest = () => {
+    setRollSel({ attr: null, skill: null });
+    setSelWeaponId(null);
+  };
   const pickAttr = (key) =>
     setRollSel((p) => ({ ...p, attr: p.attr === key ? null : key }));
   // Doporučený atribut doplň jen tehdy, když si hráč žádný nevybral.
@@ -3026,6 +3128,33 @@ function FalloutSheetApp() {
     setRollSel((p) => (p.skill === key ? { ...p, skill: null } : withSkill(p, key)));
   // …ale z řádku útoku vždycky jen vybírá, jinak by druhý klik zbraň odzbrojil.
   const selectSkill = (key) => setRollSel((p) => withSkill(p, key));
+
+  // Klik na zbraň složí rovnou celý test na zásah: dovednost zbraně a atribut,
+  // který k ní podle pravidel patří (tady se nedoporučuje, tady se určuje).
+  // Zároveň si pamatujeme zbraň, aby z ní šlo vzít i kostky poškození.
+  const selectWeapon = (w) => {
+    if (!canPickTest || !w) return;
+    const wt = weaponTest(localChar, w);
+    if (!wt) return;
+    setRollSel({ attr: wt.attr, skill: wt.skill });
+    setSelWeaponId(w.id);
+    const cd = weaponDamageDice(w);
+    if (cd) setDiceCounts((p) => ({ ...p, d6: cd }));
+  };
+  const selWeapon =
+    (selWeaponId && localChar?.weapons?.find((w) => w.id === selWeaponId)) ||
+    null;
+  // Přepnutí na poškození vezme počet CD z vybrané zbraně; hráč ho pak může
+  // libovolně přenastavit steppery (munice, perky, situační bonusy).
+  const switchDice = (type) => {
+    if (rolling) return;
+    setDiceType(type);
+    setLastRoll(null);
+    if (type === "d6" && selWeapon) {
+      const cd = weaponDamageDice(selWeapon);
+      if (cd) setDiceCounts((p) => ({ ...p, d6: cd }));
+    }
+  };
 
   // CČ = atribut + dovednost. Tagnutá dovednost rozšiřuje kritický rozsah
   // na svou hodnotu; přirozená 1 je kritický úspěch vždy. Krit = 2 úspěchy.
@@ -3137,7 +3266,7 @@ function FalloutSheetApp() {
       setRolling(false);
       setSpinFaces(null);
       setLastRoll(rec);
-      setRollLog((p) => [rec, ...p].slice(0, 60));
+      setRollLog((p) => [rec, ...p].slice(0, ROLLLOG_LIMIT));
     }, 850);
   };
   const stepDice = (dir) => {
@@ -3354,6 +3483,20 @@ function FalloutSheetApp() {
     t.w_weight,
   ];
   const weaponColsCentered = [2, 3, 4, 7, 8, 11, 12];
+
+  // Buňka tabulky zbraní. Na velkém displeji je obal průhledný
+  // (`display:contents`), takže mřížka zůstává, na mobilu se z řádku stane
+  // karta a popisek se vytáhne z `data-label`.
+  const wcell = (label, child, opts) =>
+    h(
+      "span",
+      {
+        className: "pb-wcell" + (opts && opts.cls ? " " + opts.cls : ""),
+        "data-label": label,
+        title: (opts && opts.title) || undefined,
+      },
+      child,
+    );
 
   const rowButtons = (listName, id) =>
     h(
@@ -3881,12 +4024,9 @@ function FalloutSheetApp() {
                   onChange: (v) => updatePlayField("luckPoints", v),
                   disabled: !canPlay,
                 },
-                {
-                  label: t.poisonRes,
-                  value: localChar.poisonRes,
-                  onChange: (v) => updateField("poisonRes", v),
-                  disabled: !isEditing,
-                },
+                // JEDOVÉ OZ tady nejsou schválně — je to odolnost, patří
+                // k ostatním OZ pod zásahové zóny, a dvě editovatelné kopie
+                // téhož pole si jen lezly do zelí.
                 {
                   label: t.caps,
                   value: localChar.caps,
@@ -3953,7 +4093,7 @@ function FalloutSheetApp() {
                         className: "pb-check",
                         checked: !!localChar.skills[sk.key],
                         onChange: (e) =>
-                          updateField(`skills.${sk.key}`, e.target.checked),
+                          toggleSkillTag(sk.key, e.target.checked),
                         disabled: !isEditing,
                       }),
                       h("span", { className: "pb-skill-name" }, sk.label),
@@ -4037,12 +4177,7 @@ function FalloutSheetApp() {
                         "button",
                         {
                           className: `pb-mode-btn ${diceType === "d20" ? "active" : ""}`,
-                          onClick: () => {
-                            if (!rolling) {
-                              setDiceType("d20");
-                              setLastRoll(null);
-                            }
-                          },
+                          onClick: () => switchDice("d20"),
                         },
                         "d20",
                       ),
@@ -4050,12 +4185,7 @@ function FalloutSheetApp() {
                         "button",
                         {
                           className: `pb-mode-btn ${diceType === "d6" ? "active" : ""}`,
-                          onClick: () => {
-                            if (!rolling) {
-                              setDiceType("d6");
-                              setLastRoll(null);
-                            }
-                          },
+                          onClick: () => switchDice("d6"),
                         },
                         t.diceCombat,
                       ),
@@ -4114,6 +4244,47 @@ function FalloutSheetApp() {
                             "span",
                             { className: "pb-test-hint" },
                             "◈ " + t.rollPick,
+                          ),
+                    ),
+                  // V režimu poškození se místo CČ ukazuje vybraná zbraň —
+                  // z ní se bere základní počet CD.
+                  canPickTest &&
+                    diceType === "d6" &&
+                    h(
+                      "div",
+                      { className: `pb-test-bar ${selWeapon ? "on" : ""}` },
+                      selWeapon
+                        ? h(
+                            React.Fragment,
+                            null,
+                            h(
+                              "span",
+                              { className: "pb-test-label" },
+                              t.weaponSel + " · " + (selWeapon.name || t.noName),
+                            ),
+                            weaponDamageDice(selWeapon) &&
+                              h(
+                                "span",
+                                {
+                                  className: "pb-test-tn",
+                                  title: t.dmgFromWeapon,
+                                },
+                                weaponDamageDice(selWeapon) + "×CD",
+                              ),
+                            h(
+                              "button",
+                              {
+                                className: "pb-test-clear",
+                                title: t.rollClear,
+                                onClick: clearTest,
+                              },
+                              "✕",
+                            ),
+                          )
+                        : h(
+                            "span",
+                            { className: "pb-test-hint" },
+                            "◈ " + t.dmgPick,
                           ),
                     ),
                   h(
@@ -4249,245 +4420,331 @@ function FalloutSheetApp() {
                     ),
                     h("span", null),
                   ),
-                  localChar.weapons.map((w) =>
-                    h(
+                  localChar.weapons.map((w) => {
+                    // Test na zásah je dopočítaný z pravidel — CČ ani TAG
+                    // zbraň se tedy neopisují ručně.
+                    const wt = weaponTest(localChar, w);
+                    const picked = selWeaponId === w.id;
+                    const attrCode = wt
+                      ? SPECIAL_CODES[wt.attr][lang === "en" ? "en" : "cs"]
+                      : "";
+                    return h(
                       "div",
                       {
                         key: w.id,
-                        className: `pb-wgrid row ${isEditing ? "draggable" : ""}`,
+                        className: `pb-wgrid row ${isEditing ? "draggable" : ""} ${
+                          picked ? "picked" : ""
+                        }`,
                         draggable: isEditing,
                         onDragStart: onDragStartRow("weapons", w.id),
                         onDragOver: onDragOverRow(),
                         onDrop: onDropRow("weapons", w.id),
                       },
-                      h(AutoResizeTextarea, {
-                        className: "pb-cell",
-                        value: w.name,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem("weapons", w.id, "name", e.target.value),
-                      }),
-                      isEditing
-                        ? h(
-                            "select",
-                            {
-                              className: "pb-type-pill",
-                              value: w.skill || "",
-                              title: skillFullName(t, w.skill),
+                      wcell(
+                        t.w_name,
+                        isEditing
+                          ? h(AutoResizeTextarea, {
+                              className: "pb-cell",
+                              value: w.name,
                               onChange: (e) =>
                                 updateListItem(
                                   "weapons",
                                   w.id,
-                                  "skill",
+                                  "name",
                                   e.target.value,
                                 ),
-                            },
-                            h("option", { value: "" }, t.skillPick),
-                            WEAPON_SKILLS.map((ws) =>
-                              h(
-                                "option",
-                                { key: ws.key, value: ws.key },
-                                getWeaponSkillLabel(ws.key, lang),
-                              ),
+                            })
+                          : h(
+                              "button",
+                              {
+                                className: `pb-wname ${
+                                  canPickTest && wt ? "pickable" : ""
+                                } ${picked ? "picked" : ""}`,
+                                disabled: !canPickTest || !wt,
+                                title:
+                                  canPickTest && wt
+                                    ? t.weaponPickTip
+                                    : undefined,
+                                onClick: () => selectWeapon(w),
+                              },
+                              w.name || t.noName,
                             ),
-                            // starší ručně psaná dovednost ať se neztratí
-                            w.skill &&
-                              !isWeaponSkillKey(w.skill) &&
-                              h("option", { value: w.skill }, w.skill),
-                          )
-                        : h(
-                            "button",
-                            {
-                              className: `pb-wskill ${
-                                canPickTest && isWeaponSkillKey(w.skill)
-                                  ? "pickable"
-                                  : ""
-                              } ${rollSel.skill === w.skill ? "picked" : ""}`,
-                              disabled:
-                                !canPickTest || !isWeaponSkillKey(w.skill),
-                              title:
-                                skillFullName(t, w.skill) +
-                                (canPickTest && isWeaponSkillKey(w.skill)
-                                  ? " · " + t.skillLinkTip
-                                  : ""),
-                              onClick: () => selectSkill(w.skill),
-                            },
-                            getWeaponSkillLabel(w.skill, lang) || "—",
-                          ),
-                      h("input", {
-                        type: "checkbox",
-                        className: "pb-check",
-                        style: { justifySelf: "center" },
-                        checked: !!w.assigned,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "assigned",
-                            e.target.checked,
-                          ),
-                        disabled: !isEditing,
-                      }),
-                      h("input", {
-                        className: "pb-num sm",
-                        value: w.targetNum,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "targetNum",
-                            e.target.value,
-                          ),
-                      }),
-                      h("input", {
-                        className: "pb-num sm",
-                        value: w.damage,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "damage",
-                            e.target.value,
-                          ),
-                      }),
-                      h(AutoResizeTextarea, {
-                        className: "pb-cell",
-                        value: w.effects,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "effects",
-                            e.target.value,
-                          ),
-                      }),
-                      h("input", {
-                        className: "pb-cell dim",
-                        value: w.type,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem("weapons", w.id, "type", e.target.value),
-                      }),
-                      h("input", {
-                        className: "pb-cell center",
-                        value: w.rateOfFire,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "rateOfFire",
-                            e.target.value,
-                          ),
-                      }),
-                      h("input", {
-                        className: "pb-cell center",
-                        value: w.range,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "range",
-                            e.target.value,
-                          ),
-                      }),
-                      h(AutoResizeTextarea, {
-                        className: "pb-cell dim",
-                        value: w.attributes,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "attributes",
-                            e.target.value,
-                          ),
-                      }),
-                      isEditing
-                        ? h(
-                            "select",
-                            {
-                              className: "pb-type-pill",
-                              value: w.ammo || "",
+                        { cls: "name" },
+                      ),
+                      wcell(
+                        t.w_skill,
+                        isEditing
+                          ? h(
+                              "select",
+                              {
+                                className: "pb-type-pill",
+                                value: w.skill || "",
+                                title: skillFullName(t, w.skill),
+                                onChange: (e) =>
+                                  setWeaponSkill(w.id, e.target.value),
+                              },
+                              h("option", { value: "" }, t.skillPick),
+                              WEAPON_SKILLS.map((ws) =>
+                                h(
+                                  "option",
+                                  { key: ws.key, value: ws.key },
+                                  getWeaponSkillLabel(ws.key, lang),
+                                ),
+                              ),
+                              // starší ručně psaná dovednost ať se neztratí
+                              w.skill &&
+                                !isWeaponSkillKey(w.skill) &&
+                                h("option", { value: w.skill }, w.skill),
+                            )
+                          : h(
+                              "button",
+                              {
+                                className: `pb-wskill ${
+                                  canPickTest && wt ? "pickable" : ""
+                                } ${picked ? "picked" : ""}`,
+                                disabled: !canPickTest || !wt,
+                                title:
+                                  skillFullName(t, w.skill) +
+                                  (canPickTest && wt
+                                    ? " · " + t.weaponPickTip
+                                    : ""),
+                                onClick: () => selectWeapon(w),
+                              },
+                              getWeaponSkillLabel(w.skill, lang) || "—",
+                            ),
+                      ),
+                      wcell(
+                        t.w_assigned,
+                        h("input", {
+                          type: "checkbox",
+                          className: "pb-check",
+                          style: { justifySelf: "center" },
+                          // Zrcadlo tagnuté dovednosti — ručně se needituje
+                          // ani v ÚPRAVÁCH.
+                          checked: isTagWeapon(localChar, w),
+                          disabled: true,
+                          readOnly: true,
+                          onChange: () => {},
+                        }),
+                        { cls: "center", title: t.tagWeaponTip },
+                      ),
+                      wcell(
+                        t.w_tn,
+                        wt
+                          ? h(
+                              "span",
+                              { className: "pb-tn-auto" },
+                              String(wt.tn),
+                            )
+                          : h("input", {
+                              className: "pb-num sm",
+                              value: w.targetNum,
+                              disabled: !isEditing,
                               onChange: (e) =>
                                 updateListItem(
                                   "weapons",
                                   w.id,
-                                  "ammo",
+                                  "targetNum",
                                   e.target.value,
                                 ),
-                            },
-                            h("option", { value: "" }, t.ammoPick),
-                            AMMO_TYPES.map((a) =>
-                              h(
-                                "option",
-                                { key: a.key, value: a.key },
-                                lang === "en" ? a.en : a.cs,
-                              ),
+                            }),
+                        {
+                          cls: "center",
+                          title: wt
+                            ? `${t.tnAutoTip} ${attrCode} ${wt.attrVal} + ${skillName(
+                                t,
+                                wt.skill,
+                              )} ${wt.skillVal}`
+                            : undefined,
+                        },
+                      ),
+                      wcell(
+                        t.w_dmg,
+                        h("input", {
+                          className: "pb-num sm",
+                          value: w.damage,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "weapons",
+                              w.id,
+                              "damage",
+                              e.target.value,
                             ),
-                            // starší ručně psaná hodnota ať se neztratí
-                            w.ammo &&
-                              !AMMO_TYPES.some((a) => a.key === w.ammo) &&
-                              h("option", { value: w.ammo }, w.ammo),
-                          )
-                        : h(
-                            "span",
-                            { className: "pb-cell" },
-                            getAmmoLabel(w.ammo, lang),
-                          ),
-                      (() => {
-                        const stacks = ammoStacks(w.ammo);
-                        if (!stacks.length)
+                        }),
+                        { cls: "center" },
+                      ),
+                      wcell(
+                        t.w_effects,
+                        h(AutoResizeTextarea, {
+                          className: "pb-cell",
+                          value: w.effects,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "weapons",
+                              w.id,
+                              "effects",
+                              e.target.value,
+                            ),
+                        }),
+                      ),
+                      wcell(
+                        t.w_type,
+                        h("input", {
+                          className: "pb-cell dim",
+                          value: w.type,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "weapons",
+                              w.id,
+                              "type",
+                              e.target.value,
+                            ),
+                        }),
+                      ),
+                      wcell(
+                        t.w_rate,
+                        h("input", {
+                          className: "pb-cell center",
+                          value: w.rateOfFire,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "weapons",
+                              w.id,
+                              "rateOfFire",
+                              e.target.value,
+                            ),
+                        }),
+                        { cls: "center" },
+                      ),
+                      wcell(
+                        t.w_range,
+                        h("input", {
+                          className: "pb-cell center",
+                          value: w.range,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "weapons",
+                              w.id,
+                              "range",
+                              e.target.value,
+                            ),
+                        }),
+                        { cls: "center" },
+                      ),
+                      wcell(
+                        t.w_qual,
+                        h(AutoResizeTextarea, {
+                          className: "pb-cell dim",
+                          value: w.attributes,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "weapons",
+                              w.id,
+                              "attributes",
+                              e.target.value,
+                            ),
+                        }),
+                      ),
+                      wcell(
+                        t.w_ammo,
+                        isEditing
+                          ? h(
+                              "select",
+                              {
+                                className: "pb-type-pill",
+                                value: w.ammo || "",
+                                onChange: (e) =>
+                                  updateListItem(
+                                    "weapons",
+                                    w.id,
+                                    "ammo",
+                                    e.target.value,
+                                  ),
+                              },
+                              h("option", { value: "" }, t.ammoPick),
+                              AMMO_TYPES.map((a) =>
+                                h(
+                                  "option",
+                                  { key: a.key, value: a.key },
+                                  lang === "en" ? a.en : a.cs,
+                                ),
+                              ),
+                              // starší ručně psaná hodnota ať se neztratí
+                              w.ammo &&
+                                !AMMO_TYPES.some((a) => a.key === w.ammo) &&
+                                h("option", { value: w.ammo }, w.ammo),
+                            )
+                          : h(
+                              "span",
+                              { className: "pb-cell" },
+                              getAmmoLabel(w.ammo, lang),
+                            ),
+                      ),
+                      wcell(
+                        t.w_ammoQty,
+                        (() => {
+                          const stacks = ammoStacks(w.ammo);
+                          if (!stacks.length)
+                            return h(
+                              "span",
+                              {
+                                className: "pb-ammo-count dim",
+                                title: t.ammoTip,
+                              },
+                              t.ammoNone,
+                            );
+                          const cnt = ammoCount(w.ammo);
+                          if (mode !== "play")
+                            return h(
+                              "span",
+                              { className: "pb-ammo-count", title: t.ammoTip },
+                              String(cnt),
+                            );
                           return h(
-                            "span",
-                            {
-                              className: "pb-ammo-count dim",
-                              title: t.ammoTip,
-                            },
-                            t.ammoNone,
+                            "div",
+                            { className: "pb-ammo-step", title: t.ammoTip },
+                            h(
+                              "button",
+                              { onClick: () => stepAmmo(w.ammo, -1) },
+                              "−",
+                            ),
+                            h("span", { className: "val" }, String(cnt)),
+                            h(
+                              "button",
+                              { onClick: () => stepAmmo(w.ammo, 1) },
+                              "+",
+                            ),
                           );
-                        const cnt = ammoCount(w.ammo);
-                        if (mode !== "play")
-                          return h(
-                            "span",
-                            { className: "pb-ammo-count", title: t.ammoTip },
-                            String(cnt),
-                          );
-                        return h(
-                          "div",
-                          { className: "pb-ammo-step", title: t.ammoTip },
-                          h(
-                            "button",
-                            { onClick: () => stepAmmo(w.ammo, -1) },
-                            "−",
-                          ),
-                          h("span", { className: "val" }, String(cnt)),
-                          h(
-                            "button",
-                            { onClick: () => stepAmmo(w.ammo, 1) },
-                            "+",
-                          ),
-                        );
-                      })(),
-                      h("input", {
-                        className: "pb-cell center",
-                        value: w.weight,
-                        disabled: !isEditing,
-                        onChange: (e) =>
-                          updateListItem(
-                            "weapons",
-                            w.id,
-                            "weight",
-                            e.target.value,
-                          ),
+                        })(),
+                        { cls: "center" },
+                      ),
+                      wcell(
+                        t.w_weight,
+                        h("input", {
+                          className: "pb-cell center",
+                          value: w.weight,
+                          disabled: !isEditing,
+                          onChange: (e) =>
+                            updateListItem(
+                              "weapons",
+                              w.id,
+                              "weight",
+                              e.target.value,
+                            ),
+                        }),
+                        { cls: "center" },
+                      ),
+                      wcell("", rowButtons("weapons", w.id), {
+                        cls: "actions",
                       }),
-                      rowButtons("weapons", w.id),
-                    ),
-                  ),
+                    );
+                  }),
                 ),
               ),
             ),
@@ -4796,7 +5053,14 @@ function FalloutSheetApp() {
             h(
               "div",
               { className: "pb-statusbar" },
-              h("span", null, "◉ " + t.online),
+              h(
+                "span",
+                {
+                  className: online ? null : "pb-save-bad",
+                  title: online ? null : t.offlineTip,
+                },
+                online ? "◉ " + t.online : "◌ " + t.offline,
+              ),
               h("span", { className: "sep" }, "//"),
               h(
                 "span",
@@ -4906,6 +5170,12 @@ function FalloutSheetApp() {
                       type: (key) => getTypeLabel(key, lang),
                       ammo: (key) => getAmmoLabel(key, lang),
                       weaponSkill: (key) => skillFullName(t, key),
+                      // Pravidla drží aplikace, arch si je jen vyžádá.
+                      weaponTag: (w) => isTagWeapon(localChar, w),
+                      weaponTn: (w) => {
+                        const wt = weaponTest(localChar, w);
+                        return wt ? wt.tn : null;
+                      },
                     }),
                   );
                 },
@@ -5144,7 +5414,12 @@ function FalloutSheetApp() {
                       "button",
                       {
                         className: "pb-rowbtn del",
-                        onClick: () => deleteTemplate(tplTab, row.id),
+                        // Šablona se maže z databáze pro všechny — ptáme se
+                        // stejně jako u postavy.
+                        onClick: () => {
+                          if (window.confirm(t.confirmDeleteTpl))
+                            deleteTemplate(tplTab, row.id);
+                        },
                       },
                       "✕",
                     ),
@@ -5394,26 +5669,6 @@ function FalloutSheetApp() {
                               tplDraft.weapons.skill,
                             ),
                         ),
-                      ),
-                      h(
-                        "label",
-                        {
-                          className: "pb-loc-status",
-                          style: { alignSelf: "end", paddingBottom: "8px" },
-                        },
-                        h("input", {
-                          type: "checkbox",
-                          checked: !!tplDraft.weapons.assigned,
-                          onChange: (e) =>
-                            setTplDraft((p) => ({
-                              ...p,
-                              weapons: {
-                                ...p.weapons,
-                                assigned: e.target.checked,
-                              },
-                            })),
-                        }),
-                        t.w_assigned,
                       ),
                       [
                         ["targetNum", t.w_tn],

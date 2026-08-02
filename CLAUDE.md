@@ -33,6 +33,14 @@ nad kořenem repa a proklikáním v prohlížeči.
   drží se 30). Každá změna listu musí jít přes `commitChar` — jinak se nezapíše krok
   Zpět a autosave o ní neví. Do dokumentu postavy nepřidávej velká pole; portrét se
   ukládá zvlášť a do snapshotů se nepočítá (`SNAPSHOT_OMIT`).
+- **Dopočítaná pole se neukládají jako pravda.** CČ útoku (`weaponTest`) a TAG zbraň
+  (`isTagWeapon`) se počítají při vykreslení z dovedností a atributů postavy; v datech
+  zůstávají jen jako zrcadlo pro starší záznamy a tisk. Pravidlo pro dvojici
+  dovednost → atribut drží `SKILL_ATTR` a `print.js` si ho vyžádá přes `labels`
+  (`weaponTn`, `weaponTag`) — nekopíruj ho do tisku podruhé.
+- Tabulka zbraní: každá buňka řádku jde přes pomocníka `wcell(label, obsah)`. Obal je
+  na desktopu `display: contents` (mřížka zůstává), pod 760 px se z řádku stane karta
+  a popisek se bere z `data-label`. Nový sloupec proto přidávej i do `weaponCols`.
 - API klíč ve `firebaseConfig` je záměrně veřejný, viz `SECURITY.md`.
 
 ## Backlog
