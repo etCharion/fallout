@@ -81,6 +81,7 @@ chybějící validace čísel, poloviční PWA, `server.log` v repu.
 | Dvojice dovednost → atribut | všech 17 dovedností sedí na oficiální tabulku (ATLETIKA/BEZ ZBRANĚ/CHLADNÉ → SIL, ENERGETICKÉ/OTEVÍRÁNÍ/PILOTOVÁNÍ/VÝBUŠNINY → VNI, PŘEŽITÍ/TĚŽKÉ → ODO, OBCHOD/ŘEČNICTVÍ → CHA, LÉČENÍ/OPRAVY/VĚDA → INT, LEHKÉ/PLÍŽENÍ/VRHÁNÍ → HBI) | ✓ |
 | Útok zbraní | používá primární atribut dovednosti (příklad z příručky: TĚŽKÉ 4 + ODO 8 → CČ 12) | ✓ |
 | Nosnost a postihy | 150 + 10 × SÍLA; při překročení +1 obtížnost na testy SIL a HBI, iniciativa −1, žádný Sprint | ✓ |
+| Radiace | ubírá z **maxima** HP, ne z aktuálních; když maximum klesne pod aktuální stav, srazí se i ten; přirozeně se neléčí, jen RadAway a spol. | ✓ |
 | Obrana / Iniciativa | HBI ≤ 8 → 1, ≥ 9 → 2; VNÍ + HBI | ✓ (ručně, ale vzorec v tabulce sedí) |
 
 ---
@@ -110,9 +111,15 @@ chybějící validace čísel, poloviční PWA, `server.log` v repu.
 - [x] **HOTOVO — Historie je v podkolekci.** Verze bydlí v `fallout_characters/{id}/history/{v000123}`, v dokumentu postavy zůstalo jen `historySeq`, `historyCount` a `historyHash`. Načítají se líně (až při otevření modalu VERZE). Držíme posledních 30, starší se ořezávají. Postavy se starým polem `history` se migrují samy při prvním uložení.
 - [x] **HOTOVO — Neukládá se, když se nic nezměnilo.** Před každým zápisem se porovnává otisk stavu (`fingerprint`); přepínání režimů beze změny nezapisuje vůbec a nezakládá verzi.
 - [ ] **P1 — V režimu HRA nejde dělat to, co se při hře děje.** Ověřeno proklikáním:
-  v HŘE jsou zamčené **zátky, XP, úroveň** a přidání ukořistěného předmětu (tlačítka
-  „+ PŘIDAT" a „Ze šablony" se zobrazují jen v ÚPRAVÁCH). Odemčené správně jsou HP,
-  radiace, body štěstí, poznámky, odolnosti a zranění zón, množství v inventáři a munice.
+  v HŘE jsou zamčené **zátky, XP, úroveň**, **maximum HP** a přidání ukořistěného
+  předmětu (tlačítka „+ PŘIDAT" a „Ze šablony" se zobrazují jen v ÚPRAVÁCH). Odemčené
+  správně jsou aktuální HP, radiace, body štěstí, poznámky, odolnosti a zranění zón,
+  množství v inventáři a munice.
+  **Maximum HP je z téhle party nejpalčivější:** dočasné zdraví se podle pravidel nedává
+  nad strop, ale zvedá se jím **maximum** (Buffout = +4 max HP). Zamčené pole maxima
+  proto znamená, že si hráč nemůže vzít chemii, aniž by přepnul do ÚPRAV — a přepnutí
+  režimu zakládá verzi v historii. Odemčení je jednořádková změna (`!isEditing` →
+  `!canPlay`), ale patří do balíčku „režim HRA", ať se to promyslí najednou.
 - [x] **HOTOVO — Tichá ztráta dat.** Selhání zápisu už není tiché: v liště i ve status baru je stav ukládání (`UKLÁDÁM… / ULOŽENO 18:42 / CHYBA ULOŽENÍ`) a rozdělaný stav se zálohuje do `localStorage` s nabídkou obnovy. Indikátor připojení sleduje `navigator.onLine`.
 - [x] **HOTOVO — Poznámky a AUTOSAVE.** Poznámky jdou psát i v režimu HRA a popisek panelu ukazuje skutečný stav ukládání místo neplatného slibu.
 - [x] **HOTOVO — Undo/Redo.** Jede po jednotlivých změnách, nepřepíná režim a vrácení rovnou pobere autosave. Zásobník 100 kroků žije v `localStorage`. *(Ověřeno: Zpět vrátí i přeznačení TAG zbraně.)*
@@ -122,12 +129,16 @@ chybějící validace čísel, poloviční PWA, `server.log` v repu.
   - SPECIAL při tvorbě: všechny začínají na **4**, rozděluje se **12 bodů**, strop **10**.
   - Dovednosti: rozsah **0–6**. Při tvorbě navíc tagnuté začínají na 2 a nesmí přesáhnout 4, netagnuté nesmí přesáhnout 3.
   - **3 tagy**, bodů na dovednosti při tvorbě **INT × 2**.
-  - HP ≤ efektivní maximum (maximum mínus rady).
 
-  **Pozor na tvrdé zámky:** perky, mutace a silová zbroj umí SPECIAL vytáhnout nad 10 a
-  dovednost nad běžný strop, takže „4–10" platí pro *tvorbu postavy*, ne pro celou hru.
-  Rozumnější než zakazovat je varovat — červený rámeček a nápověda „mimo meze pravidel",
-  ale hodnotu nechat zapsat. Tvrdě odmítat dává smysl leda u nesmyslů (`abc`, záporná HP).
+  **HP se nevaliduje vůbec** — ani horní mezí. Chemie a efekty umí zdraví dočasně
+  zvednout a karta s tím musí umět počítat; ořezávat aktuální HP na maximum by hru
+  omezovalo, ne hlídalo.
+
+  **Pozor na tvrdé zámky obecně:** perky, mutace a silová zbroj umí SPECIAL vytáhnout
+  nad 10 a dovednost nad běžný strop, takže „4–10" platí pro *tvorbu postavy*, ne pro
+  celou hru. Rozumnější než zakazovat je varovat — červený rámeček a nápověda „mimo meze
+  pravidel", ale hodnotu nechat zapsat. Tvrdě odmítat dává smysl leda u nesmyslů
+  (`abc`, záporné hodnoty).
 - [ ] **P2 — Přepnutí postavy během neuloženého zápisu si plete otisky.** `handleSelectChar`
   (`app.js:2920`) spustí `handleSave`/`flushSave` bez `await` a hned přepne `selectedCharId`.
   Když zápis doběhne, nastaví `savedHashRef` a `setDraft(null)` už pro **novou** postavu —
