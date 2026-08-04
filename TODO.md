@@ -19,14 +19,13 @@ přeznačí hned po tagnutí dovednosti, nosnost, radiace, zásahové zóny, mun
 i log hodů fungují. Texty pravidel v nápovědách (kritický zásah od 5 poškození,
 efekty zranění po zónách, postihy za přetížení) souhlasí s příručkou.
 
-**Technicky mají přednost dvě věci, které v minulém seznamu nejsou** — obě ověřené
-v prohlížeči, ne odvozené z kódu:
+**Technicky přibyly dvě věci, které v minulém seznamu nebyly** — obě ověřené
+v prohlížeči, ne odvozené z kódu, a obě už **opravené** (viz B0 a B1):
 
-1. **P0 — dvě změny v jednom kliknutí se navzájem přebijí** (viz B0). Kvůli tomu
-   nejde zapsat radiace ani zaškrtnout zranění zóny. Obojí je přitom v seznamu
-   odškrtnuté jako HOTOVO — hotová je logika, rozbité je uložení.
-2. **P1 — když selže anonymní přihlášení, aplikace visí na „NAČÍTÁNÍ…“ napořád**
-   (viz B1). Poctivý indikátor OFFLINE se v takové situaci nestihne vykreslit.
+1. **P0 — dvě změny v jednom kliknutí se navzájem přebíjely.** Kvůli tomu nešla
+   zapsat radiace ani zaškrtnout zranění zóny. Obojí bylo přitom odškrtnuté jako
+   HOTOVO — hotová byla logika, rozbité uložení.
+2. **P1 — když selhalo anonymní přihlášení, aplikace visela na „NAČÍTÁNÍ…“ napořád.**
 
 Zbytek otevřených bodů z minula platí beze změny: sdílená veřejná databáze,
 chybějící validace čísel, poloviční PWA, `server.log` v repu.
@@ -88,27 +87,26 @@ chybějící validace čísel, poloviční PWA, `server.log` v repu.
 
 ## B. Bugy a tření
 
-- [ ] **P0 — Dvě změny v jednom kliknutí se navzájem přebijí.** `commitChar` (`app.js:2399`)
-  si vezme `localChar` z uzávěru renderu a zavolá `setLocalChar(hodnota)` — ne funkční
-  formu `setLocalChar(prev => …)`. Dvě volání `updateField` za sebou proto obě počítají
-  ze **stejného** starého stavu a druhé přepíše první. V aplikaci jsou přesně dvě taková
-  místa a obě jsou vidět:
-  - `setRads` (`app.js:3340`): zadání radů, které srazí HP pod maximum, uloží **jen**
-    sražené HP a radiaci zahodí. Ověřeno: max 10 HP, zadáno RAD 5 → pole RAD ukazuje 0,
-    HP spadlo na 5. Zopakováním se HP ratchetuje níž a níž a nikde není vidět proč.
-  - `BodyPartCard.setInjured` a `setCount` (`app.js:1373`–`1381`): zaškrtnutí ZRANĚNO
-    nastaví počet zranění na 1, ale `injured` zůstane `false` — zóna se nezčervená
-    a zaškrtávátko se samo odškrtne. Ověřeno.
-  - Vedlejší škoda: `recordStep` proběhne dvakrát, takže v zásobníku Zpět skončí krok
-    do stavu, který na obrazovce nikdy nebyl.
-  - Oprava: buď `commitChar` přes `setLocalChar((prev) => …)` (a krok Zpět počítat
-    z `prev`), nebo obě pole měnit jedním commitem — jako to už dělá `toggleSkillTag`.
-- [ ] **P1 — Selhané přihlášení = věčné „NAČÍTÁNÍ…".** `setLoading(false)` je jen
-  v callbacku kolekčního `onSnapshot` (`app.js:2246`), který je za `if (!user) return`.
-  Když `signInAnonymously` hodí chybu (výpadek sítě, doména mimo whitelist, Firebase dole),
-  `user` zůstane `null`, efekt se nespustí a aplikace visí na hlášce „NAČÍTÁNÍ…" navždy —
-  bez chybové hlášky, bez tlačítka „zkusit znovu". Ověřeno v prohlížeči. Indikátor
-  „◌ OFFLINE" je až ve status baru listu, takže se v téhle situaci nikdy nevykreslí.
+- [x] **HOTOVO (P0) — Dvě změny v jednom kliknutí se navzájem přebíjely.** `commitChar`
+  si bral `localChar` z uzávěru renderu, takže dvě volání `updateField` za sebou obě
+  počítala ze **stejného** starého stavu a druhé přepsalo první. Projevovalo se to na
+  dvou místech: zadání radů zahodilo radiaci a nechalo jen sražené HP (a opakováním
+  se HP ratchetovalo níž), a zaškrtnutí ZRANĚNO nastavilo počet 1, ale zóna zůstala
+  „v pořádku". Opraveno dvěma vrstvami:
+  - `commitChar` bere základ z `charRef`, který se srovnává při každém renderu a hned
+    po commitu se posune. Tím je ošetřená celá třída — i budoucí místa, kde by někdo
+    napsal dvě změny za sebou.
+  - `setRads` a `BodyPartCard` mění obě pole **jedním** commitem, takže Zpět vrací
+    jeden krok na jedno kliknutí, ne dva. (Přes `setLocalChar((prev) => …)` se to
+    nedělá schválně — do updateru by se muselo volat `recordStep`, což je vedlejší
+    efekt na místě, kde ho React nechce.)
+- [x] **HOTOVO (P1) — Selhané přihlášení = věčné „NAČÍTÁNÍ…".** `setLoading(false)` bylo
+  jen v callbacku kolekčního `onSnapshot`, který je za `if (!user) return`. Když
+  `signInAnonymously` selhalo, `user` zůstal `null` a aplikace visela na hlášce navždy.
+  Teď má nápis tři cesty ven: úspěch, chybu (`catch` i chybový callback
+  `onAuthStateChanged`) a pojistku na čas (`CONNECT_TIMEOUT`, 10 s) pro případ, že se
+  přihlášení nikdy neozve. Místo kolečka se ukáže obrazovka „NEPODAŘILO SE PŘIPOJIT"
+  s tlačítkem ZKUSIT ZNOVU, která rozliší výpadek sítě od nedostupné databáze.
 - [x] **HOTOVO — Historie je v podkolekci.** Verze bydlí v `fallout_characters/{id}/history/{v000123}`, v dokumentu postavy zůstalo jen `historySeq`, `historyCount` a `historyHash`. Načítají se líně (až při otevření modalu VERZE). Držíme posledních 30, starší se ořezávají. Postavy se starým polem `history` se migrují samy při prvním uložení.
 - [x] **HOTOVO — Neukládá se, když se nic nezměnilo.** Před každým zápisem se porovnává otisk stavu (`fingerprint`); přepínání režimů beze změny nezapisuje vůbec a nezakládá verzi.
 - [ ] **P1 — V režimu HRA nejde dělat to, co se při hře děje.** Ověřeno proklikáním:
@@ -171,7 +169,7 @@ chybějící validace čísel, poloviční PWA, `server.log` v repu.
 1. ~~Balíček „hraní"~~ — **hotovo** (hod z listu, nosnost, radiace, zranění, munice).
 2. ~~Balíček „nešahej mi na data"~~ — **hotovo** (historie do podkolekce, neukládat beze změny, kroky Zpět, viditelný stav ukládání).
 3. ~~Balíček „odvozený útok"~~ — **hotovo** (CČ a TAG zbraň z pravidel, klik na zbraň skládá test, CD podle poškození, tisk, mobilní karty, log hodů).
-4. **Balíček „ať to drží": B0 + B1.** Malá oprava, velký dopad — bez ní se radiace ani zranění nedají zapsat a offline aplikace mlčky visí. Tohle je jediná položka, která opravuje už „hotové" funkce.
+4. ~~Balíček „ať to drží"~~ — **hotovo** (přebíjející se změny, chybová obrazovka místo věčného načítání).
 5. **Balíček „režim HRA":** odemknout zátky/XP/loot + rychlé akce (P1 v B, P2 v C).
 6. **Balíček „boj":** body štěstí s přehazováním, bonus ze SÍLY, munice za +1 CD, obtížnost testu.
 7. **Balíček „meze":** validace čísel podle pravidel — a teprve pak průvodce tvorbou postavy.

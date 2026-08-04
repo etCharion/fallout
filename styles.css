@@ -2119,6 +2119,39 @@ input[type="number"] {
   background: #000;
 }
 
+/* Obrazovka „nepodařilo se připojit" — místo věčně točícího se NAČÍTÁNÍ. */
+.pb-connfail {
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.pb-connfail .big {
+  font-size: 30px;
+  color: var(--pb-danger, #ff5f5f);
+}
+
+.pb-connfail .sub {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  max-width: 46ch;
+  text-shadow: none;
+  opacity: 0.85;
+}
+
+.pb-connfail .detail {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  max-width: 46ch;
+  text-shadow: none;
+  opacity: 0.5;
+  word-break: break-word;
+}
+
 .pb-empty-state {
   text-align: center;
   padding: 70px 20px;
