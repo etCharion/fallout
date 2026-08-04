@@ -222,6 +222,12 @@ const TRANSLATIONS = {
     offline: "OFFLINE",
     offlineTip:
       "Prohlížeč hlásí, že jsi bez připojení. Změny se drží lokálně a odejdou, až se síť vrátí.",
+    connectFail: "NEPODAŘILO SE PŘIPOJIT",
+    connectFailHint:
+      "Databáze neodpovídá. Zkus to za chvíli znovu — postavy jsou v pořádku, jen se k nim teď nejde dostat.",
+    connectOfflineHint:
+      "Vypadá to, že jsi bez připojení. Aplikace potřebuje síť, aby postavu načetla.",
+    retry: "ZKUSIT ZNOVU",
     autosave: "AUTOSAVE",
     active: "AKTIVNÍ",
     manual: "RUČNÍ",
@@ -482,6 +488,12 @@ const TRANSLATIONS = {
     offline: "OFFLINE",
     offlineTip:
       "The browser reports no connection. Changes stay local and sync once the network is back.",
+    connectFail: "COULD NOT CONNECT",
+    connectFailHint:
+      "The database is not responding. Try again in a moment — your characters are fine, they just can't be reached right now.",
+    connectOfflineHint:
+      "You appear to be offline. The app needs a connection to load a character.",
+    retry: "RETRY",
     autosave: "AUTOSAVE",
     active: "ACTIVE",
     manual: "MANUAL",
@@ -1143,6 +1155,8 @@ const undoKey = (id) => "fallout_undo_" + id;
 const draftKey = (id) => "fallout_draft_" + id;
 const ROLLLOG_KEY = "fallout_rolllog"; // log hodů je společný pro celý prohlížeč
 const ROLLLOG_LIMIT = 60;
+// Po téhle době bez odpovědi přestaneme čekat na přihlášení a řekneme to nahlas.
+const CONNECT_TIMEOUT = 10000;
 
 // Pole, která nepatří do snapshotu verze ani do porovnání změn: portrét je
 // velký a zapisuje se zvlášť hned při nahrání, zbytek jsou služební údaje.
@@ -1370,15 +1384,13 @@ function BodyPartCard({ name, data, field, update, canPlay, tip, t }) {
   const injuries = Math.max(0, parseInt(data.inj, 10) || 0);
   const injured = !!data.injured;
   // Zaškrtávátko a počet drží krok — nechceme „zraněno" s nulou ani naopak.
-  const setInjured = (on) => {
-    update(`${field}.injured`, on);
-    update(`${field}.inj`, on ? String(Math.max(1, injuries)) : "0");
-  };
-  const setCount = (raw) => {
-    update(`${field}.inj`, raw);
-    const n = Math.max(0, parseInt(raw, 10) || 0);
-    if (n > 0 !== injured) update(`${field}.injured`, n > 0);
-  };
+  // Obojí se mění jedním zápisem celé zóny: dva zápisy za sebou by skončily
+  // tak, že platí jen ten druhý.
+  const setZone = (patch) => update(field, { ...data, ...patch });
+  const setInjured = (on) =>
+    setZone({ injured: on, inj: on ? String(Math.max(1, injuries)) : "0" });
+  const setCount = (raw) =>
+    setZone({ inj: raw, injured: Math.max(0, parseInt(raw, 10) || 0) > 0 });
   return h(
     "div",
     { className: `pb-loc-card ${injured ? "injured" : ""}` },
@@ -1953,6 +1965,13 @@ function FalloutSheetApp() {
   const [characters, setCharacters] = useState([]);
   const [selectedCharId, setSelectedCharId] = useState(null);
   const [localChar, setLocalChar] = useState(null);
+  // Nejnovější stav listu, dostupný i uprostřed jednoho kliknutí. `localChar`
+  // je z uzávěru renderu, takže dvě změny za sebou by obě četly ten starý stav
+  // a druhá by tu první přepsala. Ref se srovnává při každém renderu, takže
+  // pokryje i zápisy, které jdou mimo `commitChar` (Zpět, obnovení verze,
+  // synchronizace z cloudu).
+  const charRef = useRef(null);
+  charRef.current = localChar;
   // Zásobník kroků Zpět/Znovu. `index` = o kolik kroků jsme vrácení zpátky,
   // 0 = díváme se na nejnovější stav. Drží se i v localStorage, ať přežije
   // refresh i zavření okna.
@@ -1978,6 +1997,9 @@ function FalloutSheetApp() {
   // podle `localChar` by druhé uložení v jednom sezení přepsalo verzi první.
   const historyMetaRef = useRef({ charId: null, seq: 0, count: 0 });
   const [loading, setLoading] = useState(true);
+  // Stav přihlášení: pending → ok, nebo error/timeout. Bez něj by se nedalo
+  // rozeznat „ještě to běží" od „nepovedlo se a nikdo to neřekne".
+  const [authState, setAuthState] = useState({ status: "pending", error: null });
   const [lang, setLang] = useState(
     () => localStorage.getItem("fallout_lang") || "cs",
   );
@@ -2230,18 +2252,48 @@ function FalloutSheetApp() {
     dragRef.current.draggedId = null;
   };
 
+  // Přihlášení. Nápis „NAČÍTÁNÍ…" smí sundat i neúspěch — dokud to uměl jen
+  // úspěch, visela aplikace na tom nápisu navždy, kdykoli byla síť pryč.
+  const connect = async () => {
+    setAuthState({ status: "pending", error: null });
+    setLoading(true);
+    try {
+      await signInAnonymously(auth);
+    } catch (err) {
+      console.error("Auth error:", err);
+      setAuthState({ status: "error", error: err.message });
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        await signInAnonymously(auth);
-      } catch (err) {
-        console.error("Auth error:", err);
-      }
-    };
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    connect();
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (u) => {
+        setUser(u);
+        if (u) setAuthState({ status: "ok", error: null });
+      },
+      (err) => {
+        console.error("Auth state error:", err);
+        setAuthState({ status: "error", error: err.message });
+        setLoading(false);
+      },
+    );
     return () => unsubscribe();
   }, []);
+
+  // Pojistka na tichý případ: přihlášení nespadne, jen se nikdy neozve.
+  useEffect(() => {
+    if (!loading || user) return;
+    const timer = setTimeout(() => {
+      setAuthState((s) =>
+        s.status === "ok" ? s : { status: "timeout", error: null },
+      );
+      setLoading(false);
+    }, CONNECT_TIMEOUT);
+    return () => clearTimeout(timer);
+  }, [loading, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -2396,11 +2448,15 @@ function FalloutSheetApp() {
 
   // Jediná cesta, kudy se mění list: zapíše krok do zásobníku Zpět a označí
   // stav jako neuložený, o zbytek se postará autosave.
+  // Základ se bere z `charRef`, ne z `localChar` — jinak by dvě změny v jednom
+  // kliknutí obě vyšly ze stejného starého stavu a druhá by tu první zahodila.
   const commitChar = (next) => {
-    if (!localChar) return;
-    const resolved = typeof next === "function" ? next(localChar) : next;
+    const prev = charRef.current;
+    if (!prev) return;
+    const resolved = typeof next === "function" ? next(prev) : next;
     if (!resolved) return;
-    recordStep(localChar, resolved);
+    charRef.current = resolved;
+    recordStep(prev, resolved);
     setLocalChar(resolved);
     setDirty(true);
   };
@@ -3319,6 +3375,27 @@ function FalloutSheetApp() {
   );
 
   if (loading) return h("div", { className: "pb-loading" }, t.loading);
+  // Přihlášení selhalo nebo se nikdo neozval. Dřív se tady jen dál točilo
+  // „NAČÍTÁNÍ…"; teď aplikace řekne, co se stalo, rozliší výpadek sítě od
+  // nedostupné databáze a nabídne další pokus.
+  if (!user && authState.status !== "pending")
+    return h(
+      "div",
+      { className: "pb-loading pb-connfail" },
+      h("div", { className: "big" }, "⚠ " + t.connectFail),
+      h(
+        "div",
+        { className: "sub" },
+        online ? t.connectFailHint : t.connectOfflineHint,
+      ),
+      authState.error &&
+        h("div", { className: "detail" }, authState.error),
+      h(
+        "button",
+        { className: "pb-chip accent", onClick: connect },
+        "⟳ " + t.retry,
+      ),
+    );
 
   // --- derived render values ---
   // Radiace ukrajuje z maxima HP a přirozeně se neléčí; když maximum klesne
@@ -3337,10 +3414,19 @@ function FalloutSheetApp() {
     rad: i >= radFrom,
   }));
 
+  // Rady i sražené HP jsou jedna změna, ne dvě — jinak by je Zpět rozpojilo
+  // a hráč by se musel vracet dvakrát za jedno kliknutí.
   const setRads = (v) => {
-    updatePlayField("rads", v);
-    const eff = Math.max(0, hpMax - Math.max(0, parseInt(v, 10) || 0));
-    if (hpCurRaw > eff) updatePlayField("hpCurrent", String(eff));
+    commitChar((prev) => {
+      const max = Math.max(0, parseInt(prev.hpMax, 10) || 0);
+      const eff = Math.max(0, max - Math.max(0, parseInt(v, 10) || 0));
+      const cur = Math.max(0, parseInt(prev.hpCurrent, 10) || 0);
+      return {
+        ...prev,
+        rads: v,
+        hpCurrent: cur > eff ? String(eff) : prev.hpCurrent,
+      };
+    });
   };
 
   // Nosnost = 150 + 10 × SÍLA; váhy v příručce bývají psané „< 0,5".
